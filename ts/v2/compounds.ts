@@ -1,5 +1,3 @@
-import { Assets } from "./assets";
-
 export class Compounds {
   constructor() {
     // Legacy (delete)
