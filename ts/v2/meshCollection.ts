@@ -80,6 +80,7 @@ export class MeshCollection extends THREE.Object3D
   public addCube(name: string, tx: IsoTransform) {
     this.cubes.Set(tx.position, name);
     this.rocks.add(tx.position, tx);
+    this.quaternions.set(tx.position, tx.quaternion);
     this.dirty = true;
   }
 

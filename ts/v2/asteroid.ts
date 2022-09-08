@@ -22,6 +22,7 @@ export class Asteroid extends MeshCollection implements Codeable {
         pos.copy(ev.worldPosition);
         this.worldToLocal(pos.position);
         Grid.round(pos.position);
+        pos.quaternion.copy(Grid.roundRotation(pos.quaternion));
 
         const cursor = cursors.get(ev.handedness);
         if (cursor.isHolding()) {
