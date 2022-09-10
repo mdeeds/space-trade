@@ -32,13 +32,17 @@ exports.Index = Index;
 
 /***/ }),
 
-/***/ 4679:
+/***/ 3800:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -56,9 +60,364 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.LocationMap = void 0;
+exports.JournalingLocationMap = void 0;
 const THREE = __importStar(__webpack_require__(5232));
-class LocationMap {
+const log_1 = __webpack_require__(4920);
+const simpleLocationMap_1 = __webpack_require__(6125);
+class Action {
+    value;
+    position;
+    constructor(position, value) {
+        this.value = value;
+        if (!position) {
+            this.position = null;
+        }
+        else {
+            this.position = new THREE.Vector3();
+            this.position.copy(position);
+        }
+    }
+    static makeMark() {
+        return new Action(null, null);
+    }
+    static makeDelete(position) {
+        return new Action(position, null);
+    }
+    static makeSet(position, value) {
+        return new Action(position, value);
+    }
+    isMark() {
+        return this.position === null;
+    }
+    apply(m) {
+        if (!this.position) {
+            throw new Error("This is a mark and cannot be applied.");
+        }
+        else if (!this.value) {
+            m.delete(this.position);
+        }
+        else {
+            m.set(this.position, this.value);
+        }
+    }
+    toString() {
+        if (this.value) {
+            return `Set ${JSON.stringify(this.value)}@${[this.position.x, this.position.y]}`;
+        }
+        else {
+            return `Delete ${[this.position.x, this.position.y]}`;
+        }
+    }
+}
+class JournalingLocationMap {
+    data = new simpleLocationMap_1.SimpleLocationMap();
+    undoActions = [];
+    constructor() { }
+    setMark() {
+        this.undoActions.push(Action.makeMark());
+    }
+    // Reverts the underlying state to the previous mark and deletes that
+    // mark. 
+    undoToMark(verbose = false) {
+        if (this.undoActions.length === 0) {
+            throw new Error("Nothing to undo!");
+        }
+        do {
+            const a = this.undoActions.pop();
+            if (a.isMark()) {
+                return;
+            }
+            if (verbose) {
+                log_1.Log.info(`Undoing ${a.toString()}`);
+            }
+            a.apply(this.data);
+        } while (true);
+    }
+    clearLastMark() {
+        for (let i = this.undoActions.length - 1; i >= 0; --i) {
+            if (this.undoActions[i].isMark()) {
+                this.undoActions.splice(i, 1);
+                return;
+            }
+        }
+    }
+    has(position) {
+        return this.data.has(position);
+    }
+    has3(x, y, z) {
+        return this.data.has3(x, y, z);
+    }
+    addUndo3(x, y, z) {
+        if (!this.data.has3(x, y, z)) {
+            this.undoActions.push(Action.makeDelete(new THREE.Vector3(x, y, z)));
+        }
+        else {
+            const oldValue = this.data.get3(x, y, z);
+            this.undoActions.push(Action.makeSet(new THREE.Vector3(x, y, z), oldValue));
+        }
+    }
+    set(position, value) {
+        this.addUndo3(position.x, position.y, position.z);
+        this.data.set(position, value);
+    }
+    set3(x, y, z, value) {
+        this.addUndo3(x, y, z);
+        this.data.set3(x, y, z, value);
+    }
+    get(position) {
+        return this.data.get(position);
+    }
+    get3(x, y, z) {
+        return this.data.get3(x, y, z);
+    }
+    delete(position) {
+        this.addUndo3(position.x, position.y, position.z);
+        return this.data.delete(position);
+    }
+    ;
+    values() {
+        return this.data.values();
+    }
+    entries() {
+        return this.data.entries();
+    }
+    getSize() {
+        return this.data.getSize();
+    }
+}
+exports.JournalingLocationMap = JournalingLocationMap;
+//# sourceMappingURL=journalingLocationMap.js.map
+
+/***/ }),
+
+/***/ 4920:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Log = void 0;
+class Log {
+    static container;
+    static initialize() {
+        Log.container = document.createElement('div');
+        document.body.appendChild(Log.container);
+    }
+    static info(message) {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        const d = document.createElement('div');
+        d.innerHTML = message;
+        Log.container.appendChild(d);
+    }
+    static clear() {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        Log.container.innerHTML = '';
+    }
+}
+exports.Log = Log;
+//# sourceMappingURL=log.js.map
+
+/***/ }),
+
+/***/ 9798:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Possibilities = void 0;
+class Possibilities {
+    possibilities;
+    total = 0;
+    constructor(possibilities) {
+        this.possibilities = possibilities;
+        for (const count of possibilities.values()) {
+            this.total += count;
+        }
+    }
+    static makeSinglePossibility(value) {
+        const m = new Map();
+        m.set(value, 1);
+        return new Possibilities(m);
+    }
+    clone() {
+        const result = new Possibilities(new Map());
+        for (const [possibility, count] of this.possibilities) {
+            result.possibilities.set(possibility, count);
+            result.total = this.total;
+        }
+        return result;
+    }
+    entropy() {
+        let ent = 0;
+        for (const num of this.possibilities.values()) {
+            ent -= Math.log2(num / this.total);
+        }
+        return ent;
+    }
+    static emptySet = new Set();
+    getRandomItemNotInSet(exclude) {
+        let total = this.total;
+        if (exclude.size > 0) {
+            for (const [possibility, count] of this.possibilities.entries()) {
+                if (exclude.has(possibility))
+                    total -= count;
+            }
+        }
+        let randomIndex = Math.floor(Math.random() * total);
+        for (const [possibility, count] of this.possibilities.entries()) {
+            if (exclude.has(possibility))
+                continue;
+            randomIndex -= count;
+            if (randomIndex < 0) {
+                return possibility;
+            }
+        }
+        throw new Error("Should never get here.");
+    }
+    getRandomItem() {
+        return this.getRandomItemNotInSet(Possibilities.emptySet);
+    }
+    *allItemsInRandomOrder() {
+        const exclude = new Set();
+        while (exclude.size < this.possibilities.size) {
+            const nextValue = this.getRandomItemNotInSet(exclude);
+            exclude.add(nextValue);
+            yield nextValue;
+        }
+    }
+    intersectWith(other) {
+        for (const [possibility, count] of this.possibilities.entries()) {
+            if (!other.possibilities.has(possibility)) {
+                this.possibilities.delete(possibility);
+            }
+            else {
+                this.possibilities.set(possibility, Math.min(other.possibilities.get(possibility), count));
+            }
+        }
+        // Recompute total. Sure it would be more efficient to do this in the loop
+        // above. Maybe come back here to improve performance later.
+        this.total = 0;
+        for (const count of this.possibilities.values()) {
+            this.total += count;
+        }
+    }
+    impossible() {
+        return this.total == 0;
+    }
+    obvious() {
+        if (this.possibilities.size == 1) {
+            for (const p of this.possibilities.keys()) {
+                return p;
+            }
+        }
+        return undefined;
+    }
+    getSize() {
+        return this.possibilities.size;
+    }
+}
+exports.Possibilities = Possibilities;
+//# sourceMappingURL=possibilities.js.map
+
+/***/ }),
+
+/***/ 5325:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AllRuleBuilder = exports.RuleBuilder = void 0;
+const possibilities_1 = __webpack_require__(9798);
+const simpleLocationMap_1 = __webpack_require__(6125);
+class RuleBuilder {
+    base;
+    possibilities = new simpleLocationMap_1.SimpleLocationMap();
+    constructor(base) {
+        this.base = base;
+    }
+    add3(dx, dy, dz, possibility) {
+        if (possibility == undefined) {
+            throw new Error('Undefined!');
+        }
+        let m;
+        if (!this.possibilities.has3(dx, dy, dz)) {
+            m = new Map();
+            this.possibilities.set3(dx, dy, dz, m);
+        }
+        else {
+            m = this.possibilities.get3(dx, dy, dz);
+        }
+        if (!m.has(possibility)) {
+            m.set(possibility, 1);
+        }
+        else {
+            m.set(possibility, m.get(possibility) + 1);
+        }
+    }
+    build() {
+        const lm = new simpleLocationMap_1.SimpleLocationMap();
+        for (const [k, v] of this.possibilities.entries()) {
+            const p = new possibilities_1.Possibilities(v);
+            lm.set(k, p);
+        }
+        return [this.base, lm];
+    }
+}
+exports.RuleBuilder = RuleBuilder;
+class AllRuleBuilder {
+    allRules = new Map();
+    constructor() { }
+    add3(center, dx, dy, dz, possibility) {
+        if (!this.allRules.has(center)) {
+            this.allRules.set(center, new RuleBuilder(center));
+        }
+        this.allRules.get(center).add3(dx, dy, dz, possibility);
+    }
+    *buildRules() {
+        for (const [k, v] of this.allRules.entries()) {
+            yield v.build();
+        }
+    }
+}
+exports.AllRuleBuilder = AllRuleBuilder;
+//# sourceMappingURL=ruleBuilder.js.map
+
+/***/ }),
+
+/***/ 6125:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SimpleLocationMap = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class SimpleLocationMap {
     vectors = new Map();
     data = new Map();
     constructor() { }
@@ -119,82 +478,30 @@ class LocationMap {
     getSize() {
         return this.data.size;
     }
+    clone() {
+        const result = new SimpleLocationMap();
+        for (const [pos, value] of this.entries()) {
+            result.set(pos, value);
+        }
+        return result;
+    }
 }
-exports.LocationMap = LocationMap;
-//# sourceMappingURL=locationMap.js.map
+exports.SimpleLocationMap = SimpleLocationMap;
+//# sourceMappingURL=simpleLocationMap.js.map
 
 /***/ }),
 
-/***/ 5325:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AllRuleBuilder = exports.RuleBuilder = void 0;
-const locationMap_1 = __webpack_require__(4679);
-const wfcGen_1 = __webpack_require__(5137);
-class RuleBuilder {
-    base;
-    possibilities = new locationMap_1.LocationMap();
-    constructor(base) {
-        this.base = base;
-    }
-    add3(dx, dy, dz, possibility) {
-        if (possibility == undefined) {
-            throw new Error('Undefined!');
-        }
-        let m;
-        if (!this.possibilities.has3(dx, dy, dz)) {
-            m = new Map();
-            this.possibilities.set3(dx, dy, dz, m);
-        }
-        else {
-            m = this.possibilities.get3(dx, dy, dz);
-        }
-        if (!m.has(possibility)) {
-            m.set(possibility, 1);
-        }
-        else {
-            m.set(possibility, m.get(possibility) + 1);
-        }
-    }
-    build() {
-        const lm = new locationMap_1.LocationMap();
-        for (const [k, v] of this.possibilities.entries()) {
-            const p = new wfcGen_1.Possibilities(v);
-            lm.set(k, p);
-        }
-        return [this.base, lm];
-    }
-}
-exports.RuleBuilder = RuleBuilder;
-class AllRuleBuilder {
-    allRules = new Map();
-    constructor() { }
-    add3(center, dx, dy, dz, possibility) {
-        if (!this.allRules.has(center)) {
-            this.allRules.set(center, new RuleBuilder(center));
-        }
-        this.allRules.get(center).add3(dx, dy, dz, possibility);
-    }
-    *buildRules() {
-        for (const [k, v] of this.allRules.entries()) {
-            yield v.build();
-        }
-    }
-}
-exports.AllRuleBuilder = AllRuleBuilder;
-//# sourceMappingURL=ruleBuilder.js.map
-
-/***/ }),
-
-/***/ 5137:
+/***/ 218:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -212,126 +519,129 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.WFCGen = exports.Possibilities = void 0;
+exports.WfcBuild = void 0;
 const THREE = __importStar(__webpack_require__(5232));
-const locationMap_1 = __webpack_require__(4679);
-class Possibilities {
-    possibilities;
-    total = 0;
-    constructor(possibilities) {
-        this.possibilities = possibilities;
-        for (const count of possibilities.values()) {
-            this.total += count;
+const journalingLocationMap_1 = __webpack_require__(3800);
+const log_1 = __webpack_require__(4920);
+const possibilities_1 = __webpack_require__(9798);
+const simpleLocationMap_1 = __webpack_require__(6125);
+class WfcBuild {
+    radius;
+    rules = new Map();
+    state = new journalingLocationMap_1.JournalingLocationMap();
+    constructor(rules, radius) {
+        this.radius = radius;
+        for (const [tile, rule] of rules.buildRules()) {
+            this.rules.set(tile, rule);
         }
     }
-    clone() {
-        const result = new Possibilities(new Map());
-        for (const [possibility, count] of this.possibilities) {
-            result.possibilities.set(possibility, count);
-            result.total = this.total;
+    build() {
+        this.state = new journalingLocationMap_1.JournalingLocationMap();
+        if (!this.solveWith(new THREE.Vector3(), 1)) {
+            log_1.Log.info('Impossible.');
+            throw new Error("Impossible.");
+        }
+        const result = new simpleLocationMap_1.SimpleLocationMap();
+        for (const [pos, possibilities] of this.state.entries()) {
+            const value = possibilities.obvious();
+            if (value === undefined) {
+                log_1.Log.info('Did not finish.');
+                throw new Error("Did not finish.");
+            }
+            result.set(pos, value);
         }
         return result;
     }
-    entropy() {
-        let ent = 0;
-        for (const num of this.possibilities.values()) {
-            ent -= Math.log2(num / this.total);
+    solveSteps = 0;
+    // Attempts to solve by setting `value` at `pos`.
+    solveWith(pos, value) {
+        if (++this.solveSteps > 10000) {
+            log_1.Log.info('Aborting.');
+            return false;
         }
-        return ent;
-    }
-    getRandomItem() {
-        let randomIndex = Math.floor(Math.random() * this.total);
-        for (const [possibility, count] of this.possibilities.entries()) {
-            randomIndex -= count;
-            if (randomIndex <= 0) {
-                return possibility;
+        log_1.Log.info(`Attempting ${value} at (${[pos.x, pos.y]})`);
+        this.state.setMark();
+        this.state.set(pos, possibilities_1.Possibilities.makeSinglePossibility(value));
+        const rule = this.rules.get(value);
+        for (const [dp, constraints] of rule.entries()) {
+            const targetPosition = new THREE.Vector3();
+            targetPosition.copy(pos);
+            targetPosition.add(dp);
+            if (targetPosition.length() > this.radius) {
+                continue;
             }
-        }
-        throw new Error("Should never get here.");
-    }
-    intersectWith(other) {
-        for (const [possibility, count] of other.possibilities.entries()) {
-            if (!this.possibilities.has(possibility)) {
-                this.possibilities.delete(possibility);
+            let existingConstraints;
+            if (this.state.has(targetPosition)) {
+                existingConstraints = this.state.get(targetPosition).clone();
+                existingConstraints.intersectWith(constraints);
             }
             else {
-                this.possibilities.set(possibility, Math.min(this.possibilities.get(possibility), count));
+                existingConstraints = constraints.clone();
             }
-        }
-        // Recompute total. Sure it would be more efficient to do this in the loop
-        // above. Maybe come back here to improve performance later.
-        this.total = 0;
-        for (const count of this.possibilities.values()) {
-            this.total += count;
-        }
-    }
-}
-exports.Possibilities = Possibilities;
-class WFCGen {
-    maxRadius;
-    is = new locationMap_1.LocationMap();
-    canBe = new locationMap_1.LocationMap();
-    rules = new Map();
-    example = new locationMap_1.LocationMap();
-    constructor(maxRadius) {
-        this.maxRadius = maxRadius;
-    }
-    randomItemFromExample() {
-        return 1;
-    }
-    getRandomInt(max) {
-        return Math.floor(Math.random() * max);
-    }
-    build() {
-        // start with one block at the origin
-        let item = this.randomItemFromExample();
-        let pos = new THREE.Vector3(0, 0, 0);
-        this.addAndUpdateRules(pos, item);
-        while (true) {
-            // find the lowest entropy
-            let minPos;
-            let minItems;
-            let minEntropy = Infinity;
-            for (const [pos, items] of this.canBe.entries()) {
-                const entropy = items.entropy();
-                if (entropy < minEntropy) {
-                    minPos = pos;
-                    minItems = items;
-                    minEntropy = entropy;
-                }
-            }
-            if (!!minItems) {
-                item = minItems.getRandomItem();
-                this.addAndUpdateRules(minPos, item);
+            if (existingConstraints.impossible()) {
+                this.state.undoToMark();
+                log_1.Log.info(`Impossible at ${[targetPosition.x, targetPosition.y]}`);
+                return false;
             }
             else {
+                // Log.info(`Constrained ${[targetPosition.x, targetPosition.y]}`);
+                this.state.set(targetPosition, existingConstraints);
+            }
+        }
+        if (!this.solve()) {
+            this.state.undoToMark();
+            return false;
+        }
+        this.state.clearLastMark();
+        return true;
+    }
+    solve() {
+        if (++this.solveSteps > 10000) {
+            log_1.Log.info('Aborting.');
+            return false;
+        }
+        // Find cell with lowest entropy
+        let minEntropy = Infinity;
+        let minPosition = undefined;
+        let doneCount = 0;
+        let openCount = 0;
+        for (const [pos, possibilities] of this.state.entries()) {
+            const entropy = possibilities.entropy();
+            if (entropy === 0) {
+                ++doneCount;
+                continue;
+            }
+            ++openCount;
+            if (entropy < minEntropy) {
+                minEntropy = entropy;
+                minPosition = pos;
+            }
+        }
+        log_1.Log.info(`Open: ${openCount}, done: ${doneCount}`);
+        if (minPosition === undefined) {
+            return true; // DONE!
+        }
+        // Attempt to fill it in.
+        this.state.setMark();
+        let success = false;
+        for (const value of this.state.get(minPosition).allItemsInRandomOrder()) {
+            if (this.solveWith(minPosition, value)) {
+                success = true;
                 break;
             }
         }
-    }
-    addAndUpdateRules(pos, item) {
-        this.is.set(pos, item);
-        this.canBe.delete(pos);
-        if (this.rules.has(item)) {
-            for (let [offset, cellCanBe] of this.rules.get(item).entries()) {
-                const setPos = new THREE.Vector3();
-                setPos.add(pos);
-                setPos.add(offset);
-                if (setPos.manhattanLength() <= this.maxRadius &&
-                    !this.is.has(setPos)) {
-                    if (!this.canBe.has(setPos)) {
-                        this.canBe.set(setPos, cellCanBe.clone());
-                    }
-                    else {
-                        this.canBe.get(setPos).intersectWith(cellCanBe);
-                    }
-                }
-            }
+        if (!success) {
+            this.state.undoToMark();
+            return false;
         }
+        else {
+            this.state.clearLastMark();
+        }
+        return success;
     }
 }
-exports.WFCGen = WFCGen;
-//# sourceMappingURL=wfcGen.js.map
+exports.WfcBuild = WfcBuild;
+//# sourceMappingURL=wfcBuild.js.map
 
 /***/ }),
 
@@ -37165,8 +37475,9 @@ var __webpack_unused_export__;
 // import * as THREE from "three";
 __webpack_unused_export__ = ({ value: true });
 const _1 = __webpack_require__(4576);
+const log_1 = __webpack_require__(4920);
 const ruleBuilder_1 = __webpack_require__(5325);
-const wfcGen_1 = __webpack_require__(5137);
+const wfcBuild_1 = __webpack_require__(218);
 class WFC2D {
     static kInputSize = 32;
     static kPixelSize = 16;
@@ -37186,11 +37497,15 @@ class WFC2D {
         this.addGenCanvas();
     }
     setPixel(i, j) {
-        const ctx = this.drawCanvas.getContext('2d');
-        ctx.fillStyle = this.currentColor;
-        ctx.fillRect(i * WFC2D.kPixelSize, j * WFC2D.kPixelSize, WFC2D.kPixelSize, WFC2D.kPixelSize);
         const c = this.colorIndex.getIndex(this.currentColor);
         this.exampleData[j * WFC2D.kInputSize + i] = c;
+        this.updatePixel(i, j);
+    }
+    updatePixel(i, j) {
+        const ctx = this.drawCanvas.getContext('2d');
+        const c = this.exampleData[j * WFC2D.kInputSize + i];
+        ctx.fillStyle = this.colorIndex.getValue(c);
+        ctx.fillRect(i * WFC2D.kPixelSize, j * WFC2D.kPixelSize, WFC2D.kPixelSize, WFC2D.kPixelSize);
     }
     getPixel(i, j) {
         if (i < 0 || j < 0 || i >= WFC2D.kInputSize || j >= WFC2D.kInputSize) {
@@ -37266,20 +37581,28 @@ class WFC2D {
             return;
         }
         const thisTile = this.tileData[j * WFC2D.kInputSize + i];
-        if (thisTile == 0) {
-            return;
-        }
+        // if (thisTile == 0) {
+        //   return;
+        // }
         const thatTile = this.tileData[(j + dj) * WFC2D.kInputSize + i + di];
         builder.add3(thisTile, di, dj, 0, thatTile);
     }
     generateRules() {
-        console.log('Generating tiles');
+        log_1.Log.clear();
+        log_1.Log.info('Generating tiles');
         const tileIndex = new _1.Index();
+        const ctx = this.drawCanvas.getContext('2d');
+        ctx.clearRect(0, 0, this.drawCanvas.width, this.drawCanvas.height);
         for (const [i, j] of this.allInputIJs()) {
-            const tile = tileIndex.getIndex(this.makeTile(i, j));
+            this.updatePixel(i, j);
+        }
+        ctx.fillStyle = 'blue';
+        for (const [i, j] of this.allInputIJs()) {
+            const tile = tileIndex.getIndex(this.makeTile5(i, j));
+            ctx.fillText(tile.toFixed(0), i * WFC2D.kPixelSize, (j + 0.6) * WFC2D.kPixelSize);
             this.tileData[j * WFC2D.kInputSize + i] = tile;
         }
-        console.log(`Found ${tileIndex.getSize()} tiles.`);
+        log_1.Log.info(`Found ${tileIndex.getSize()} tiles.`);
         const allRules = new ruleBuilder_1.AllRuleBuilder();
         for (const [i, j] of this.allInputIJs()) {
             this.addRule(i, j, -1, 0, allRules);
@@ -37287,32 +37610,32 @@ class WFC2D {
             this.addRule(i, j, 0, -1, allRules);
             this.addRule(i, j, 0, 1, allRules);
         }
-        const wfc = new wfcGen_1.WFCGen(WFC2D.kInputSize / 2 + 1);
-        let numRules = 0;
-        for (const [center, possibilities] of allRules.buildRules()) {
-            wfc.rules.set(center, possibilities);
-            numRules += possibilities.getSize();
-        }
-        console.log(`Number of rules: ${numRules}`);
-        wfc.build();
-        console.log(`Generated: ${wfc.is.getSize()}`);
-        this.paintGenCanvas(wfc, tileIndex);
+        const wfc = new wfcBuild_1.WfcBuild(allRules, 5); // WFC2D.kInputSize / 2 + 1);
+        this.paintGenCanvas(wfc.build(), tileIndex);
     }
-    paintGenCanvas(wfc, tileIndex) {
+    paintGenCanvas(state, tileIndex) {
         const ctx = this.genCanvas.getContext('2d');
         ctx.clearRect(0, 0, this.genCanvas.width, this.genCanvas.height);
-        for (const [pos, n] of wfc.is.entries()) {
-            if (pos.z != 0 || !n) {
+        for (let x = 0; x < this.genCanvas.width; x += 11) {
+            for (let y = 0; y < this.genCanvas.height; y += 11) {
+                ctx.fillStyle = ((x + y) & 0x1) === 0x1 ? '#777' : '#888';
+                ctx.fillRect(x, y, 11, 11);
+            }
+        }
+        for (const [pos, n] of state.entries()) {
+            if (pos.z != 0) {
                 continue;
             }
             const i = Math.round(pos.x + WFC2D.kInputSize / 2);
             const j = Math.round(pos.y + WFC2D.kInputSize / 2);
             ctx.fillStyle = this.getTileColor(tileIndex.getValue(n));
             ctx.fillRect(i * WFC2D.kPixelSize, j * WFC2D.kPixelSize, WFC2D.kPixelSize, WFC2D.kPixelSize);
+            ctx.fillStyle = 'blue';
+            ctx.fillText(n.toFixed(0), i * WFC2D.kPixelSize, (j + 0.6) * WFC2D.kPixelSize);
             const c = this.colorIndex.getIndex(this.currentColor);
         }
     }
-    makeTile(i, j) {
+    makeTile5(i, j) {
         let tileChars = [];
         tileChars.push(String.fromCharCode(65 + this.getPixel(i, j)));
         tileChars.push(String.fromCharCode(65 + this.getPixel(i, j - 1)));
@@ -37321,9 +37644,14 @@ class WFC2D {
         tileChars.push(String.fromCharCode(65 + this.getPixel(i, j + 1)));
         return tileChars.join('');
     }
+    makeTile1(i, j) {
+        return String.fromCharCode(65 + this.getPixel(i, j));
+    }
     getTileColor(tile) {
         const colorNumber = tile.charCodeAt(0) - 65;
-        return this.colorIndex.getValue(colorNumber);
+        const color = this.colorIndex.getValue(colorNumber);
+        // Log.info(`${tile} = ${color}`);
+        return color;
     }
 }
 console.log('Starting...');

@@ -2,7 +2,7 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 812:
+/***/ 5812:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31,8 +31,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaletteTest = exports.Palette = void 0;
-const THREE = __importStar(__webpack_require__(232));
-const VRButton_js_1 = __webpack_require__(18);
+const THREE = __importStar(__webpack_require__(5232));
+const VRButton_js_1 = __webpack_require__(9018);
 class Palette {
     static primary;
     static secondary;
@@ -196,7 +196,7 @@ exports.PaletteTest = PaletteTest;
 
 /***/ }),
 
-/***/ 232:
+/***/ 5232:
 /***/ ((__unused_webpack_module, exports) => {
 
 /**
@@ -36990,7 +36990,7 @@ exports.sRGBEncoding = sRGBEncoding;
 
 /***/ }),
 
-/***/ 18:
+/***/ 9018:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -37271,7 +37271,7 @@ var exports = __webpack_exports__;
 var __webpack_unused_export__;
 
 __webpack_unused_export__ = ({ value: true });
-const palette_1 = __webpack_require__(812);
+const palette_1 = __webpack_require__(5812);
 new palette_1.PaletteTest();
 //# sourceMappingURL=colorTest.js.map
 })();

@@ -2,13 +2,98 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 3648:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.InstancePack = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class InstancePack extends THREE.Object3D {
+    geometry;
+    material;
+    // Instances per pack
+    static kPackSize = 10000;
+    packs = [];
+    count = 0;
+    constructor(geometry, material) {
+        super();
+        this.geometry = geometry;
+        this.material = material;
+    }
+    getCount() {
+        return this.count;
+    }
+    getPackForIndex(index) {
+        const packIndex = Math.floor(index / InstancePack.kPackSize);
+        while (packIndex >= this.packs.length) {
+            const pack = new THREE.InstancedMesh(this.geometry, this.material, InstancePack.kPackSize);
+            pack.count = 0;
+            this.packs.push(pack);
+            this.add(pack);
+            console.log(`Allocating new packs for index ${index} (pack: ${packIndex})`);
+        }
+        this.count = Math.max(this.count, index + 1);
+        return this.packs[packIndex];
+    }
+    setMatrixAt(index, matrix) {
+        const pack = this.getPackForIndex(index);
+        const packOffset = index % InstancePack.kPackSize;
+        pack.setMatrixAt(packOffset, matrix);
+        pack.count = Math.max(pack.count, packOffset + 1);
+    }
+    setColorAt(index, color) {
+        const pack = this.getPackForIndex(index);
+        const packOffset = index % InstancePack.kPackSize;
+        pack.setColorAt(packOffset, color);
+        pack.count = Math.max(pack.count, packOffset + 1);
+        pack.instanceColor.needsUpdate = true;
+    }
+    static makeMatrix(position, scale) {
+        const m = new THREE.Matrix4();
+        m.set(scale, 0, 0, position.x, 0, scale, 0, position.y, 0, 0, scale, position.z, 0, 0, 0, 1);
+        return m;
+    }
+}
+exports.InstancePack = InstancePack;
+//# sourceMappingURL=instancePack.js.map
+
+/***/ }),
+
 /***/ 9838:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -53,7 +138,7 @@ class OctoMass {
         const childMass = new Float32Array(8);
         const childCapacity = this.capacity() / 8;
         let remainingMass = this.content.mass;
-        const numPidgeons = 2; // 8 * (1 + Math.log2(this.radius));
+        const numPidgeons = Math.round(2 + 6 * Math.random()); // 8 * (1 + Math.log2(this.radius));
         const massPerPidgeon = Math.ceil(this.content.mass / numPidgeons);
         while (remainingMass > 0) {
             const pigeonMass = Math.min(massPerPidgeon, remainingMass);
@@ -107,7 +192,11 @@ exports.OctoMass = OctoMass;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -128,14 +217,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const THREE = __importStar(__webpack_require__(5232));
 const octoMass_1 = __webpack_require__(9838);
 const VRButton_js_1 = __webpack_require__(9018);
+const instancePack_1 = __webpack_require__(3648);
+const grid_1 = __webpack_require__(3424);
 class OctoScene {
     scene = new THREE.Scene();
     universe = new THREE.Group();
     camera;
     renderer;
-    octoMass = new octoMass_1.OctoMass(new THREE.Vector3(), 1 << 12, new octoMass_1.Content(4000));
-    closestSet = false;
-    closest = new THREE.Vector3();
+    octoMass = new octoMass_1.OctoMass(new THREE.Vector3(), 1 << 12, new octoMass_1.Content(8));
+    targetIsSet = false;
+    negativeTarget = new THREE.Vector3();
+    cubes;
     constructor() {
         document.body.innerHTML = '';
         this.scene.add(this.universe);
@@ -150,13 +242,37 @@ class OctoScene {
         this.renderer.xr.enabled = true;
         this.renderer.setAnimationLoop(() => {
             this.updateVisible();
-            this.universe.position.lerp(this.closest, 0.002);
+            this.universe.position.lerp(this.negativeTarget, 0.02);
             this.renderer.render(this.scene, this.camera);
         });
+        this.cubes = new instancePack_1.InstancePack(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({
+            color: '#fff', blending: THREE.AdditiveBlending, depthTest: false
+        }));
+        this.universe.add(this.cubes);
     }
+    // Maps an octomass position to an index in the
+    // instancepack.
     visibleObjects = new Map();
+    visibleLocation = new Map();
+    // A "recycle bin" for available matrix positions.
+    freePositions = new Set();
     t = new THREE.Vector3();
     t2 = new THREE.Vector3();
+    colorMap = [
+        new THREE.Color('#008'),
+        new THREE.Color('#044'),
+        new THREE.Color('#080'),
+        new THREE.Color('#084'),
+        new THREE.Color('#088'),
+        new THREE.Color('#444'),
+        new THREE.Color('#800'),
+        new THREE.Color('#804'),
+        new THREE.Color('#808'),
+        new THREE.Color('#844'),
+        new THREE.Color('#880'),
+        new THREE.Color('#884'),
+        new THREE.Color('#888'),
+    ];
     updateVisible() {
         let closestDistance = 0;
         const toDelete = new Set();
@@ -166,44 +282,152 @@ class OctoScene {
         this.t2.copy(this.universe.position);
         this.t2.multiplyScalar(-1);
         let poppedIn = 0;
+        let minDiameter = Infinity;
         for (const o of this.octoMass.elementsNear(this.t2)) {
+            const diameter = 2 * o.radius;
+            minDiameter = Math.min(minDiameter, diameter);
             if (this.visibleObjects.has(o.center)) {
                 toDelete.delete(o.center);
                 continue;
             }
             ++poppedIn;
-            const diameter = 2 * o.radius;
-            const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(diameter, diameter, diameter), new THREE.MeshBasicMaterial({ color: '#fed' }));
-            cube.position.copy(o.center);
-            this.universe.add(cube);
-            if (!this.closestSet) {
+            let position = 0;
+            if (this.freePositions.size > 0) {
+                for (const p of this.freePositions) {
+                    position = p;
+                    break;
+                }
+                this.freePositions.delete(position);
+            }
+            else {
+                position = this.cubes.getCount();
+            }
+            this.cubes.setMatrixAt(position, instancePack_1.InstancePack.makeMatrix(o.center, diameter));
+            const colorIndex = Math.round(Math.log2(diameter));
+            console.log(`x: ${o.center.x}; p: ${position}; Color index: ${colorIndex}`);
+            this.cubes.setColorAt(position, this.colorMap[colorIndex]);
+            this.visibleObjects.set(o.center, position);
+            this.visibleLocation.set(position, o.center);
+            if (!this.targetIsSet) {
                 this.t.copy(o.center);
                 this.t.add(this.universe.position);
                 if (this.t.length() > closestDistance) {
-                    this.closest.copy(o.center);
-                    this.closest.multiplyScalar(-1);
+                    this.negativeTarget.copy(o.center);
+                    this.negativeTarget.multiplyScalar(-1);
                     closestDistance = this.t.length();
                 }
             }
-            this.visibleObjects.set(o.center, cube);
         }
-        if (!this.closestSet) {
-            this.closest.multiplyScalar(-1);
-            this.camera.lookAt(this.closest);
-            this.closest.multiplyScalar(-1);
-            this.closestSet = true;
+        if (!this.targetIsSet) {
+            this.negativeTarget.multiplyScalar(-1);
+            console.log(`Headed for ${this.negativeTarget.x}`);
+            this.camera.lookAt(this.negativeTarget);
+            this.negativeTarget.multiplyScalar(-1);
+            this.targetIsSet = true;
         }
-        if (poppedIn > 0) {
-            console.log(`Popped: ${poppedIn}; Deleting ${toDelete.size}`);
+        for (const p of toDelete) {
+            const k = this.visibleObjects.get(p);
+            this.cubes.setMatrixAt(k, grid_1.Grid.zeroMatrix);
+            this.visibleLocation.delete(k);
+            this.visibleObjects.delete(p);
+            this.freePositions.add(k);
         }
-        for (const k of toDelete) {
-            this.universe.remove(this.visibleObjects.get(k));
-            this.visibleObjects.delete(k);
-        }
+        // if (poppedIn > 0) {
+        //   console.log(`Popped: ${poppedIn}; Deleting ${toDelete.size}; Min diameter: ${minDiameter}; Visible: ${this.visibleLocation.size}`);
+        // }
     }
 }
 new OctoScene();
 //# sourceMappingURL=scene.js.map
+
+/***/ }),
+
+/***/ 3424:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Grid = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+const three_1 = __webpack_require__(5232);
+class Grid {
+    static round(v) {
+        v.set(Math.round(v.x), Math.round(v.y), Math.round(v.z));
+    }
+    static lerp(a, b, p) {
+        return p * b + (1 - p) * a;
+    }
+    static roundLerp(v, p) {
+        v.set(Grid.lerp(v.x, Math.round(v.x), p), Grid.lerp(v.y, Math.round(v.y), p), Grid.lerp(v.z, Math.round(v.z), p));
+    }
+    static zero = new THREE.Vector3(0, 0, 0);
+    static one = new THREE.Vector3(1, 1, 1);
+    static notRotated = new THREE.Quaternion(0, 0, 0, 1);
+    static U0 = new THREE.Quaternion().copy(Grid.notRotated);
+    static U1 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, Math.PI / 2, 0));
+    static U2 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, Math.PI, 0));
+    static U3 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, -Math.PI / 2, 0));
+    static F0 = new THREE.Quaternion().setFromEuler(new three_1.Euler(Math.PI / 2, 0, 0));
+    static B0 = new THREE.Quaternion().setFromEuler(new three_1.Euler(-Math.PI / 2, 0, 0));
+    static L0 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, 0, Math.PI / 2));
+    static R0 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, 0, -Math.PI / 2));
+    static D0 = new THREE.Quaternion().setFromEuler(new three_1.Euler(0, 0, Math.PI));
+    static F1 = new THREE.Quaternion().copy(Grid.U1).multiply(Grid.F0);
+    static F2 = new THREE.Quaternion().copy(Grid.U2).multiply(Grid.F0);
+    static F3 = new THREE.Quaternion().copy(Grid.U3).multiply(Grid.F0);
+    static B1 = new THREE.Quaternion().copy(Grid.U1).multiply(Grid.B0);
+    static B2 = new THREE.Quaternion().copy(Grid.U2).multiply(Grid.B0);
+    static B3 = new THREE.Quaternion().copy(Grid.U3).multiply(Grid.B0);
+    static L1 = new THREE.Quaternion().copy(Grid.U1).multiply(Grid.L0);
+    static L2 = new THREE.Quaternion().copy(Grid.U2).multiply(Grid.L0);
+    static L3 = new THREE.Quaternion().copy(Grid.U3).multiply(Grid.L0);
+    static R1 = new THREE.Quaternion().copy(Grid.U1).multiply(Grid.R0);
+    static R2 = new THREE.Quaternion().copy(Grid.U2).multiply(Grid.R0);
+    static R3 = new THREE.Quaternion().copy(Grid.U3).multiply(Grid.R0);
+    static D1 = new THREE.Quaternion().copy(Grid.U1).multiply(Grid.D0);
+    static D2 = new THREE.Quaternion().copy(Grid.U2).multiply(Grid.D0);
+    static D3 = new THREE.Quaternion().copy(Grid.U3).multiply(Grid.D0);
+    static allRotations = [
+        Grid.U0, Grid.F0, Grid.B0, Grid.L0, Grid.R0, Grid.D0,
+        Grid.U1, Grid.F1, Grid.B1, Grid.L1, Grid.R1, Grid.D1,
+        Grid.U2, Grid.F2, Grid.B2, Grid.L2, Grid.R2, Grid.D2,
+        Grid.U3, Grid.F3, Grid.B3, Grid.L3, Grid.R3, Grid.D3,
+    ];
+    static randomRotation() {
+        return Grid.allRotations[Math.floor(Math.random() * Grid.allRotations.length)];
+    }
+    static makeTranslation(x, y, z) {
+        const m = new THREE.Matrix4();
+        m.makeTranslation(x, y, z);
+        return m;
+    }
+    static zeroMatrix = new THREE.Matrix4().set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+}
+exports.Grid = Grid;
+//# sourceMappingURL=grid.js.map
 
 /***/ }),
 
