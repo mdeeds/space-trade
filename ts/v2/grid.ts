@@ -64,6 +64,16 @@ export class Grid {
       Math.floor(Math.random() * Grid.allRotations.length)];
   }
 
+  public static roundRotation(q: THREE.Quaternion) {
+    const ninety = Math.PI / 2;
+    const euler = new THREE.Euler();
+    euler.setFromQuaternion(q);
+    euler.x = ninety * Math.round(euler.x / ninety);
+    euler.y = ninety * Math.round(euler.y / ninety);
+    euler.z = ninety * Math.round(euler.z / ninety);
+    q.setFromEuler(euler);
+  }
+
   public static makeTranslation(x: number, y: number, z: number)
     : THREE.Matrix4 {
     const m = new THREE.Matrix4();
