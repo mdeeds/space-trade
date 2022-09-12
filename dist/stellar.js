@@ -222,6 +222,7 @@ class Asteroid extends meshCollection_1.MeshCollection {
                 pos.copy(ev.worldPosition);
                 this.worldToLocal(pos.position);
                 grid_1.Grid.round(pos.position);
+                pos.quaternion.copy(grid_1.Grid.roundRotation(pos.quaternion));
                 const cursor = cursors.get(ev.handedness);
                 if (cursor.isHolding()) {
                     this.handleDrop(pos, cursor);
@@ -983,6 +984,18 @@ class Grid {
     static randomRotation() {
         return Grid.allRotations[Math.floor(Math.random() * Grid.allRotations.length)];
     }
+    static roundRotation(q) {
+        let result = Grid.notRotated;
+        let nearestAngle = Infinity;
+        for (const gridQ of Grid.allRotations) {
+            const angle = gridQ.angleTo(q);
+            if (angle < nearestAngle) {
+                nearestAngle = angle;
+                result = gridQ;
+            }
+        }
+        return result;
+    }
     static makeTranslation(x, y, z) {
         const m = new THREE.Matrix4();
         m.makeTranslation(x, y, z);
@@ -1282,6 +1295,7 @@ class MeshCollection extends THREE.Object3D {
     addCube(name, tx) {
         this.cubes.Set(tx.position, name);
         this.rocks.add(tx.position, tx);
+        this.quaternions.set(tx.position, tx.quaternion);
         this.dirty = true;
     }
     removeCube(position) {
