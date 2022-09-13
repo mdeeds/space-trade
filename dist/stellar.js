@@ -222,7 +222,7 @@ class Asteroid extends meshCollection_1.MeshCollection {
                 pos.copy(ev.worldPosition);
                 this.worldToLocal(pos.position);
                 grid_1.Grid.round(pos.position);
-                pos.quaternion.copy(grid_1.Grid.roundRotation(pos.quaternion));
+                grid_1.Grid.roundRotation(pos.quaternion);
                 const cursor = cursors.get(ev.handedness);
                 if (cursor.isHolding()) {
                     this.handleDrop(pos, cursor);
@@ -985,16 +985,13 @@ class Grid {
         return Grid.allRotations[Math.floor(Math.random() * Grid.allRotations.length)];
     }
     static roundRotation(q) {
-        let result = Grid.notRotated;
-        let nearestAngle = Infinity;
-        for (const gridQ of Grid.allRotations) {
-            const angle = gridQ.angleTo(q);
-            if (angle < nearestAngle) {
-                nearestAngle = angle;
-                result = gridQ;
-            }
-        }
-        return result;
+        const ninety = Math.PI / 2;
+        const euler = new THREE.Euler();
+        euler.setFromQuaternion(q);
+        euler.x = ninety * Math.round(euler.x / ninety);
+        euler.y = ninety * Math.round(euler.y / ninety);
+        euler.z = ninety * Math.round(euler.z / ninety);
+        q.setFromEuler(euler);
     }
     static makeTranslation(x, y, z) {
         const m = new THREE.Matrix4();
@@ -2561,6 +2558,12 @@ class Stellar {
         this.scene.add(light);
         const ambient = new THREE.AmbientLight('#def', 0.5);
         this.scene.add(ambient);
+        // add sky sphere
+        var geometry = new THREE.SphereGeometry(20e9, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2);
+        var material = new THREE.MeshBasicMaterial();
+        material.color.set(0xFFFFFF);
+        var m = new THREE.Mesh(geometry, material);
+        this.scene.add(m);
         console.log('Initialize World');
         const assets = await assets_1.Assets.load();
         console.log('Assets loaded.');
