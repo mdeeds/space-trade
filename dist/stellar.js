@@ -2558,12 +2558,6 @@ class Stellar {
         this.scene.add(light);
         const ambient = new THREE.AmbientLight('#def', 0.5);
         this.scene.add(ambient);
-        // add sky sphere
-        var geometry = new THREE.SphereGeometry(20e9, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2);
-        var material = new THREE.MeshBasicMaterial();
-        material.color.set(0xFFFFFF);
-        var m = new THREE.Mesh(geometry, material);
-        this.scene.add(m);
         console.log('Initialize World');
         const assets = await assets_1.Assets.load();
         console.log('Assets loaded.');
