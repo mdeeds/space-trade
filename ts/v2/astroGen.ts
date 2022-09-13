@@ -113,8 +113,20 @@ export class AstroGen {
 
   private addAt(x: number, y: number, z: number) {
     const quaternion = Grid.randomRotation();
+    let typeA = 'iron-chondrite'
+    let typeB = 'carbon-chondrite'
+
+    if (Math.random() < 0.5) {
+      typeA = 'borosilicate'
+      typeB = 'lithium-silicate'
+    }
+    else if (Math.random() < 0.5) {
+      typeA = 'fuel'
+      typeB = 'iron'
+    }
+
     this.construction.addCube(
-      Math.random() < 0.5 ? 'iron-chondrite' : 'carbon-chondrite',
+      Math.random() < 0.5 ? typeA : typeB,
       new IsoTransform(
         new THREE.Vector3(x, y, z),
         quaternion));

@@ -396,7 +396,17 @@ class AstroGen {
     }
     addAt(x, y, z) {
         const quaternion = grid_1.Grid.randomRotation();
-        this.construction.addCube(Math.random() < 0.5 ? 'iron-chondrite' : 'carbon-chondrite', new isoTransform_1.IsoTransform(new THREE.Vector3(x, y, z), quaternion));
+        let typeA = 'iron-chondrite';
+        let typeB = 'carbon-chondrite';
+        if (Math.random() < 0.5) {
+            typeA = 'borosilicate';
+            typeB = 'lithium-silicate';
+        }
+        else if (Math.random() < 0.5) {
+            typeA = 'fuel';
+            typeB = 'iron';
+        }
+        this.construction.addCube(Math.random() < 0.5 ? typeA : typeB, new isoTransform_1.IsoTransform(new THREE.Vector3(x, y, z), quaternion));
     }
     buildOriginMarker(size) {
         for (let x = 0; x < size; x++) {
