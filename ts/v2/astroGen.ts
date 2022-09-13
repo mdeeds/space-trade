@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { randInt } from "three/src/math/MathUtils";
 import { Construction } from "./construction";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
@@ -111,16 +112,16 @@ export class AstroGen {
     return hat[index];
   }
 
-  private addAt(x: number, y: number, z: number) {
+  private addAt(x: number, y: number, z: number, TypeClass = 0) {
     const quaternion = Grid.randomRotation();
     let typeA = 'iron-chondrite'
     let typeB = 'carbon-chondrite'
 
-    if (Math.random() < 0.5) {
+    if (TypeClass == 1) {
       typeA = 'borosilicate'
       typeB = 'lithium-silicate'
     }
-    else if (Math.random() < 0.5) {
+    else if (TypeClass == 2) {
       typeA = 'fuel'
       typeB = 'iron'
     }
@@ -164,11 +165,12 @@ export class AstroGen {
 
   buildAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
+    const TypeClass = randInt(0, 2);
     for (let x = -r; x < r; x++) {
       for (let y = -r; y < r; y++) {
         for (let z = -r; z < r; z++) {
           if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-            this.addAt(x + xOffset, y + yOffset, z + zOffset);
+            this.addAt(x + xOffset, y + yOffset, z + zOffset, TypeClass);
           }
         }
       }
