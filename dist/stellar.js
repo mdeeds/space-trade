@@ -503,7 +503,7 @@ class AstroTools {
     blocks = new simpleLocationMap_1.SimpleLocationMap();
     orthogonalVectors = [
         new three_1.Vector3(0, 0, -1),
-        new three_1.Vector3(0, 1, 0),
+        new three_1.Vector3(0, 0, 1),
         new three_1.Vector3(0, -1, 0),
         new three_1.Vector3(0, 1, 0),
         new three_1.Vector3(-1, 0, 0),
@@ -2655,6 +2655,7 @@ class Stellar {
         this.playerGroup.add(this.camera);
         this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         this.renderer.setSize(512, 512);
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
         document.body.appendChild(this.renderer.domElement);
         document.body.appendChild(VRButton_js_1.VRButton.createButton(this.renderer));
         this.renderer.xr.enabled = true;
