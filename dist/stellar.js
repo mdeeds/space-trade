@@ -292,7 +292,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AstroGen = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const three_1 = __webpack_require__(5232);
 const MathUtils_1 = __webpack_require__(9542);
+const astroTools_1 = __webpack_require__(2904);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
 class rarity {
@@ -424,26 +426,29 @@ class AstroGen {
     }
     buildAsteroid(r, xOffset, yOffset, zOffset) {
         let items = [];
-        switch ((0, MathUtils_1.randInt)(0, 2)) {
-            case 0:
-                items = ['iron-chondrite', 'carbon-chondrite'];
-                break;
-            case 1:
-                items = ['iron', 'fuel'];
-                break;
-            case 2:
-                items = ['lithium-silicate', 'borosilicate'];
-                break;
-        }
-        for (let x = -r; x < r; x++) {
-            for (let y = -r; y < r; y++) {
-                for (let z = -r; z < r; z++) {
-                    if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-                        this.addAt(x + xOffset, y + yOffset, z + zOffset);
-                    }
-                }
-            }
-        }
+        // switch (randInt(0, 2)) {
+        //   case 0:
+        //     items = ['iron-chondrite', 'carbon-chondrite'];
+        //     break;
+        //   case 1:
+        //     items = ['iron', 'fuel'];
+        //     break;
+        //   case 2:
+        //     items = ['lithium-silicate', 'borosilicate'];
+        //     break;
+        // }
+        // for (let x = -r; x < r; x++) {
+        //   for (let y = -r; y < r; y++) {
+        //     for (let z = -r; z < r; z++) {
+        //       if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
+        //         this.addAt(x + xOffset, y + yOffset, z + zOffset);
+        //       }
+        //     }
+        //   }
+        // }
+        let at = new astroTools_1.AstroTools();
+        at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, 'iron-chondrite');
+        at.addToConstruction(this.construction);
     }
     buildDiamond(r, xOffset, yOffset, zOffset) {
         for (let x = -r; x < r; x++) {
@@ -473,6 +478,122 @@ class AstroGen {
 }
 exports.AstroGen = AstroGen;
 //# sourceMappingURL=astroGen.js.map
+
+/***/ }),
+
+/***/ 2904:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AstroTools = void 0;
+const three_1 = __webpack_require__(5232);
+const grid_1 = __webpack_require__(3424);
+const isoTransform_1 = __webpack_require__(3265);
+const simpleLocationMap_1 = __webpack_require__(6125);
+class AstroTools {
+    density = 1.0; // density is the chance that a block will be placed
+    blocks = new simpleLocationMap_1.SimpleLocationMap();
+    orthogonalVectors = [
+        new three_1.Vector3(0, 0, -1),
+        new three_1.Vector3(0, 1, 0),
+        new three_1.Vector3(0, -1, 0),
+        new three_1.Vector3(0, 1, 0),
+        new three_1.Vector3(-1, 0, 0),
+        new three_1.Vector3(1, 0, 0),
+    ];
+    constructor() {
+        // this.randomWalk(new Vector3(), 5, "cube");
+        // this.dialate("clay");
+        // this.erode();
+    }
+    addAt(pos, item, overwrite = false) {
+        if (Math.random() < this.density) {
+            if (this.blocks.has(pos)) {
+                if (overwrite) {
+                    this.blocks.delete(pos);
+                    this.blocks.set(pos, item);
+                }
+            }
+            else {
+                this.blocks.set(pos, item);
+            }
+        }
+    }
+    randomDirection() {
+        let possibilities = this.orthogonalVectors;
+        const index = Math.floor(Math.random() * possibilities.length);
+        return possibilities[index];
+    }
+    removeAt(pos) {
+        if (Math.random() < this.density) {
+            if (this.blocks.has(pos)) {
+                this.blocks.delete(pos);
+            }
+        }
+    }
+    disk(pos, r, item, overwrite = false) {
+        for (let x = -r; x < r; x++) {
+            for (let z = -r; z < r; z++) {
+                if (Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2)) < r) {
+                    let localPos = new three_1.Vector3(x, 0, z);
+                    localPos.add(pos);
+                    this.addAt(localPos, item, overwrite);
+                }
+            }
+        }
+    }
+    randomWalk(pos, n, item, overwrite = false) {
+        for (let i = 0; i < n; i++) {
+            this.addAt(pos, item, overwrite);
+            pos.add(this.randomDirection());
+        }
+    }
+    dialate(item) {
+        for (let i of this.blocks.clone().entries()) {
+            for (let v of this.orthogonalVectors) {
+                let localPos = new three_1.Vector3();
+                localPos.add(i[0]);
+                localPos.add(v);
+                this.addAt(localPos, item, false);
+            }
+        }
+    }
+    erode(n = 6) {
+        for (let i of this.blocks.clone().entries()) {
+            let neighbors = 0;
+            for (let v of this.orthogonalVectors) {
+                let localPos = new three_1.Vector3();
+                localPos.add(i[0]);
+                localPos.add(v);
+                if (this.blocks.has(localPos)) {
+                    neighbors++;
+                }
+            }
+            if (neighbors < n) {
+                this.blocks.delete(i[0]);
+            }
+        }
+    }
+    double() {
+        let retValue = new simpleLocationMap_1.SimpleLocationMap();
+        for (let i of this.blocks.entries()) {
+            let localPos = new three_1.Vector3();
+            retValue.set(i[0], i[1]);
+            // TODO(SWD): finish this code
+        }
+    }
+    addToConstruction(construction) {
+        for (let block of this.blocks.entries()) {
+            const quaternion = grid_1.Grid.randomRotation();
+            const location = block[0];
+            const item = block[1];
+            construction.addCube(item, new isoTransform_1.IsoTransform(location, quaternion));
+        }
+    }
+}
+exports.AstroTools = AstroTools;
+//# sourceMappingURL=astroTools.js.map
 
 /***/ }),
 

@@ -1,5 +1,7 @@
 import * as THREE from "three";
+import { Vector3 } from "three";
 import { randInt } from "three/src/math/MathUtils";
+import { AstroTools } from "./astroTools";
 import { Construction } from "./construction";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
@@ -155,26 +157,31 @@ export class AstroGen {
   buildAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
     let items = [];
-    switch (randInt(0, 2)) {
-      case 0:
-        items = ['iron-chondrite', 'carbon-chondrite'];
-        break;
-      case 1:
-        items = ['iron', 'fuel'];
-        break;
-      case 2:
-        items = ['lithium-silicate', 'borosilicate'];
-        break;
-    }
-    for (let x = -r; x < r; x++) {
-      for (let y = -r; y < r; y++) {
-        for (let z = -r; z < r; z++) {
-          if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-            this.addAt(x + xOffset, y + yOffset, z + zOffset);
-          }
-        }
-      }
-    }
+    // switch (randInt(0, 2)) {
+    //   case 0:
+    //     items = ['iron-chondrite', 'carbon-chondrite'];
+    //     break;
+    //   case 1:
+    //     items = ['iron', 'fuel'];
+    //     break;
+    //   case 2:
+    //     items = ['lithium-silicate', 'borosilicate'];
+    //     break;
+    // }
+    // for (let x = -r; x < r; x++) {
+    //   for (let y = -r; y < r; y++) {
+    //     for (let z = -r; z < r; z++) {
+    //       if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
+    //         this.addAt(x + xOffset, y + yOffset, z + zOffset);
+    //       }
+    //     }
+    //   }
+    // }
+
+    let at = new AstroTools();
+    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron-chondrite');
+    at.addToConstruction(this.construction);
+
   }
 
   buildDiamond(r: number,

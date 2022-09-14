@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { PositionalAudio, Vector3 } from "three";
 import { randFloat } from "three/src/math/MathUtils";
+import { Item } from "../assets";
+import { Construction } from "./construction";
 import { Grid } from "./grid";
+import { IsoTransform } from "./isoTransform";
 import { NeighborCount } from "./neighborCount";
 import { SimpleLocationMap } from "./simpleLocationMap";
 
@@ -18,9 +21,9 @@ export class AstroTools {
     ]
 
     public constructor() {
-        this.randomWalk(new Vector3(), 5, "cube");
-        this.dialate("clay");
-        this.erode();
+        // this.randomWalk(new Vector3(), 5, "cube");
+        // this.dialate("clay");
+        // this.erode();
     }
 
     private addAt(pos: Vector3, item: string, overwrite = false) {
@@ -51,7 +54,7 @@ export class AstroTools {
         }
     }
 
-    private disk(pos: Vector3, r: number, item: string, overwrite = false) {
+    public disk(pos: Vector3, r: number, item: string, overwrite = false) {
         for (let x = -r; x < r; x++) {
             for (let z = -r; z < r; z++) {
                 if (Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2)) < r) {
@@ -63,14 +66,14 @@ export class AstroTools {
         }
     }
 
-    private randomWalk(pos: Vector3, n: number, item: string, overwrite = false) {
+    public randomWalk(pos: Vector3, n: number, item: string, overwrite = false) {
         for (let i = 0; i < n; i++) {
-            this.addAt(pos, item), overwrite;
+            this.addAt(pos, item, overwrite);
             pos.add(this.randomDirection());
         }
     }
 
-    private dialate(item: string) {
+    public dialate(item: string) {
         for (let i of this.blocks.clone().entries()) {
             for (let v of this.orthogonalVectors) {
                 let localPos = new Vector3();
@@ -81,7 +84,7 @@ export class AstroTools {
         }
     }
 
-    private erode(n = 6) {
+    public erode(n = 6) {
         for (let i of this.blocks.clone().entries()) {
             let neighbors = 0;
             for (let v of this.orthogonalVectors) {
@@ -98,13 +101,23 @@ export class AstroTools {
         }
     }
 
-
-    private double() {
+    public double() {
         let retValue = new SimpleLocationMap<string>();
         for (let i of this.blocks.entries()) {
             let localPos = new Vector3();
             retValue.set(i[0], i[1]);
             // TODO(SWD): finish this code
+        }
+    }
+
+    public addToConstruction(construction: Construction) {
+        for (let block of this.blocks.entries()) {
+            const quaternion = Grid.randomRotation();
+            const location = block[0];
+            const item = block[1];
+            construction.addCube(item, new IsoTransform(
+                location,
+                quaternion));
         }
     }
 }
