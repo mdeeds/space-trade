@@ -179,7 +179,14 @@ export class AstroGen {
     // }
 
     let at = new AstroTools();
-    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron-chondrite');
+    at.density = 0.9
+    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron');
+    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron');
+    at.density = 0.5
+    at.dialate('carbon-chondrite')
+    at.dialate('iron-chondrite')
+    at.dialate('carbon-chondrite')
+    at.dialate('iron-chondrite')
     at.addToConstruction(this.construction);
 
   }

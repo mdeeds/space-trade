@@ -447,7 +447,14 @@ class AstroGen {
         //   }
         // }
         let at = new astroTools_1.AstroTools();
-        at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, 'iron-chondrite');
+        at.density = 0.9;
+        at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, 'iron');
+        at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, 'iron');
+        at.density = 0.5;
+        at.dialate('carbon-chondrite');
+        at.dialate('iron-chondrite');
+        at.dialate('carbon-chondrite');
+        at.dialate('iron-chondrite');
         at.addToConstruction(this.construction);
     }
     buildDiamond(r, xOffset, yOffset, zOffset) {
