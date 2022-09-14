@@ -395,19 +395,10 @@ class AstroGen {
         let index = Math.floor(Math.random() * hat.length);
         return hat[index];
     }
-    addAt(x, y, z, TypeClass = 0) {
+    addAt(x, y, z, items = ['iron-chondrite', 'carbon-chondrite']) {
         const quaternion = grid_1.Grid.randomRotation();
-        let typeA = 'iron-chondrite';
-        let typeB = 'carbon-chondrite';
-        if (TypeClass == 1) {
-            typeA = 'borosilicate';
-            typeB = 'lithium-silicate';
-        }
-        else if (TypeClass == 2) {
-            typeA = 'fuel';
-            typeB = 'iron';
-        }
-        this.construction.addCube(Math.random() < 0.5 ? typeA : typeB, new isoTransform_1.IsoTransform(new THREE.Vector3(x, y, z), quaternion));
+        let item = items[(0, MathUtils_1.randInt)(0, items.length - 1)];
+        this.construction.addCube(item, new isoTransform_1.IsoTransform(new THREE.Vector3(x, y, z), quaternion));
     }
     buildOriginMarker(size) {
         for (let x = 0; x < size; x++) {
@@ -432,12 +423,23 @@ class AstroGen {
         }
     }
     buildAsteroid(r, xOffset, yOffset, zOffset) {
-        const TypeClass = (0, MathUtils_1.randInt)(0, 2);
+        let items = [];
+        switch ((0, MathUtils_1.randInt)(0, 2)) {
+            case 0:
+                items = ['iron-chondrite', 'carbon-chondrite'];
+                break;
+            case 1:
+                items = ['iron', 'fuel'];
+                break;
+            case 2:
+                items = ['lithium-silicate', 'borosilicate'];
+                break;
+        }
         for (let x = -r; x < r; x++) {
             for (let y = -r; y < r; y++) {
                 for (let z = -r; z < r; z++) {
                     if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-                        this.addAt(x + xOffset, y + yOffset, z + zOffset, TypeClass);
+                        this.addAt(x + xOffset, y + yOffset, z + zOffset);
                     }
                 }
             }
