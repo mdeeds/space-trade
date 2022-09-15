@@ -101,11 +101,7 @@ exports.Tick = Tick;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -202,11 +198,31 @@ exports.Assets = Assets;
 /***/ }),
 
 /***/ 4038:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Asteroid = void 0;
+const THREE = __importStar(__webpack_require__(5232));
 const settings_1 = __webpack_require__(6451);
 const astroGen_1 = __webpack_require__(6647);
 const compounds_1 = __webpack_require__(6772);
@@ -214,8 +230,10 @@ const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
 class Asteroid extends meshCollection_1.MeshCollection {
+    cursors;
     constructor(assets, controls, cursors) {
         super(assets, settings_1.S.float('as') * 1.2);
+        this.cursors = cursors;
         controls.setStartStopCallback((ev) => {
             if (ev.state == 'start') {
                 const pos = new isoTransform_1.IsoTransform();
@@ -229,10 +247,34 @@ class Asteroid extends meshCollection_1.MeshCollection {
                 }
                 else {
                     const removed = this.removeCube(pos.position);
-                    cursor.setHold(removed);
+                    if (!removed && this.cursorsAreTogether()) {
+                        this.handleSplit();
+                    }
+                    else {
+                        cursor.setHold(removed);
+                    }
                 }
             }
         });
+    }
+    cursorsAreTogether() {
+        const v = new THREE.Vector3();
+        v.copy(this.cursors.get('left').position);
+        v.sub(this.cursors.get('right').position);
+        return v.length() < 0.20;
+    }
+    handleSplit() {
+        const left = this.cursors.get('left');
+        const right = this.cursors.get('right');
+        let item = left.getHold();
+        if (!item) {
+            item = right.getHold();
+        }
+        const [a, b] = this.compounds.break(item);
+        if (a || b) {
+            left.setHold(a);
+            right.setHold(b);
+        }
     }
     compounds = new compounds_1.Compounds();
     handleDrop(pos, cursor) {
@@ -268,11 +310,7 @@ exports.Asteroid = Asteroid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -702,11 +740,7 @@ exports.Compounds = Compounds;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -926,11 +960,7 @@ exports.Controls = Controls;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1055,11 +1085,7 @@ exports.File = File;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1153,11 +1179,7 @@ exports.Grid = Grid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1209,11 +1231,7 @@ exports.IsoTransform = IsoTransform;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1343,11 +1361,7 @@ exports.Latice = Latice;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1622,11 +1636,7 @@ exports.NeighborCount = NeighborCount;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1931,11 +1941,7 @@ exports.PointMapOctoTree = PointMapOctoTree;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1991,11 +1997,7 @@ exports.Player = Player;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2207,11 +2209,7 @@ exports.PointCloudUnion = PointCloudUnion;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2311,11 +2309,7 @@ exports.SimpleLocationMap = SimpleLocationMap;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2428,11 +2422,7 @@ exports.Star = Star;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2552,11 +2542,7 @@ exports.Stars = Stars;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2734,11 +2720,7 @@ document.body.appendChild(startButton);
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2888,11 +2870,7 @@ exports.System = System;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -95085,28 +95063,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DEG2RAD": () => (/* binding */ DEG2RAD),
 /* harmony export */   "RAD2DEG": () => (/* binding */ RAD2DEG),
-/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
-/* harmony export */   "clamp": () => (/* binding */ clamp),
-/* harmony export */   "damp": () => (/* binding */ damp),
-/* harmony export */   "degToRad": () => (/* binding */ degToRad),
-/* harmony export */   "denormalize": () => (/* binding */ denormalize),
-/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
-/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "generateUUID": () => (/* binding */ generateUUID),
-/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
-/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
-/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "clamp": () => (/* binding */ clamp),
+/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
 /* harmony export */   "mapLinear": () => (/* binding */ mapLinear),
-/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
+/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "damp": () => (/* binding */ damp),
 /* harmony export */   "pingpong": () => (/* binding */ pingpong),
-/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "smoothstep": () => (/* binding */ smoothstep),
+/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
+/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "randFloat": () => (/* binding */ randFloat),
 /* harmony export */   "randFloatSpread": () => (/* binding */ randFloatSpread),
-/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "seededRandom": () => (/* binding */ seededRandom),
+/* harmony export */   "degToRad": () => (/* binding */ degToRad),
+/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
+/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
+/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "setQuaternionFromProperEuler": () => (/* binding */ setQuaternionFromProperEuler),
-/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
-/* harmony export */   "smoothstep": () => (/* binding */ smoothstep)
+/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "denormalize": () => (/* binding */ denormalize)
 /* harmony export */ });
 const _lut = [];
 
