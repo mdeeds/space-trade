@@ -13,7 +13,7 @@ import { MeshCollection } from "./meshCollection";
 
 export class Asteroid extends MeshCollection implements Codeable {
   constructor(assets: Assets, controls: Controls,
-    cursors: Map<THREE.XRHandedness, Cursor>) {
+    private cursors: Map<THREE.XRHandedness, Cursor>) {
     super(assets, S.float('as') * 1.2);
 
     controls.setStartStopCallback((ev: StartStopEvent) => {
@@ -29,10 +29,35 @@ export class Asteroid extends MeshCollection implements Codeable {
           this.handleDrop(pos, cursor);
         } else {
           const removed = this.removeCube(pos.position);
-          cursor.setHold(removed);
+          if (!removed && this.cursorsAreTogether()) {
+            this.handleSplit();
+          } else {
+            cursor.setHold(removed);
+          }
         }
       }
     });
+  }
+
+  private cursorsAreTogether(): boolean {
+    const v = new THREE.Vector3();
+    v.copy(this.cursors.get('left').position);
+    v.sub(this.cursors.get('right').position);
+    return v.length() < 0.20;
+  }
+
+  private handleSplit() {
+    const left = this.cursors.get('left');
+    const right = this.cursors.get('right');
+    let item = left.getHold();
+    if (!item) {
+      item = right.getHold();
+    }
+    const [a, b] = this.compounds.break(item);
+    if (a || b) {
+      left.setHold(a);
+      right.setHold(b);
+    }
   }
 
   private compounds = new Compounds();

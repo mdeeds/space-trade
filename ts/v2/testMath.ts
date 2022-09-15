@@ -14,7 +14,7 @@ const target = new THREE.Quaternion();
 
 function check(player: THREE.Quaternion, hand: THREE.Quaternion, expect: THREE.Quaternion) {
   setWorldToPlayerQ(player, hand, target);
-  console.log(`zero: ${expect.angleTo(target)}`);
+  console.log(`Expect: ${[expect.x, expect.y, expect.z, expect.w]} actual: ${[target.x, target.y, target.z, target.w]}`);
 }
 
 // Player facing forward
