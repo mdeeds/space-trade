@@ -156,39 +156,69 @@ export class AstroGen {
 
   buildAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
+    switch (randInt(0, 1)) {
+      case 0:
+        this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+        break;
+      case 1:
+        this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+        break;
+    }
+  }
+
+  buildRandomWalkAsteroid(r: number,
+    xOffset: number, yOffset: number, zOffset: number) {
+
     let items = [];
-    // switch (randInt(0, 2)) {
-    //   case 0:
-    //     items = ['iron-chondrite', 'carbon-chondrite'];
-    //     break;
-    //   case 1:
-    //     items = ['iron', 'fuel'];
-    //     break;
-    //   case 2:
-    //     items = ['lithium-silicate', 'borosilicate'];
-    //     break;
-    // }
-    // for (let x = -r; x < r; x++) {
-    //   for (let y = -r; y < r; y++) {
-    //     for (let z = -r; z < r; z++) {
-    //       if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-    //         this.addAt(x + xOffset, y + yOffset, z + zOffset);
-    //       }
-    //     }
-    //   }
-    // }
+    switch (randInt(0, 2)) {
+      case 0:
+        items = ['iron-chondrite', 'carbon-chondrite', 'iron'];
+        break;
+      case 1:
+        items = ['carbon-chondrite', 'iron', 'fuel'];
+        break;
+      case 2:
+        items = ['lithium-silicate', 'borosilicate', 'silicon'];
+        break;
+    }
 
     let at = new AstroTools();
     at.density = 0.9
-    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron');
-    at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, 'iron');
+    for (let i = 0; i < r; r++) {
+      at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, items[0]);
+    }
     at.density = 0.5
-    at.dialate('carbon-chondrite')
-    at.dialate('iron-chondrite')
-    at.dialate('carbon-chondrite')
-    at.dialate('iron-chondrite')
+    for (let i = 0; i < r; r++) {
+      at.dialate(items[1])
+      at.dialate(items[2])
+    }
     at.addToConstruction(this.construction);
 
+  }
+
+  bulidBallAsteroid(r: number,
+    xOffset: number, yOffset: number, zOffset: number) {
+    let items = [];
+    switch (randInt(0, 2)) {
+      case 0:
+        items = ['iron-chondrite', 'carbon-chondrite'];
+        break;
+      case 1:
+        items = ['iron', 'fuel'];
+        break;
+      case 2:
+        items = ['lithium-silicate', 'borosilicate'];
+        break;
+    }
+    for (let x = -r; x < r; x++) {
+      for (let y = -r; y < r; y++) {
+        for (let z = -r; z < r; z++) {
+          if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
+            this.addAt(x + xOffset, y + yOffset, z + zOffset);
+          }
+        }
+      }
+    }
   }
 
   buildDiamond(r: number,
