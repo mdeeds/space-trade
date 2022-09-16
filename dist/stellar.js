@@ -475,14 +475,14 @@ class AstroGen {
         }
     }
     buildAsteroid(r, xOffset, yOffset, zOffset) {
-        switch ((0, MathUtils_1.randInt)(0, 1)) {
-            case 0:
-                this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
-                break;
-            case 1:
-                this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
-                break;
-        }
+        // switch (randInt(0, 1)) {
+        //   case 0:
+        //     this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+        //     break;
+        //   case 1:
+        this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+        //     break;
+        // }
     }
     buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset) {
         let items = [];
@@ -527,7 +527,7 @@ class AstroGen {
             for (let y = -r; y < r; y++) {
                 for (let z = -r; z < r; z++) {
                     if (Math.sqrt(x * x + y * y + z * z) < r + Math.random() - 0.5) {
-                        this.addAt(x + xOffset, y + yOffset, z + zOffset);
+                        this.addAt(x + xOffset, y + yOffset, z + zOffset, items);
                     }
                 }
             }
