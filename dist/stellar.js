@@ -499,6 +499,7 @@ class AstroGen {
         }
         let at = new astroTools_1.AstroTools();
         at.density = 0.9;
+        r = 2;
         for (let i = 0; i < r; r++) {
             at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, items[0]);
         }

@@ -184,6 +184,7 @@ export class AstroGen {
 
     let at = new AstroTools();
     at.density = 0.9
+    r = 2
     for (let i = 0; i < r; r++) {
       at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, items[0]);
     }
