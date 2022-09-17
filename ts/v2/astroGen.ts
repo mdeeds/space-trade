@@ -156,14 +156,14 @@ export class AstroGen {
 
   buildAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
-    // switch (randInt(0, 1)) {
-    //   case 0:
-    //     this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
-    //     break;
-    //   case 1:
-    this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
-    //     break;
-    // }
+    switch (randInt(0, 1)) {
+      case 0:
+        this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+        break;
+      case 1:
+        this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+        break;
+    }
   }
 
   buildRandomWalkAsteroid(r: number,
@@ -183,13 +183,14 @@ export class AstroGen {
     }
 
     let at = new AstroTools();
-    at.density = 0.9
-    r = 2
-    for (let i = 0; i < r; r++) {
-      at.randomWalk(new Vector3(xOffset, yOffset, zOffset), 10, items[0]);
+    at.density = 0.9;
+    let spurs = Math.ceil(r / 3);
+    for (let i = 0; i < spurs; i++) {
+      at.randomWalk(new Vector3(xOffset, yOffset, zOffset), r * 3, items[0]);
     }
     at.density = 0.5
-    for (let i = 0; i < r; r++) {
+    let layers = Math.ceil(r / 3);
+    for (let i = 0; i < layers; i++) {
       at.dialate(items[1])
       at.dialate(items[2])
     }

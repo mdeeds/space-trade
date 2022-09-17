@@ -94,7 +94,7 @@ export class Stellar {
     this.playerGroup.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
-    this.renderer.setSize(512, 512);
+    this.renderer.setSize(800, 800);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(VRButton.createButton(this.renderer));

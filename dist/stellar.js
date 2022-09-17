@@ -475,14 +475,14 @@ class AstroGen {
         }
     }
     buildAsteroid(r, xOffset, yOffset, zOffset) {
-        // switch (randInt(0, 1)) {
-        //   case 0:
-        //     this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
-        //     break;
-        //   case 1:
-        this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
-        //     break;
-        // }
+        switch ((0, MathUtils_1.randInt)(0, 1)) {
+            case 0:
+                this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+                break;
+            case 1:
+                this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+                break;
+        }
     }
     buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset) {
         let items = [];
@@ -499,12 +499,13 @@ class AstroGen {
         }
         let at = new astroTools_1.AstroTools();
         at.density = 0.9;
-        r = 2;
-        for (let i = 0; i < r; r++) {
-            at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), 10, items[0]);
+        let spurs = Math.ceil(r / 3);
+        for (let i = 0; i < spurs; i++) {
+            at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), r * 3, items[0]);
         }
         at.density = 0.5;
-        for (let i = 0; i < r; r++) {
+        let layers = Math.ceil(r / 3);
+        for (let i = 0; i < layers; i++) {
             at.dialate(items[1]);
             at.dialate(items[2]);
         }
@@ -2730,7 +2731,7 @@ class Stellar {
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);
         this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
-        this.renderer.setSize(512, 512);
+        this.renderer.setSize(800, 800);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         document.body.appendChild(this.renderer.domElement);
         document.body.appendChild(VRButton_js_1.VRButton.createButton(this.renderer));
