@@ -10,10 +10,12 @@ import { Codeable } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
 import { MeshCollection } from "./meshCollection";
+import { Sound } from "./sfx/sound";
 
 export class Asteroid extends MeshCollection implements Codeable {
   constructor(assets: Assets, controls: Controls,
-    private cursors: Map<THREE.XRHandedness, Cursor>) {
+    private cursors: Map<THREE.XRHandedness, Cursor>,
+    private sound: Sound) {
     super(assets, S.float('as') * 1.2);
 
     controls.setStartStopCallback((ev: StartStopEvent) => {
@@ -27,6 +29,7 @@ export class Asteroid extends MeshCollection implements Codeable {
         const cursor = cursors.get(ev.handedness);
         if (cursor.isHolding()) {
           this.handleDrop(pos, cursor);
+          this.sound.playOnObject(cursor, 'boop');
         } else {
           const removed = this.removeCube(pos.position);
           if (!removed && this.cursorsAreTogether()) {

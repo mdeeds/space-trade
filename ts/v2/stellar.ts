@@ -12,6 +12,7 @@ import { Stars } from "./stars";
 import { Grid } from "./grid";
 import { Tick, Ticker } from "../tick";
 import { IsoTransform } from "./isoTransform";
+import { Sound } from "./sfx/sound";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -36,6 +37,7 @@ export class Stellar {
 
   private async initialize() {
     this.initializeGraphics();
+    this.initializeSound();
     await this.initializeWorld();
 
     // Set up animation loop last - after everything is loaded.
@@ -101,6 +103,13 @@ export class Stellar {
     this.renderer.xr.enabled = true;
   }
 
+  private sound: Sound;
+  private initializeSound() {
+    const listener = new THREE.AudioListener();
+    this.camera.add(listener);
+    this.sound = new Sound(listener);
+  }
+
   private tmpV = new THREE.Vector3();
   private distanceToClosest(): number {
     this.tmpV.copy(this.playerGroup.position);
@@ -116,6 +125,8 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
+        this.sound.makeAudio('left', this.cursors.get('left'));
+        this.sound.makeAudio('right', this.cursors.get('right'));
       }
     }
     const velocity = S.float('rv') * this.distanceToClosest();
@@ -157,7 +168,10 @@ export class Stellar {
     console.log('Initialize World');
     const assets = await Assets.load();
     console.log('Assets loaded.');
-    this.stars = new Stars(assets, this.controls, this.cursors);
+    if (!this.sound) {
+      throw new Error('Sound not initialized yet!');
+    }
+    this.stars = new Stars(assets, this.controls, this.cursors, this.sound);
     File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
     this.universe.add(this.stars);
     this.allPoints.add(this.stars);
