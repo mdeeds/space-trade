@@ -9,6 +9,7 @@ module.exports = {
     stellar: "./src/v2/stellar.js",
     octo: "./src/u2/scene.js",
     wfc2d: "./src/v2/wfc2d.js",
+    forces: "./src/v2/forces.js",
   },
   output: {
     path: __dirname + "/dist",
@@ -59,6 +60,12 @@ module.exports = {
       template: "./src/index.html",
       filename: "wfc2d.html",
       chunks: ['wfc2d']
+    }),
+    new HtmlWebPackPlugin({
+      name: "forces",
+      template: "./src/index.html",
+      filename: "forces.html",
+      chunks: ['forces']
     }),
   ],
   devtool: "source-map",

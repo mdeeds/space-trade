@@ -1,31 +1,21 @@
 import * as THREE from "three";
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
-import { Player } from "./player";
-import { S } from "../settings";
-import { Assets } from "./assets";
-import { Controls } from "./controls";
-import { Cursor } from "./cursor";
-import { File } from "./file";
-import { NebulaSphere } from "./nebulaSphere";
-import { PointCloudUnion } from "./pointSet";
-import { Stars } from "./stars";
-import { Grid } from "./grid";
-import { Tick, Ticker } from "../tick";
+import { Controls, StartStopEvent } from "./controls";
+import { ForcePointCloud } from "./forcePointCloud";
 import { IsoTransform } from "./isoTransform";
+import { Tick, Ticker } from "../tick";
 import { Sound } from "./sfx/sound";
 
-export class Stellar {
+export class Forces {
   private scene = new THREE.Scene();
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
   private universe = new THREE.Group();
   private playerGroup = new THREE.Group();
-  private player = new Player();
+  private playerFrame = new IsoTransform();
 
-  private allPoints = new PointCloudUnion();
-  private stars: Stars;
-  private cursors = new Map<THREE.XRHandedness, Cursor>();
+  private stars: ForcePointCloud;
   private leftPosition = new IsoTransform();
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
@@ -36,6 +26,7 @@ export class Stellar {
     this.initialize();
   }
 
+  private tmpV = new THREE.Vector3();
   private async initialize() {
     this.initializeGraphics();
     this.initializeSound();
@@ -51,21 +42,12 @@ export class Stellar {
       ++frameCount;
       this.renderer.render(this.scene, this.camera);
       this.handleControls(deltaS);
-      this.stars.handlePops(this.universe, this.allPoints);
       this.tmpV.copy(this.universe.position);
       this.tmpV.multiplyScalar(-1);
       // this.nebulae.updatePosition(this.tmpV);
       if (!!this.controls) {
         this.controls.setPositions(this.leftPosition, this.rightPosition,
           this.camera);
-        this.setWorldToPlayer(
-          this.leftPosition.position, this.cursors.get('left').position)
-        this.setWorldToPlayerQ(
-          this.leftPosition.quaternion, this.cursors.get('left').quaternion)
-        this.setWorldToPlayer(
-          this.rightPosition.position, this.cursors.get('right').position)
-        this.setWorldToPlayerQ(
-          this.rightPosition.quaternion, this.cursors.get('right').quaternion)
       }
       this.scene.traverseVisible((o) => {
         if (o['tick']) {
@@ -73,19 +55,6 @@ export class Stellar {
         }
       })
     });
-  }
-
-  private setWorldToPlayer(pos: THREE.Vector3, target: THREE.Vector3) {
-    target.copy(pos);
-    this.playerGroup.worldToLocal(target);
-  }
-
-  private setWorldToPlayerQ(q: THREE.Quaternion, target: THREE.Quaternion) {
-    // We need to "subtract" the playerGroup quaternion from q.
-    // q - pgq = q + (-pgq)
-    target.copy(this.playerGroup.quaternion);
-    target.invert();
-    target.premultiply(q)
   }
 
   private initializeGraphics() {
@@ -111,13 +80,6 @@ export class Stellar {
     this.sound = new Sound(listener);
   }
 
-  private tmpV = new THREE.Vector3();
-  private distanceToClosest(): number {
-    this.tmpV.copy(this.playerGroup.position);
-    this.tmpV.sub(this.universe.position);
-    return this.allPoints.getClosestDistance(this.tmpV);
-  }
-
   private velocityVector = new THREE.Vector3();
   private q = new THREE.Quaternion();
   private yAxis = new THREE.Vector3(0, 1, 0);
@@ -126,11 +88,9 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
-        this.sound.makeAudio('left', this.cursors.get('left'));
-        this.sound.makeAudio('right', this.cursors.get('right'));
       }
     }
-    const velocity = S.float('rv') * this.distanceToClosest();
+    const velocity = 1.0;
     this.velocityVector.set(
       this.controls.leftRight(),
       this.controls.upDown(),
@@ -138,18 +98,18 @@ export class Stellar {
     if (this.velocityVector.lengthSq() > 0) {
       this.velocityVector.multiplyScalar(velocity * deltaS);
       this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
-      this.player.position.add(this.velocityVector);
+      this.playerFrame.position.add(this.velocityVector);
     }
 
     const spinRate = this.controls.spinLeftRight();
     if (spinRate != 0) {
       this.q.setFromAxisAngle(this.yAxis, deltaS * spinRate * 3);
-      this.player.rotation.multiply(this.q);
+      this.playerFrame.quaternion.multiply(this.q);
     }
 
-    this.universe.position.copy(this.player.position);
+    this.universe.position.copy(this.playerFrame.position);
     this.universe.position.multiplyScalar(-1);
-    this.playerGroup.quaternion.copy(this.player.rotation);
+    this.playerGroup.quaternion.copy(this.playerFrame.quaternion);
   }
 
   private async initializeWorld() {
@@ -157,6 +117,12 @@ export class Stellar {
     const canvas = document.getElementsByTagName('canvas')[0];
     this.controls = new Controls(this.camera, canvas,
       this.renderer.xr, this.playerGroup);
+
+    this.controls.setStartStopCallback((ev: StartStopEvent) => {
+      if (ev.state == 'start') {
+        const color = ev.handedness == 'left' ? 'blue' : 'red';
+      }
+    });
 
     const light = new THREE.DirectionalLight(new THREE.Color('#fff'),
       1.0);
@@ -166,23 +132,19 @@ export class Stellar {
     const ambient = new THREE.AmbientLight('#def', 0.5);
     this.scene.add(ambient);
 
-    console.log('Initialize World');
-    const assets = await Assets.load();
-    console.log('Assets loaded.');
     if (!this.sound) {
       throw new Error('Sound not initialized yet!');
     }
-    this.stars = new Stars(assets, this.controls, this.cursors, this.sound);
-    File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
-    this.universe.add(this.stars);
-    this.allPoints.add(this.stars);
-    this.cursors.set('left', new Cursor(assets));
-    this.cursors.set('right', new Cursor(assets));
-    this.playerGroup.add(this.cursors.get('left'));
-    this.playerGroup.add(this.cursors.get('right'));
+    this.stars = new ForcePointCloud();
 
-    File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
-    setInterval(() => { File.save(this.player, 'Player') }, 1000);
+    for (let i = 0; i < 10; ++i) {
+      this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5,
+        Math.random() * 5, Math.random() * 5 - 2.5), 'red');
+      this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5,
+        Math.random() * 5, Math.random() * 5 - 2.5), 'blue');
+    }
+
+    this.universe.add(this.stars);
     return;
   }
 }
@@ -190,6 +152,6 @@ export class Stellar {
 const startButton = document.createElement('div');
 startButton.innerHTML = 'Start';
 startButton.onclick = () => {
-  new Stellar();
+  new Forces();
 }
 document.body.appendChild(startButton);
