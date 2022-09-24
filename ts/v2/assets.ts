@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Log } from "./log";
 
 export class Assets {
   private constructor(private namedMeshes: Map<string, THREE.Mesh>) { }
@@ -64,8 +65,8 @@ export class Assets {
       'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
     ];
     for (const modelName of modelNames) {
-      // console.log(`Loading ${modelName}`);
-      const m = await Assets.loadMeshFromModel(`Model/${modelName}', '`);
+      Log.info(`Loading '${modelName}'`);
+      const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
       m.name = modelName;
       namedMeshes.set(modelName, m);
     }
