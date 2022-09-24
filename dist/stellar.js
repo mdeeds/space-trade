@@ -122,6 +122,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Assets = void 0;
 const THREE = __importStar(__webpack_require__(5232));
 const GLTFLoader_js_1 = __webpack_require__(9217);
+const log_1 = __webpack_require__(4920);
 class Assets {
     namedMeshes;
     constructor(namedMeshes) {
@@ -184,8 +185,8 @@ class Assets {
             'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
         ];
         for (const modelName of modelNames) {
-            // console.log(`Loading ${modelName}`);
-            const m = await Assets.loadMeshFromModel(`Model/${modelName}', '`);
+            log_1.Log.info(`Loading '${modelName}'`);
+            const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
             m.name = modelName;
             namedMeshes.set(modelName, m);
         }
@@ -1385,6 +1386,38 @@ class Latice {
 }
 exports.Latice = Latice;
 //# sourceMappingURL=latice.js.map
+
+/***/ }),
+
+/***/ 4920:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Log = void 0;
+class Log {
+    static container;
+    static initialize() {
+        Log.container = document.createElement('div');
+        document.body.appendChild(Log.container);
+    }
+    static info(message) {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        const d = document.createElement('div');
+        d.innerHTML = message;
+        Log.container.appendChild(d);
+    }
+    static clear() {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        Log.container.innerHTML = '';
+    }
+}
+exports.Log = Log;
+//# sourceMappingURL=log.js.map
 
 /***/ }),
 
