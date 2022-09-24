@@ -51,18 +51,21 @@ export class Assets {
   public static async load(): Promise<Assets> {
     const namedMeshes = new Map<string, THREE.Mesh>();
     const modelNames = [
-      'borosilicate', 'carbon-chondrite', 'carbon-fiber', 'carbon-fiber-cube',
-      'carbon-fiber-wedge', 'chrome-corner', 'chrome-cube', 'chrome-wedge',
-      'chromium', 'chromium-ore', 'clay', 'cluster-jet', 'computer',
-      'conveyer', 'cube', 'doped-silicon', 'doping', 'factory', 'food',
-      'fuel', 'fuel-tank', 'glass-cone', 'glass-rod', 'habitat',
-      'ht-steel-cylinder', 'ice', 'iron', 'iron-chondrite', 'lithium',
-      'lithium-silicate', 'organics', 'refined-silicon', 'silicon',
-      'solar-panel', 'steel-corner', 'steel-cylinder', 'steel-wedge',
-      'thruster-jet', 'wedge'];
+      'accordion', 'chrome-wedge', 'Cube.013', 'guide', 'organics', 'solar-panel',
+      'arm', 'chromium', 'cube', 'habitat', 'port', 'steel-corner',
+      'borosilicate', 'chromium-ore', 'doped-silicon', 'ht-steel-cylinder', 'producer', 'steel-cylinder',
+      'carbon-chondrite', 'clay', 'doping', 'ice', 'refined-silicon', 'steel-wedge',
+      'carbon-fiber-cube', 'cluster-jet', 'factory', 'iron-chondrite', 'salt-common', 'tank',
+      'carbon-fiber', 'composite-slab', 'flight computer', 'iron', 'salt-rare', 'thruster-jet',
+      'carbon-fiber-wedge', 'computer', 'food', 'light-blue', 'scaffold', 'untitled',
+      'chair', 'console', 'fuel', 'lithium', 'ship', 'wedge 2',
+      'chopped corner', 'conveyer', 'fuel-tank', 'lithium-silicate', 'silicate-rock', 'wedge',
+      'chrome-corner', 'corner', 'glass-cone', 'metal-common', 'silicon-crystalized', 'window-slope',
+      'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
+    ];
     for (const modelName of modelNames) {
       // console.log(`Loading ${modelName}`);
-      const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
+      const m = await Assets.loadMeshFromModel(`Model/${modelName}', '`);
       m.name = modelName;
       namedMeshes.set(modelName, m);
     }
