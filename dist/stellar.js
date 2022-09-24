@@ -101,11 +101,7 @@ exports.Tick = Tick;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -175,19 +171,21 @@ class Assets {
     static async load() {
         const namedMeshes = new Map();
         const modelNames = [
-            'borosilicate', 'carbon-chondrite', 'carbon-fiber', 'carbon-fiber-cube',
-            'carbon-fiber-wedge', 'chrome-corner', 'chrome-cube', 'chrome-wedge',
-            'chromium', 'chromium-ore', 'clay', 'cluster-jet', 'computer',
-            'conveyer', 'cube', 'doped-silicon', 'doping', 'factory', 'food',
-            'fuel', 'fuel-tank', 'glass-cone', 'glass-rod', 'habitat',
-            'ht-steel-cylinder', 'ice', 'iron', 'iron-chondrite', 'lithium',
-            'lithium-silicate', 'organics', 'refined-silicon', 'silicon',
-            'solar-panel', 'steel-corner', 'steel-cylinder', 'steel-wedge',
-            'thruster-jet', 'wedge'
+            'accordion', 'chrome-wedge', 'Cube.013', 'guide', 'organics', 'solar-panel',
+            'arm', 'chromium', 'cube', 'habitat', 'port', 'steel-corner',
+            'borosilicate', 'chromium-ore', 'doped-silicon', 'ht-steel-cylinder', 'producer', 'steel-cylinder',
+            'carbon-chondrite', 'clay', 'doping', 'ice', 'refined-silicon', 'steel-wedge',
+            'carbon-fiber-cube', 'cluster-jet', 'factory', 'iron-chondrite', 'salt-common', 'tank',
+            'carbon-fiber', 'composite-slab', 'flight computer', 'iron', 'salt-rare', 'thruster-jet',
+            'carbon-fiber-wedge', 'computer', 'food', 'light-blue', 'scaffold', 'untitled',
+            'chair', 'console', 'fuel', 'lithium', 'ship', 'wedge 2',
+            'chopped corner', 'conveyer', 'fuel-tank', 'lithium-silicate', 'silicate-rock', 'wedge',
+            'chrome-corner', 'corner', 'glass-cone', 'metal-common', 'silicon-crystalized', 'window-slope',
+            'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
         ];
         for (const modelName of modelNames) {
             // console.log(`Loading ${modelName}`);
-            const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
+            const m = await Assets.loadMeshFromModel(`Model/${modelName}', '`);
             m.name = modelName;
             namedMeshes.set(modelName, m);
         }
@@ -207,11 +205,7 @@ exports.Assets = Assets;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -239,9 +233,11 @@ const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
 class Asteroid extends meshCollection_1.MeshCollection {
     cursors;
-    constructor(assets, controls, cursors) {
+    sound;
+    constructor(assets, controls, cursors, sound) {
         super(assets, settings_1.S.float('as') * 1.2);
         this.cursors = cursors;
+        this.sound = sound;
         controls.setStartStopCallback((ev) => {
             if (ev.state == 'start') {
                 const pos = new isoTransform_1.IsoTransform();
@@ -252,6 +248,7 @@ class Asteroid extends meshCollection_1.MeshCollection {
                 const cursor = cursors.get(ev.handedness);
                 if (cursor.isHolding()) {
                     this.handleDrop(pos, cursor);
+                    this.sound.playOnObject(cursor, 'boop');
                 }
                 else {
                     const removed = this.removeCube(pos.position);
@@ -318,11 +315,7 @@ exports.Asteroid = Asteroid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -689,38 +682,39 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Compounds = void 0;
 class Compounds {
     constructor() {
-        // Legacy (delete)
-        this.add("clay", "clay", "wedge");
-        this.add("wedge", "wedge", "cube");
         // Class-S
-        this.addUpgrade(['lithium-silicate', 'lithium', 'doping']);
-        this.add('lithium-silicate', 'borosilicate', 'silicon');
-        this.addUpgrade(['borosilicate', 'borosilicate']);
-        this.addUpgrade(['silicon', 'refined-silicon']);
-        this.add('doping', 'refined-silicon', 'doped-silicon');
-        this.addUpgrade(['glass-rod', 'glass-cone']);
+        this.addUpgrade(['borosilicate', 'glass', 'glass-rod', 'glass-cone', 'glass-large-cylinder', 'glass-cube']);
+        this.addUpgrade(['lithium-silicate', 'silicone', '', 'silicone-point', 'silicone-wedge', 'silicon-lopped', 'silicon-cube']);
         // Class-M
-        this.addUpgrade(['chromium-ore', 'chromium', 'chrome-corner',
-            'chrome-wedge', 'chrome-cube']);
+        this.addUpgrade(['iron-chondrite', 'iron', 'steel-corner', 'steel-wedge', 'iron-cube']);
         // Class-C
-        this.addUpgrade(['iron-chondrite', 'iron']);
-        this.addUpgrade(['carbon-chondrite', 'organics', 'carbon-fiber',
-            'carbon-fiber-wedge', 'carbon-fiber-cube']);
-        this.addUpgrade(['ice', 'fuel']);
-        this.add('iron-chondrite', 'carbon-chondrite', 'chromium-ore');
-        this.add('iron', 'organics', 'steel-corner');
-        this.addUpgrade(['steel-corner', 'steel-wedge', 'steel-cylinder']);
-        this.add('ice', 'organics', 'food');
-        this.add('carbon-fiber-wedge', 'steel-wedge', 'cluster-jet');
-        this.add('chrome-wedge', 'carbon-fiber-cube', 'fuel-tank');
-        this.add('steel-cylinder', 'chromium', 'ht-steel-cylinder');
-        // Cross-Class
-        this.add('ht-steel-cylinder', 'glass-cone', 'thruster-jet');
-        this.add('steel-cylinder', 'computer', 'habitat');
-        this.add('doped-silicon', 'steel-wedge', 'computer');
-        this.add('computer', 'ht-steel-cylinder', 'factory');
-        this.add('solar-panel', 'steel-wedge', 'conveyer');
-        this.add('silicon', 'steel-wedge', 'solar-panel');
+        this.addUpgrade(['carbon-chondrite', 'carbon-fiber',
+            'carbon-fiber-corner', 'carbon-fiber-wedge', 'carbon-fiber-cube']);
+        // Right slice
+        this.add('iron-chondrite', 'carbon-chondrite', 'Cube.001');
+        this.add('iron', 'carbon-fiber', 'fuel');
+        this.add('steel-corner', 'carbon-fiber-corner', 'cluster-jet');
+        this.add('steel-wedge', 'carbon-fiber-wedge', 'chair');
+        // Front slice
+        this.add('borosilicate', 'iron-chondrite', 'nutrient');
+        this.add('glass', 'iron', 'Cube.013');
+        this.add('glass-rod', 'steel-corner', 'composite-slab');
+        this.add('glass-cone', 'steel-wedge', 'thruster-jet');
+        this.add('glass-large-cylinder', 'iron-cube', 'factory');
+        // Middle slice
+        this.add('Cube.005', 'Cube.001', 'food');
+        this.add('fuel-tank', 'fuel', 'full-tank');
+        // Back slice
+        this.add('lithium-silicate', 'carbon-chondrite', 'organics');
+        this.add('silicone', 'carbon-fiber', 'Cube.010');
+        this.add('silicone-point', 'carbon-fiber-corner', 'wheel');
+        this.add('silicon-lopped', 'carbon-fiber-cube', 'computer');
+        // Left slice
+        this.add('lithium-silicate', 'borosilicate', 'Cube.005');
+        this.add('silicone', 'glass', 'fuel-tank');
+        this.add('silicone-point', 'glass-rod', 'scanner');
+        this.add('silicone-wedge', 'glass-cone', 'solar-panel');
+        this.add('silicon-lopped', 'glass-large-cylinder', 'conveyer');
     }
     combinations = new Map();
     breaks = new Map();
@@ -779,11 +773,7 @@ exports.Compounds = Compounds;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1003,11 +993,7 @@ exports.Controls = Controls;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1132,11 +1118,7 @@ exports.File = File;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1230,11 +1212,7 @@ exports.Grid = Grid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1286,11 +1264,7 @@ exports.IsoTransform = IsoTransform;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1420,11 +1394,7 @@ exports.Latice = Latice;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1699,11 +1669,7 @@ exports.NeighborCount = NeighborCount;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2008,11 +1974,7 @@ exports.PointMapOctoTree = PointMapOctoTree;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2068,11 +2030,7 @@ exports.Player = Player;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2247,11 +2205,31 @@ exports.PointCloud = PointCloud;
 /***/ }),
 
 /***/ 7536:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PointCloudUnion = void 0;
+const THREE = __importStar(__webpack_require__(5232));
 class PointCloudUnion {
     pointSets = new Set();
     constructor() {
@@ -2262,12 +2240,14 @@ class PointCloudUnion {
     delete(ps) {
         this.pointSets.delete(ps);
     }
-    getClosestDistance(p) {
+    tmp = new THREE.Vector3();
+    getClosestDistance(p, out) {
         let closestDistance = Infinity;
         for (const ps of this.pointSets) {
-            const distance = ps.getClosestDistance(p);
+            const distance = ps.getClosestDistance(p, this.tmp);
             if (distance < closestDistance) {
                 closestDistance = distance;
+                out.copy(this.tmp);
             }
         }
         return closestDistance;
@@ -2278,17 +2258,90 @@ exports.PointCloudUnion = PointCloudUnion;
 
 /***/ }),
 
+/***/ 1861:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Sound = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class SfxCollection {
+    source;
+    constructor(source) {
+        this.source = source;
+    }
+    sfx = new Map();
+    getOrMake(name, factory) {
+        if (this.sfx.has(name)) {
+            return this.sfx.get(name);
+        }
+        const result = factory();
+        this.sfx.set(name, result);
+        result.getNode().connect(this.source.gain);
+        return result;
+    }
+}
+class Sound {
+    listener;
+    ctx;
+    constructor(listener) {
+        this.listener = listener;
+        this.ctx = listener.context;
+    }
+    audioMap = new Map();
+    audioObjectMap = new Map();
+    makeAudio(id, source) {
+        const audio = new THREE.Audio(this.listener);
+        this.audioMap.set(id, audio);
+        this.audioObjectMap.set(source, audio);
+        source.add(audio);
+        return audio;
+    }
+    sfxObjectMap = new Map();
+    playOnObject(object, soundName) {
+        const audio = this.audioObjectMap.get(object);
+        if (!audio) {
+            throw new Error('No audio created on object.');
+        }
+        if (!this.sfxObjectMap.has(object)) {
+            this.sfxObjectMap.set(object, new SfxCollection(audio));
+        }
+        // TODO: Implement factory.
+        this.sfxObjectMap.get(object)
+            .getOrMake(soundName, () => { return undefined; });
+    }
+}
+exports.Sound = Sound;
+//# sourceMappingURL=sound.js.map
+
+/***/ }),
+
 /***/ 6125:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2388,11 +2441,7 @@ exports.SimpleLocationMap = SimpleLocationMap;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2505,11 +2554,7 @@ exports.Star = Star;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2537,12 +2582,14 @@ class Stars extends pointCloud_1.PointCloud {
     assets;
     controls;
     cursors;
+    sound;
     activeSystems = new Map();
-    constructor(assets, controls, cursors) {
+    constructor(assets, controls, cursors, sound) {
         super(true);
         this.assets = assets;
         this.controls = controls;
         this.cursors = cursors;
+        this.sound = sound;
     }
     tmpV = new THREE.Vector3();
     getClosestDistance(p) {
@@ -2574,7 +2621,7 @@ class Stars extends pointCloud_1.PointCloud {
         }
         for (const k of this.tmpSet) {
             if (!this.activeSystems.has(k)) {
-                const system = new system_1.System(this.assets, this.controls, this.cursors);
+                const system = new system_1.System(this.assets, this.controls, this.cursors, this.sound);
                 const name = `System:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
                 file_1.File.load(system, name, k);
                 this.activeSystems.set(k, system);
@@ -2629,11 +2676,7 @@ exports.Stars = Stars;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2664,6 +2707,7 @@ const pointSet_1 = __webpack_require__(7536);
 const stars_1 = __webpack_require__(1652);
 const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
+const sound_1 = __webpack_require__(1861);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2674,8 +2718,8 @@ class Stellar {
     allPoints = new pointSet_1.PointCloudUnion();
     stars;
     cursors = new Map();
-    leftPosition = new isoTransform_1.IsoTransform;
-    rightPosition = new isoTransform_1.IsoTransform;
+    leftPosition = new isoTransform_1.IsoTransform();
+    rightPosition = new isoTransform_1.IsoTransform();
     controls = undefined;
     constructor() {
         this.scene.add(this.playerGroup);
@@ -2684,6 +2728,7 @@ class Stellar {
     }
     async initialize() {
         this.initializeGraphics();
+        this.initializeSound();
         await this.initializeWorld();
         // Set up animation loop last - after everything is loaded.
         const clock = new THREE.Clock();
@@ -2737,26 +2782,44 @@ class Stellar {
         document.body.appendChild(VRButton_js_1.VRButton.createButton(this.renderer));
         this.renderer.xr.enabled = true;
     }
+    sound;
+    initializeSound() {
+        const listener = new THREE.AudioListener();
+        this.camera.add(listener);
+        this.sound = new sound_1.Sound(listener);
+    }
     tmpV = new THREE.Vector3();
-    distanceToClosest() {
+    distanceToClosest(closestPos) {
         this.tmpV.copy(this.playerGroup.position);
         this.tmpV.sub(this.universe.position);
-        return this.allPoints.getClosestDistance(this.tmpV);
+        return this.allPoints.getClosestDistance(this.tmpV, closestPos);
     }
     velocityVector = new THREE.Vector3();
     q = new THREE.Quaternion();
     yAxis = new THREE.Vector3(0, 1, 0);
+    closestPos = new THREE.Vector3();
     handleControls(deltaS) {
         if (!this.controls.hasSession()) {
             const session = this.renderer.xr.getSession();
             if (session) {
                 this.controls.setSession(session);
+                this.sound.makeAudio('left', this.cursors.get('left'));
+                this.sound.makeAudio('right', this.cursors.get('right'));
             }
         }
-        const velocity = settings_1.S.float('rv') * this.distanceToClosest();
-        this.velocityVector.set(this.controls.leftRight(), this.controls.upDown(), this.controls.forwardBack());
+        const r = this.distanceToClosest(this.closestPos);
+        if (r < 1.0) {
+            this.velocityVector.copy(this.player.position);
+            this.velocityVector.sub(this.closestPos);
+            this.velocityVector.setLength(5.0);
+        }
+        else {
+            const velocity = settings_1.S.float('rv') * r;
+            this.velocityVector.set(this.controls.leftRight(), this.controls.upDown(), this.controls.forwardBack());
+            this.velocityVector.multiplyScalar(velocity);
+        }
         if (this.velocityVector.lengthSq() > 0) {
-            this.velocityVector.multiplyScalar(velocity * deltaS);
+            this.velocityVector.multiplyScalar(deltaS);
             this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
             this.player.position.add(this.velocityVector);
         }
@@ -2781,7 +2844,10 @@ class Stellar {
         console.log('Initialize World');
         const assets = await assets_1.Assets.load();
         console.log('Assets loaded.');
-        this.stars = new stars_1.Stars(assets, this.controls, this.cursors);
+        if (!this.sound) {
+            throw new Error('Sound not initialized yet!');
+        }
+        this.stars = new stars_1.Stars(assets, this.controls, this.cursors, this.sound);
         file_1.File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
         this.universe.add(this.stars);
         this.allPoints.add(this.stars);
@@ -2811,11 +2877,7 @@ document.body.appendChild(startButton);
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2845,15 +2907,17 @@ class System extends THREE.Object3D {
     assets;
     controls;
     cursors;
+    sound;
     asteroids = new pointCloud_1.PointCloud(false);
     planets = new pointCloud_1.PointCloud(false);
     star;
     activeAsteroids = new Map();
-    constructor(assets, controls, cursors) {
+    constructor(assets, controls, cursors, sound) {
         super();
         this.assets = assets;
         this.controls = controls;
         this.cursors = cursors;
+        this.sound = sound;
         this.star = new star_1.Star();
         this.add(this.star);
         this.add(this.asteroids);
@@ -2902,7 +2966,7 @@ class System extends THREE.Object3D {
         for (const k of this.tmpSet) {
             if (!this.activeAsteroids.has(k)) {
                 console.log(`Asteroid count: ${this.activeAsteroids.size}`);
-                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors);
+                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors, this.sound);
                 const name = `Asteroid:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
                 file_1.File.load(asteroid, name, k);
                 this.activeAsteroids.set(k, asteroid);
@@ -2965,11 +3029,7 @@ exports.System = System;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -95162,28 +95222,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DEG2RAD": () => (/* binding */ DEG2RAD),
 /* harmony export */   "RAD2DEG": () => (/* binding */ RAD2DEG),
-/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
-/* harmony export */   "clamp": () => (/* binding */ clamp),
-/* harmony export */   "damp": () => (/* binding */ damp),
-/* harmony export */   "degToRad": () => (/* binding */ degToRad),
-/* harmony export */   "denormalize": () => (/* binding */ denormalize),
-/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
-/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "generateUUID": () => (/* binding */ generateUUID),
-/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
-/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
-/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "clamp": () => (/* binding */ clamp),
+/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
 /* harmony export */   "mapLinear": () => (/* binding */ mapLinear),
-/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
+/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "damp": () => (/* binding */ damp),
 /* harmony export */   "pingpong": () => (/* binding */ pingpong),
-/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "smoothstep": () => (/* binding */ smoothstep),
+/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
+/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "randFloat": () => (/* binding */ randFloat),
 /* harmony export */   "randFloatSpread": () => (/* binding */ randFloatSpread),
-/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "seededRandom": () => (/* binding */ seededRandom),
+/* harmony export */   "degToRad": () => (/* binding */ degToRad),
+/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
+/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
+/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "setQuaternionFromProperEuler": () => (/* binding */ setQuaternionFromProperEuler),
-/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
-/* harmony export */   "smoothstep": () => (/* binding */ smoothstep)
+/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "denormalize": () => (/* binding */ denormalize)
 /* harmony export */ });
 const _lut = [];
 
