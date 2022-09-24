@@ -112,15 +112,16 @@ export class Stellar {
   }
 
   private tmpV = new THREE.Vector3();
-  private distanceToClosest(): number {
+  private distanceToClosest(closestPos: THREE.Vector3): number {
     this.tmpV.copy(this.playerGroup.position);
     this.tmpV.sub(this.universe.position);
-    return this.allPoints.getClosestDistance(this.tmpV);
+    return this.allPoints.getClosestDistance(this.tmpV, closestPos);
   }
 
   private velocityVector = new THREE.Vector3();
   private q = new THREE.Quaternion();
   private yAxis = new THREE.Vector3(0, 1, 0);
+  private closestPos = new THREE.Vector3();
   private handleControls(deltaS: number) {
     if (!this.controls.hasSession()) {
       const session = this.renderer.xr.getSession();
@@ -130,13 +131,21 @@ export class Stellar {
         this.sound.makeAudio('right', this.cursors.get('right'));
       }
     }
-    const velocity = S.float('rv') * this.distanceToClosest();
-    this.velocityVector.set(
-      this.controls.leftRight(),
-      this.controls.upDown(),
-      this.controls.forwardBack());
+    const r = this.distanceToClosest(this.closestPos);
+    if (r < 1.0) {
+      this.velocityVector.copy(this.player.position);
+      this.velocityVector.sub(this.closestPos);
+      this.velocityVector.setLength(5.0);
+    } else {
+      const velocity = S.float('rv') * r;
+      this.velocityVector.set(
+        this.controls.leftRight(),
+        this.controls.upDown(),
+        this.controls.forwardBack());
+      this.velocityVector.multiplyScalar(velocity);
+    }
     if (this.velocityVector.lengthSq() > 0) {
-      this.velocityVector.multiplyScalar(velocity * deltaS);
+      this.velocityVector.multiplyScalar(deltaS);
       this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
       this.player.position.add(this.velocityVector);
     }
