@@ -698,6 +698,9 @@ class Buzz {
     connect(target) {
         this.gain.connect(target);
     }
+    getOutput() {
+        return this.gain;
+    }
 }
 exports.Buzz = Buzz;
 //# sourceMappingURL=buzz.js.map
@@ -2755,7 +2758,9 @@ class Stellar {
         const source = new THREE.PositionalAudio(this.listener);
         sourceObject.add(source);
         const buzz = new buzz_1.Buzz(this.listener.context);
-        buzz.connect(source.panner);
+        // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
+        // audio source.
+        source.setNodeSource(buzz.getOutput());
         return source;
     }
     velocityVector = new THREE.Vector3();

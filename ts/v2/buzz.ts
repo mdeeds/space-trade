@@ -24,4 +24,8 @@ export class Buzz {
   public connect(target: AudioNode) {
     this.gain.connect(target);
   }
+
+  public getOutput(): AudioNode {
+    return this.gain;
+  }
 }

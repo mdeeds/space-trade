@@ -128,7 +128,9 @@ export class Stellar {
     const source = new THREE.PositionalAudio(this.listener);
     sourceObject.add(source);
     const buzz = new Buzz(this.listener.context);
-    buzz.connect(source.panner);
+    // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
+    // audio source.
+    source.setNodeSource(buzz.getOutput() as AudioBufferSourceNode)
     return source;
   }
 
