@@ -121,6 +121,7 @@ export class Forces {
     this.controls.setStartStopCallback((ev: StartStopEvent) => {
       if (ev.state == 'start') {
         const color = ev.handedness == 'left' ? 'blue' : 'red';
+        this.stars.addStar(ev.worldPosition.position, color);
       }
     });
 

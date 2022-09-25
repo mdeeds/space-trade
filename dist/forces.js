@@ -550,6 +550,7 @@ class Forces {
         this.controls.setStartStopCallback((ev) => {
             if (ev.state == 'start') {
                 const color = ev.handedness == 'left' ? 'blue' : 'red';
+                this.stars.addStar(ev.worldPosition.position, color);
             }
         });
         const light = new THREE.DirectionalLight(new THREE.Color('#fff'), 1.0);
