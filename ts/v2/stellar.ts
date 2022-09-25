@@ -148,8 +148,9 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
-        this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
-        this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
+        Log.once('setting session');
+        // this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
+        // this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
       }
     }
     const r = this.distanceToClosest(this.closestPos);

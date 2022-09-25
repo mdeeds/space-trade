@@ -14,9 +14,9 @@ export class Log {
 
   static loggedMessages = new Set<string>();
   static once(message: string): void {
-    if (!this.loggedMessages.has(message)) {
-      this.loggedMessages.add(message);
-      this.info(message);
+    if (!Log.loggedMessages.has(message)) {
+      Log.loggedMessages.add(message);
+      Log.info(message);
     }
   }
 
