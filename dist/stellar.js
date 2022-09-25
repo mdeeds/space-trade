@@ -2748,7 +2748,7 @@ class Stellar {
         const source = new THREE.PositionalAudio(this.listener);
         sourceObject.add(source);
         const buzz = new buzz_1.Buzz(this.listener.context);
-        buzz.connect(source.gain);
+        buzz.connect(source.panner);
         return buzz;
     }
     velocityVector = new THREE.Vector3();
