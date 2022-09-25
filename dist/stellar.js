@@ -1421,6 +1421,45 @@ exports.Latice = Latice;
 
 /***/ }),
 
+/***/ 4920:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Log = void 0;
+class Log {
+    static container;
+    static initialize() {
+        Log.container = document.createElement('div');
+        document.body.appendChild(Log.container);
+    }
+    static info(message) {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        const d = document.createElement('div');
+        d.innerHTML = message;
+        Log.container.appendChild(d);
+    }
+    static loggedMessages = new Set();
+    static once(message) {
+        if (!this.loggedMessages.has(message)) {
+            this.loggedMessages.add(message);
+            this.info(message);
+        }
+    }
+    static clear() {
+        if (!Log.container) {
+            Log.initialize();
+        }
+        Log.container.innerHTML = '';
+    }
+}
+exports.Log = Log;
+//# sourceMappingURL=log.js.map
+
+/***/ }),
+
 /***/ 1090:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -2317,6 +2356,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionalDelayAudio = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const log_1 = __webpack_require__(4920);
 class PositionalDelayAudio extends THREE.Audio {
     _position = /*@__PURE__*/ new THREE.Vector3();
     _quaternion = /*@__PURE__*/ new THREE.Quaternion();
@@ -2382,6 +2422,7 @@ class PositionalDelayAudio extends THREE.Audio {
     rightEar = new THREE.Vector3(0.07, 0, 0);
     d = new THREE.Vector3();
     updateMatrixWorld(force) {
+        log_1.Log.once('updateMatrixWorld');
         super.updateMatrixWorld(force);
         if (this.hasPlaybackControl === true && this.isPlaying === false)
             return;
@@ -2393,11 +2434,14 @@ class PositionalDelayAudio extends THREE.Audio {
         this.d.copy(this._position);
         this.d.sub(this.rightEar);
         const rightDistance = this.d.length();
+        log_1.Log.once('updateMatrixWorld A');
         const endTime = this.context.currentTime + this.listener.timeDelta;
         this.leftDelay.delayTime.linearRampToValueAtTime(leftDistance / 343, endTime);
         this.rightDelay.delayTime.linearRampToValueAtTime(rightDistance / 343, endTime);
+        log_1.Log.once('updateMatrixWorld B');
         const panner = this.panner;
         if (panner.positionX) {
+            log_1.Log.once('updateMatrixWorld C');
             // code path for Chrome and Firefox (see #14393)
             panner.positionX.linearRampToValueAtTime(this._position.x, endTime);
             panner.positionY.linearRampToValueAtTime(this._position.y, endTime);
@@ -2407,9 +2451,11 @@ class PositionalDelayAudio extends THREE.Audio {
             panner.orientationZ.linearRampToValueAtTime(this._orientation.z, endTime);
         }
         else {
+            log_1.Log.once('updateMatrixWorld D');
             panner.setPosition(this._position.x, this._position.y, this._position.z);
             panner.setOrientation(this._orientation.x, this._orientation.y, this._orientation.z);
         }
+        log_1.Log.once('updateMatrixWorld done');
     }
 }
 exports.PositionalDelayAudio = PositionalDelayAudio;
@@ -2789,6 +2835,7 @@ const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
 const buzz_1 = __webpack_require__(2437);
 const positionalDelayAudio_1 = __webpack_require__(1050);
+const log_1 = __webpack_require__(4920);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2882,12 +2929,15 @@ class Stellar {
         return this.allPoints.getClosestDistance(this.tmpV, closestPos);
     }
     addBuzz(sourceObject) {
+        log_1.Log.once("addBuzz");
         const source = new positionalDelayAudio_1.PositionalDelayAudio(this.listener);
         sourceObject.add(source);
+        log_1.Log.once("newBuzz");
         const buzz = new buzz_1.Buzz(this.listener.context);
         // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
         // audio source.
         source.setNodeSource(buzz.getOutput());
+        log_1.Log.once('returning source');
         return source;
     }
     velocityVector = new THREE.Vector3();

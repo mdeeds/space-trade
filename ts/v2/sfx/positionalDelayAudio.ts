@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { Log } from "../log";
 
 export class PositionalDelayAudio extends THREE.Audio {
 
@@ -83,6 +84,7 @@ export class PositionalDelayAudio extends THREE.Audio {
   private rightEar = new THREE.Vector3(0.07, 0, 0);
   private d = new THREE.Vector3();
   updateMatrixWorld(force: boolean) {
+    Log.once('updateMatrixWorld');
     super.updateMatrixWorld(force);
     if (this.hasPlaybackControl === true && this.isPlaying === false) return;
     this.matrixWorld.decompose(this._position, this._quaternion, this._scale);
@@ -95,14 +97,17 @@ export class PositionalDelayAudio extends THREE.Audio {
     this.d.sub(this.rightEar);
     const rightDistance = this.d.length();
 
+    Log.once('updateMatrixWorld A');
     const endTime = this.context.currentTime + this.listener.timeDelta;
     this.leftDelay.delayTime.linearRampToValueAtTime(
       leftDistance / 343, endTime);
     this.rightDelay.delayTime.linearRampToValueAtTime(
       rightDistance / 343, endTime);
 
+    Log.once('updateMatrixWorld B');
     const panner = this.panner;
     if (panner.positionX) {
+      Log.once('updateMatrixWorld C');
       // code path for Chrome and Firefox (see #14393)
       panner.positionX.linearRampToValueAtTime(this._position.x, endTime);
       panner.positionY.linearRampToValueAtTime(this._position.y, endTime);
@@ -111,8 +116,10 @@ export class PositionalDelayAudio extends THREE.Audio {
       panner.orientationY.linearRampToValueAtTime(this._orientation.y, endTime);
       panner.orientationZ.linearRampToValueAtTime(this._orientation.z, endTime);
     } else {
+      Log.once('updateMatrixWorld D');
       panner.setPosition(this._position.x, this._position.y, this._position.z);
       panner.setOrientation(this._orientation.x, this._orientation.y, this._orientation.z);
     }
+    Log.once('updateMatrixWorld done');
   }
 }

@@ -14,6 +14,7 @@ import { Tick, Ticker } from "../tick";
 import { IsoTransform } from "./isoTransform";
 import { Buzz } from "./buzz";
 import { PositionalDelayAudio } from "./sfx/positionalDelayAudio";
+import { Log } from "./log";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -126,12 +127,15 @@ export class Stellar {
   }
 
   private addBuzz(sourceObject: THREE.Object3D): PositionalDelayAudio {
+    Log.once("addBuzz");
     const source = new PositionalDelayAudio(this.listener);
     sourceObject.add(source);
+    Log.once("newBuzz");
     const buzz = new Buzz(this.listener.context);
     // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
     // audio source.
     source.setNodeSource(buzz.getOutput() as AudioBufferSourceNode)
+    Log.once('returning source');
     return source;
   }
 
