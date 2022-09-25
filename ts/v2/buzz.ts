@@ -13,7 +13,7 @@ export class Buzz {
     this.osc.type = 'square';
     this.filter.type = 'lowpass';
     this.filter.frequency.setValueAtTime(256, ctx.currentTime);
-    this.gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    this.gain.gain.setValueAtTime(0.0, ctx.currentTime);
 
     this.osc.connect(this.filter);
     this.filter.connect(this.gain);
