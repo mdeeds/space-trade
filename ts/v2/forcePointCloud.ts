@@ -65,19 +65,20 @@ export class ForcePointCloud extends THREE.Object3D implements Ticker {
     super();
     this.addStars();
     const redRules = new Map<string, AtomRule>();
-    redRules.set('red', new AtomRule(0.1, 1.0));
-    redRules.set('blue', new AtomRule(0.2, 0.3));
+    // Strength, Distance
+    redRules.set('red', new AtomRule(0.1, 1));
+    redRules.set('blue', new AtomRule(0.1, 0.5));
 
     const blueRules = new Map<string, AtomRule>();
-    blueRules.set('red', new AtomRule(0.2, 0.3));
-    blueRules.set('blue', new AtomRule(0.5, 1.0));
+    blueRules.set('blue', new AtomRule(0.1, 0.5));
+    blueRules.set('red', new AtomRule(0.1, 0.5));
 
     this.atomRules.set('red', redRules);
     this.atomRules.set('blue', blueRules);
   }
 
   public addStar(pos: THREE.Vector3, color: string) {
-    const a = new Atom(pos, color, /*f=*/1.0);
+    const a = new Atom(pos, color, /*f=*/1.5);
     this.allAtoms.push(a);
   }
 

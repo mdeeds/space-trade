@@ -137,11 +137,14 @@ export class Forces {
     }
     this.stars = new ForcePointCloud();
 
-    for (let i = 0; i < 10; ++i) {
-      this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5,
-        Math.random() * 5, Math.random() * 5 - 2.5), 'red');
-      this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5,
-        Math.random() * 5, Math.random() * 5 - 2.5), 'blue');
+    for (let i = 0; i < 100; ++i) {
+      if (Math.random() < 0.1) {
+        this.stars.addStar(new THREE.Vector3(Math.random() * 10 - 5,
+          Math.random() * 10, Math.random() * 10 - 5), 'red');
+      } else {
+        this.stars.addStar(new THREE.Vector3(Math.random() * 10 - 5,
+          Math.random() * 10, Math.random() * 10 - 5), 'blue');
+      }
     }
 
     this.universe.add(this.stars);

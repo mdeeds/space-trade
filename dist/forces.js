@@ -335,16 +335,17 @@ class ForcePointCloud extends THREE.Object3D {
         super();
         this.addStars();
         const redRules = new Map();
-        redRules.set('red', new AtomRule(0.1, 1.0));
-        redRules.set('blue', new AtomRule(0.2, 0.3));
+        // Strength, Distance
+        redRules.set('red', new AtomRule(0.1, 1));
+        redRules.set('blue', new AtomRule(0.1, 0.5));
         const blueRules = new Map();
-        blueRules.set('red', new AtomRule(0.2, 0.3));
-        blueRules.set('blue', new AtomRule(0.5, 1.0));
+        blueRules.set('blue', new AtomRule(0.1, 0.5));
+        blueRules.set('red', new AtomRule(0.1, 0.5));
         this.atomRules.set('red', redRules);
         this.atomRules.set('blue', blueRules);
     }
     addStar(pos, color) {
-        const a = new Atom(pos, color, /*f=*/ 1.0);
+        const a = new Atom(pos, color, /*f=*/ 1.5);
         this.allAtoms.push(a);
     }
     addStars() {
@@ -560,9 +561,13 @@ class Forces {
             throw new Error('Sound not initialized yet!');
         }
         this.stars = new forcePointCloud_1.ForcePointCloud();
-        for (let i = 0; i < 10; ++i) {
-            this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5, Math.random() * 5, Math.random() * 5 - 2.5), 'red');
-            this.stars.addStar(new THREE.Vector3(Math.random() * 5 - 2.5, Math.random() * 5, Math.random() * 5 - 2.5), 'blue');
+        for (let i = 0; i < 100; ++i) {
+            if (Math.random() < 0.1) {
+                this.stars.addStar(new THREE.Vector3(Math.random() * 10 - 5, Math.random() * 10, Math.random() * 10 - 5), 'red');
+            }
+            else {
+                this.stars.addStar(new THREE.Vector3(Math.random() * 10 - 5, Math.random() * 10, Math.random() * 10 - 5), 'blue');
+            }
         }
         this.universe.add(this.stars);
         return;
