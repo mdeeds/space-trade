@@ -117,7 +117,7 @@ export class Stellar {
   }
 
   private addBuzz(sourceObject: THREE.Object3D) {
-    const source = new THREE.Audio(this.listener);
+    const source = new THREE.PositionalAudio(this.listener);
     sourceObject.add(source);
     const buzz = new Buzz(this.listener.context);
     buzz.connect(source.gain);

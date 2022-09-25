@@ -2745,7 +2745,7 @@ class Stellar {
         return this.allPoints.getClosestDistance(this.tmpV, closestPos);
     }
     addBuzz(sourceObject) {
-        const source = new THREE.Audio(this.listener);
+        const source = new THREE.PositionalAudio(this.listener);
         sourceObject.add(source);
         const buzz = new buzz_1.Buzz(this.listener.context);
         buzz.connect(source.gain);
