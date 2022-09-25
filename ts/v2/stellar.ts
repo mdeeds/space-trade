@@ -28,6 +28,7 @@ export class Stellar {
   private leftPosition = new IsoTransform();
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
+  private buzzes = new Map<THREE.XRHandedness, THREE.PositionalAudio>();
 
   constructor() {
     this.scene.add(this.playerGroup);
@@ -71,6 +72,7 @@ export class Stellar {
           (o as any as Ticker).tick(new Tick(elapsedS, deltaS, frameCount));
         }
       })
+      this.updateSound(deltaS);
     });
   }
 
@@ -109,6 +111,12 @@ export class Stellar {
     this.camera.add(this.listener);
   }
 
+  private updateSound(deltaS: number) {
+    for (const b of this.buzzes.values()) {
+      b.updateMatrixWorld(true);
+    }
+  }
+
   private tmpV = new THREE.Vector3();
   private distanceToClosest(closestPos: THREE.Vector3): number {
     this.tmpV.copy(this.playerGroup.position);
@@ -116,12 +124,12 @@ export class Stellar {
     return this.allPoints.getClosestDistance(this.tmpV, closestPos);
   }
 
-  private addBuzz(sourceObject: THREE.Object3D) {
+  private addBuzz(sourceObject: THREE.Object3D): THREE.PositionalAudio {
     const source = new THREE.PositionalAudio(this.listener);
     sourceObject.add(source);
     const buzz = new Buzz(this.listener.context);
     buzz.connect(source.panner);
-    return buzz;
+    return source;
   }
 
   private velocityVector = new THREE.Vector3();
@@ -133,8 +141,8 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
-        this.addBuzz(this.cursors.get('left'));
-        this.addBuzz(this.cursors.get('right'));
+        this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
+        this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
       }
     }
     const r = this.distanceToClosest(this.closestPos);

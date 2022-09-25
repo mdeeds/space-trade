@@ -2672,6 +2672,7 @@ class Stellar {
     leftPosition = new isoTransform_1.IsoTransform();
     rightPosition = new isoTransform_1.IsoTransform();
     controls = undefined;
+    buzzes = new Map();
     constructor() {
         this.scene.add(this.playerGroup);
         this.scene.add(this.universe);
@@ -2707,6 +2708,7 @@ class Stellar {
                     o.tick(new tick_1.Tick(elapsedS, deltaS, frameCount));
                 }
             });
+            this.updateSound(deltaS);
         });
     }
     setWorldToPlayer(pos, target) {
@@ -2738,6 +2740,11 @@ class Stellar {
         this.listener = new THREE.AudioListener();
         this.camera.add(this.listener);
     }
+    updateSound(deltaS) {
+        for (const b of this.buzzes.values()) {
+            b.updateMatrixWorld(true);
+        }
+    }
     tmpV = new THREE.Vector3();
     distanceToClosest(closestPos) {
         this.tmpV.copy(this.playerGroup.position);
@@ -2749,7 +2756,7 @@ class Stellar {
         sourceObject.add(source);
         const buzz = new buzz_1.Buzz(this.listener.context);
         buzz.connect(source.panner);
-        return buzz;
+        return source;
     }
     velocityVector = new THREE.Vector3();
     q = new THREE.Quaternion();
@@ -2760,8 +2767,8 @@ class Stellar {
             const session = this.renderer.xr.getSession();
             if (session) {
                 this.controls.setSession(session);
-                this.addBuzz(this.cursors.get('left'));
-                this.addBuzz(this.cursors.get('right'));
+                this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
+                this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
             }
         }
         const r = this.distanceToClosest(this.closestPos);
