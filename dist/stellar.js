@@ -2367,14 +2367,23 @@ class PositionalDelayAudio extends THREE.Audio {
     rightDelay;
     constructor(listener) {
         super(listener);
-        this.panner = this.context.createPanner();
-        this.panner.panningModel = 'equalpower';
-        this.leftDelay = listener.context.createDelay();
-        this.rightDelay = listener.context.createDelay();
-        this.panner.connect(this.leftDelay, 0);
-        this.panner.connect(this.rightDelay, 1);
-        this.leftDelay.connect(this.gain);
-        this.rightDelay.connect(this.gain);
+        try {
+            this.panner = this.context.createPanner();
+            this.panner.panningModel = 'equalpower';
+            this.leftDelay = listener.context.createDelay();
+            this.rightDelay = listener.context.createDelay();
+            const splitter = listener.context.createChannelSplitter(2);
+            const merger = listener.context.createChannelMerger(2);
+            this.panner.connect(splitter);
+            splitter.connect(this.leftDelay, 0, 0);
+            splitter.connect(this.rightDelay, 1, 0);
+            this.leftDelay.connect(merger, 0, 0);
+            this.rightDelay.connect(merger, 0, 1);
+            merger.connect(this.gain);
+        }
+        catch (e) {
+            log_1.Log.info(e);
+        }
     }
     disconnect() {
         super.disconnect();
@@ -2422,7 +2431,6 @@ class PositionalDelayAudio extends THREE.Audio {
     rightEar = new THREE.Vector3(0.07, 0, 0);
     d = new THREE.Vector3();
     updateMatrixWorld(force) {
-        log_1.Log.once('updateMatrixWorld');
         super.updateMatrixWorld(force);
         if (this.hasPlaybackControl === true && this.isPlaying === false)
             return;
@@ -2434,14 +2442,11 @@ class PositionalDelayAudio extends THREE.Audio {
         this.d.copy(this._position);
         this.d.sub(this.rightEar);
         const rightDistance = this.d.length();
-        log_1.Log.once('updateMatrixWorld A');
         const endTime = this.context.currentTime + this.listener.timeDelta;
         this.leftDelay.delayTime.linearRampToValueAtTime(leftDistance / 343, endTime);
         this.rightDelay.delayTime.linearRampToValueAtTime(rightDistance / 343, endTime);
-        log_1.Log.once('updateMatrixWorld B');
         const panner = this.panner;
         if (panner.positionX) {
-            log_1.Log.once('updateMatrixWorld C');
             // code path for Chrome and Firefox (see #14393)
             panner.positionX.linearRampToValueAtTime(this._position.x, endTime);
             panner.positionY.linearRampToValueAtTime(this._position.y, endTime);
@@ -2451,11 +2456,9 @@ class PositionalDelayAudio extends THREE.Audio {
             panner.orientationZ.linearRampToValueAtTime(this._orientation.z, endTime);
         }
         else {
-            log_1.Log.once('updateMatrixWorld D');
             panner.setPosition(this._position.x, this._position.y, this._position.z);
             panner.setOrientation(this._orientation.x, this._orientation.y, this._orientation.z);
         }
-        log_1.Log.once('updateMatrixWorld done');
     }
 }
 exports.PositionalDelayAudio = PositionalDelayAudio;
@@ -2918,9 +2921,14 @@ class Stellar {
         this.camera.add(this.listener);
     }
     updateSound(deltaS) {
-        // for (const b of this.buzzes.values()) {
-        //   b.updateMatrixWorld(true);
-        // }
+        for (const [hand, b] of this.buzzes.entries()) {
+            if (this.cursors.get(hand).isHolding()) {
+                b.gain.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
+            }
+            else {
+                b.gain.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
+            }
+        }
     }
     tmpV = new THREE.Vector3();
     distanceToClosest(closestPos) {
@@ -2950,8 +2958,6 @@ class Stellar {
             if (session) {
                 this.controls.setSession(session);
                 log_1.Log.once('setting session');
-                // this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
-                // this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
             }
         }
         const r = this.distanceToClosest(this.closestPos);
@@ -2999,6 +3005,8 @@ class Stellar {
         this.cursors.set('right', new cursor_1.Cursor(assets));
         this.playerGroup.add(this.cursors.get('left'));
         this.playerGroup.add(this.cursors.get('right'));
+        this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
+        this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
         file_1.File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
         setInterval(() => { file_1.File.save(this.player, 'Player'); }, 1000);
         return;

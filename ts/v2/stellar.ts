@@ -114,9 +114,13 @@ export class Stellar {
   }
 
   private updateSound(deltaS: number) {
-    // for (const b of this.buzzes.values()) {
-    //   b.updateMatrixWorld(true);
-    // }
+    for (const [hand, b] of this.buzzes.entries()) {
+      if (this.cursors.get(hand).isHolding()) {
+        b.gain.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
+      } else {
+        b.gain.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
+      }
+    }
   }
 
   private tmpV = new THREE.Vector3();
@@ -149,8 +153,6 @@ export class Stellar {
       if (session) {
         this.controls.setSession(session);
         Log.once('setting session');
-        // this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
-        // this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
       }
     }
     const r = this.distanceToClosest(this.closestPos);
@@ -208,6 +210,8 @@ export class Stellar {
     this.cursors.set('right', new Cursor(assets));
     this.playerGroup.add(this.cursors.get('left'));
     this.playerGroup.add(this.cursors.get('right'));
+    this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
+    this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
 
     File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
     setInterval(() => { File.save(this.player, 'Player') }, 1000);
