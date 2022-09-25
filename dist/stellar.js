@@ -690,7 +690,7 @@ class Buzz {
         this.osc.type = 'square';
         this.filter.type = 'lowpass';
         this.filter.frequency.setValueAtTime(256, ctx.currentTime);
-        this.gain.gain.setValueAtTime(0.0, ctx.currentTime);
+        this.gain.gain.setValueAtTime(0.15, ctx.currentTime);
         this.osc.connect(this.filter);
         this.filter.connect(this.gain);
         this.osc.start();
@@ -2291,6 +2291,132 @@ exports.PointCloudUnion = PointCloudUnion;
 
 /***/ }),
 
+/***/ 1050:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PositionalDelayAudio = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class PositionalDelayAudio extends THREE.Audio {
+    _position = /*@__PURE__*/ new THREE.Vector3();
+    _quaternion = /*@__PURE__*/ new THREE.Quaternion();
+    _scale = /*@__PURE__*/ new THREE.Vector3();
+    _orientation = /*@__PURE__*/ new THREE.Vector3();
+    panner;
+    leftDelay;
+    rightDelay;
+    constructor(listener) {
+        super(listener);
+        this.panner = this.context.createPanner();
+        this.panner.panningModel = 'equalpower';
+        this.leftDelay = listener.context.createDelay();
+        this.rightDelay = listener.context.createDelay();
+        this.panner.connect(this.leftDelay, 0);
+        this.panner.connect(this.rightDelay, 1);
+        this.leftDelay.connect(this.gain);
+        this.rightDelay.connect(this.gain);
+    }
+    disconnect() {
+        super.disconnect();
+        this.panner.disconnect(this.gain);
+        return this;
+    }
+    getOutput() {
+        return this.gain;
+    }
+    getRefDistance() {
+        return this.panner.refDistance;
+    }
+    setRefDistance(value) {
+        this.panner.refDistance = value;
+        return this;
+    }
+    getRolloffFactor() {
+        return this.panner.rolloffFactor;
+    }
+    setRolloffFactor(value) {
+        this.panner.rolloffFactor = value;
+        return this;
+    }
+    getDistanceModel() {
+        return this.panner.distanceModel;
+    }
+    setDistanceModel(value) {
+        this.panner.distanceModel = value;
+        return this;
+    }
+    getMaxDistance() {
+        return this.panner.maxDistance;
+    }
+    setMaxDistance(value) {
+        this.panner.maxDistance = value;
+        return this;
+    }
+    setDirectionalCone(coneInnerAngle, coneOuterAngle, coneOuterGain) {
+        this.panner.coneInnerAngle = coneInnerAngle;
+        this.panner.coneOuterAngle = coneOuterAngle;
+        this.panner.coneOuterGain = coneOuterGain;
+        return this;
+    }
+    leftEar = new THREE.Vector3(-0.07, 0, 0);
+    rightEar = new THREE.Vector3(0.07, 0, 0);
+    d = new THREE.Vector3();
+    updateMatrixWorld(force) {
+        super.updateMatrixWorld(force);
+        if (this.hasPlaybackControl === true && this.isPlaying === false)
+            return;
+        this.matrixWorld.decompose(this._position, this._quaternion, this._scale);
+        this._orientation.set(0, 0, 1).applyQuaternion(this._quaternion);
+        this.d.copy(this._position);
+        this.d.sub(this.leftEar);
+        const leftDistance = this.d.length();
+        this.d.copy(this._position);
+        this.d.sub(this.rightEar);
+        const rightDistance = this.d.length();
+        const endTime = this.context.currentTime + this.listener.timeDelta;
+        this.leftDelay.delayTime.linearRampToValueAtTime(leftDistance / 343, endTime);
+        this.rightDelay.delayTime.linearRampToValueAtTime(rightDistance / 343, endTime);
+        const panner = this.panner;
+        if (panner.positionX) {
+            // code path for Chrome and Firefox (see #14393)
+            panner.positionX.linearRampToValueAtTime(this._position.x, endTime);
+            panner.positionY.linearRampToValueAtTime(this._position.y, endTime);
+            panner.positionZ.linearRampToValueAtTime(this._position.z, endTime);
+            panner.orientationX.linearRampToValueAtTime(this._orientation.x, endTime);
+            panner.orientationY.linearRampToValueAtTime(this._orientation.y, endTime);
+            panner.orientationZ.linearRampToValueAtTime(this._orientation.z, endTime);
+        }
+        else {
+            panner.setPosition(this._position.x, this._position.y, this._position.z);
+            panner.setOrientation(this._orientation.x, this._orientation.y, this._orientation.z);
+        }
+    }
+}
+exports.PositionalDelayAudio = PositionalDelayAudio;
+//# sourceMappingURL=positionalDelayAudio.js.map
+
+/***/ }),
+
 /***/ 6125:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -2662,6 +2788,7 @@ const stars_1 = __webpack_require__(1652);
 const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
 const buzz_1 = __webpack_require__(2437);
+const positionalDelayAudio_1 = __webpack_require__(1050);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2755,7 +2882,7 @@ class Stellar {
         return this.allPoints.getClosestDistance(this.tmpV, closestPos);
     }
     addBuzz(sourceObject) {
-        const source = new THREE.PositionalAudio(this.listener);
+        const source = new positionalDelayAudio_1.PositionalDelayAudio(this.listener);
         sourceObject.add(source);
         const buzz = new buzz_1.Buzz(this.listener.context);
         // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer

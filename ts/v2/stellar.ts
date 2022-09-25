@@ -13,6 +13,7 @@ import { Grid } from "./grid";
 import { Tick, Ticker } from "../tick";
 import { IsoTransform } from "./isoTransform";
 import { Buzz } from "./buzz";
+import { PositionalDelayAudio } from "./sfx/positionalDelayAudio";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -28,7 +29,7 @@ export class Stellar {
   private leftPosition = new IsoTransform();
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
-  private buzzes = new Map<THREE.XRHandedness, THREE.PositionalAudio>();
+  private buzzes = new Map<THREE.XRHandedness, PositionalDelayAudio>();
 
   constructor() {
     this.scene.add(this.playerGroup);
@@ -124,8 +125,8 @@ export class Stellar {
     return this.allPoints.getClosestDistance(this.tmpV, closestPos);
   }
 
-  private addBuzz(sourceObject: THREE.Object3D): THREE.PositionalAudio {
-    const source = new THREE.PositionalAudio(this.listener);
+  private addBuzz(sourceObject: THREE.Object3D): PositionalDelayAudio {
+    const source = new PositionalDelayAudio(this.listener);
     sourceObject.add(source);
     const buzz = new Buzz(this.listener.context);
     // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
