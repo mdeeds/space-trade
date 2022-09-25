@@ -19,8 +19,7 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
   private activeAsteroids = new Map<THREE.Vector3, Asteroid>();
 
   constructor(private assets: Assets, private controls: Controls,
-    private cursors: Map<THREE.XRHandedness, Cursor>,
-    private sound: Sound) {
+    private cursors: Map<THREE.XRHandedness, Cursor>) {
     super();
     this.star = new Star();
     this.add(this.star);
@@ -74,7 +73,7 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
       if (!this.activeAsteroids.has(k)) {
         console.log(`Asteroid count: ${this.activeAsteroids.size}`);
         const asteroid = new Asteroid(
-          this.assets, this.controls, this.cursors, this.sound);
+          this.assets, this.controls, this.cursors);
         const name = `Asteroid:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
         File.load(asteroid, name, k);
         this.activeAsteroids.set(k, asteroid);

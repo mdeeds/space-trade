@@ -65,7 +65,7 @@ export class Assets {
       'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
     ];
     for (const modelName of modelNames) {
-      Log.info(`Loading '${modelName}'`);
+      // Log.info(`Loading '${modelName}'`);
       const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
       m.name = modelName;
       namedMeshes.set(modelName, m);

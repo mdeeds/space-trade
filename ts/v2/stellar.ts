@@ -7,13 +7,12 @@ import { Assets } from "./assets";
 import { Controls } from "./controls";
 import { Cursor } from "./cursor";
 import { File } from "./file";
-import { NebulaSphere } from "./nebulaSphere";
 import { PointCloudUnion } from "./pointSet";
 import { Stars } from "./stars";
 import { Grid } from "./grid";
 import { Tick, Ticker } from "../tick";
 import { IsoTransform } from "./isoTransform";
-import { Sound } from "./sfx/sound";
+import { Buzz } from "./buzz";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -104,11 +103,10 @@ export class Stellar {
     this.renderer.xr.enabled = true;
   }
 
-  private sound: Sound;
+  private listener: THREE.AudioListener;
   private initializeSound() {
-    const listener = new THREE.AudioListener();
-    this.camera.add(listener);
-    this.sound = new Sound(listener);
+    this.listener = new THREE.AudioListener();
+    this.camera.add(this.listener);
   }
 
   private tmpV = new THREE.Vector3();
@@ -116,6 +114,14 @@ export class Stellar {
     this.tmpV.copy(this.playerGroup.position);
     this.tmpV.sub(this.universe.position);
     return this.allPoints.getClosestDistance(this.tmpV, closestPos);
+  }
+
+  private addBuzz(sourceObject: THREE.Object3D) {
+    const source = new THREE.Audio(this.listener);
+    sourceObject.add(source);
+    const buzz = new Buzz(this.listener.context);
+    buzz.connect(source.gain);
+    return buzz;
   }
 
   private velocityVector = new THREE.Vector3();
@@ -127,8 +133,8 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
-        this.sound.makeAudio('left', this.cursors.get('left'));
-        this.sound.makeAudio('right', this.cursors.get('right'));
+        this.addBuzz(this.cursors.get('left'));
+        this.addBuzz(this.cursors.get('right'));
       }
     }
     const r = this.distanceToClosest(this.closestPos);
@@ -178,10 +184,7 @@ export class Stellar {
     console.log('Initialize World');
     const assets = await Assets.load();
     console.log('Assets loaded.');
-    if (!this.sound) {
-      throw new Error('Sound not initialized yet!');
-    }
-    this.stars = new Stars(assets, this.controls, this.cursors, this.sound);
+    this.stars = new Stars(assets, this.controls, this.cursors);
     File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
     this.universe.add(this.stars);
     this.allPoints.add(this.stars);

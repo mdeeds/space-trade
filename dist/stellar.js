@@ -122,7 +122,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Assets = void 0;
 const THREE = __importStar(__webpack_require__(5232));
 const GLTFLoader_js_1 = __webpack_require__(9217);
-const log_1 = __webpack_require__(4920);
 class Assets {
     namedMeshes;
     constructor(namedMeshes) {
@@ -185,7 +184,7 @@ class Assets {
             'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
         ];
         for (const modelName of modelNames) {
-            log_1.Log.info(`Loading '${modelName}'`);
+            // Log.info(`Loading '${modelName}'`);
             const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
             m.name = modelName;
             namedMeshes.set(modelName, m);
@@ -234,11 +233,9 @@ const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
 class Asteroid extends meshCollection_1.MeshCollection {
     cursors;
-    sound;
-    constructor(assets, controls, cursors, sound) {
+    constructor(assets, controls, cursors) {
         super(assets, settings_1.S.float('as') * 1.2);
         this.cursors = cursors;
-        this.sound = sound;
         controls.setStartStopCallback((ev) => {
             if (ev.state == 'start') {
                 const pos = new isoTransform_1.IsoTransform();
@@ -249,7 +246,7 @@ class Asteroid extends meshCollection_1.MeshCollection {
                 const cursor = cursors.get(ev.handedness);
                 if (cursor.isHolding()) {
                     this.handleDrop(pos, cursor);
-                    this.sound.playOnObject(cursor, 'boop');
+                    // this.sound.playOnObject(cursor, 'boop');
                 }
                 else {
                     const removed = this.removeCube(pos.position);
@@ -672,6 +669,38 @@ class AstroTools {
 }
 exports.AstroTools = AstroTools;
 //# sourceMappingURL=astroTools.js.map
+
+/***/ }),
+
+/***/ 2437:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Buzz = void 0;
+class Buzz {
+    gain;
+    osc;
+    filter;
+    constructor(ctx) {
+        this.gain = ctx.createGain();
+        this.osc = ctx.createOscillator();
+        this.filter = ctx.createBiquadFilter();
+        this.osc.frequency.setValueAtTime(64, ctx.currentTime);
+        this.osc.type = 'square';
+        this.filter.type = 'lowpass';
+        this.filter.frequency.setValueAtTime(256, ctx.currentTime);
+        this.gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        this.osc.connect(this.filter);
+        this.filter.connect(this.gain);
+        this.osc.start();
+    }
+    connect(target) {
+        this.gain.connect(target);
+    }
+}
+exports.Buzz = Buzz;
+//# sourceMappingURL=buzz.js.map
 
 /***/ }),
 
@@ -1386,38 +1415,6 @@ class Latice {
 }
 exports.Latice = Latice;
 //# sourceMappingURL=latice.js.map
-
-/***/ }),
-
-/***/ 4920:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Log = void 0;
-class Log {
-    static container;
-    static initialize() {
-        Log.container = document.createElement('div');
-        document.body.appendChild(Log.container);
-    }
-    static info(message) {
-        if (!Log.container) {
-            Log.initialize();
-        }
-        const d = document.createElement('div');
-        d.innerHTML = message;
-        Log.container.appendChild(d);
-    }
-    static clear() {
-        if (!Log.container) {
-            Log.initialize();
-        }
-        Log.container.innerHTML = '';
-    }
-}
-exports.Log = Log;
-//# sourceMappingURL=log.js.map
 
 /***/ }),
 
@@ -2291,83 +2288,6 @@ exports.PointCloudUnion = PointCloudUnion;
 
 /***/ }),
 
-/***/ 1861:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Sound = void 0;
-const THREE = __importStar(__webpack_require__(5232));
-class SfxCollection {
-    source;
-    constructor(source) {
-        this.source = source;
-    }
-    sfx = new Map();
-    getOrMake(name, factory) {
-        if (this.sfx.has(name)) {
-            return this.sfx.get(name);
-        }
-        const result = factory();
-        this.sfx.set(name, result);
-        result.getNode().connect(this.source.gain);
-        return result;
-    }
-}
-class Sound {
-    listener;
-    ctx;
-    constructor(listener) {
-        this.listener = listener;
-        this.ctx = listener.context;
-    }
-    audioMap = new Map();
-    audioObjectMap = new Map();
-    makeAudio(id, source) {
-        const audio = new THREE.Audio(this.listener);
-        this.audioMap.set(id, audio);
-        this.audioObjectMap.set(source, audio);
-        source.add(audio);
-        return audio;
-    }
-    sfxObjectMap = new Map();
-    playOnObject(object, soundName) {
-        const audio = this.audioObjectMap.get(object);
-        if (!audio) {
-            throw new Error('No audio created on object.');
-        }
-        if (!this.sfxObjectMap.has(object)) {
-            this.sfxObjectMap.set(object, new SfxCollection(audio));
-        }
-        // TODO: Implement factory.
-        this.sfxObjectMap.get(object)
-            .getOrMake(soundName, () => { return undefined; });
-    }
-}
-exports.Sound = Sound;
-//# sourceMappingURL=sound.js.map
-
-/***/ }),
-
 /***/ 6125:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -2615,14 +2535,12 @@ class Stars extends pointCloud_1.PointCloud {
     assets;
     controls;
     cursors;
-    sound;
     activeSystems = new Map();
-    constructor(assets, controls, cursors, sound) {
+    constructor(assets, controls, cursors) {
         super(true);
         this.assets = assets;
         this.controls = controls;
         this.cursors = cursors;
-        this.sound = sound;
     }
     tmpV = new THREE.Vector3();
     getClosestDistance(p) {
@@ -2654,7 +2572,7 @@ class Stars extends pointCloud_1.PointCloud {
         }
         for (const k of this.tmpSet) {
             if (!this.activeSystems.has(k)) {
-                const system = new system_1.System(this.assets, this.controls, this.cursors, this.sound);
+                const system = new system_1.System(this.assets, this.controls, this.cursors);
                 const name = `System:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
                 file_1.File.load(system, name, k);
                 this.activeSystems.set(k, system);
@@ -2740,7 +2658,7 @@ const pointSet_1 = __webpack_require__(7536);
 const stars_1 = __webpack_require__(1652);
 const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
-const sound_1 = __webpack_require__(1861);
+const buzz_1 = __webpack_require__(2437);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2815,17 +2733,23 @@ class Stellar {
         document.body.appendChild(VRButton_js_1.VRButton.createButton(this.renderer));
         this.renderer.xr.enabled = true;
     }
-    sound;
+    listener;
     initializeSound() {
-        const listener = new THREE.AudioListener();
-        this.camera.add(listener);
-        this.sound = new sound_1.Sound(listener);
+        this.listener = new THREE.AudioListener();
+        this.camera.add(this.listener);
     }
     tmpV = new THREE.Vector3();
     distanceToClosest(closestPos) {
         this.tmpV.copy(this.playerGroup.position);
         this.tmpV.sub(this.universe.position);
         return this.allPoints.getClosestDistance(this.tmpV, closestPos);
+    }
+    addBuzz(sourceObject) {
+        const source = new THREE.Audio(this.listener);
+        sourceObject.add(source);
+        const buzz = new buzz_1.Buzz(this.listener.context);
+        buzz.connect(source.gain);
+        return buzz;
     }
     velocityVector = new THREE.Vector3();
     q = new THREE.Quaternion();
@@ -2836,8 +2760,8 @@ class Stellar {
             const session = this.renderer.xr.getSession();
             if (session) {
                 this.controls.setSession(session);
-                this.sound.makeAudio('left', this.cursors.get('left'));
-                this.sound.makeAudio('right', this.cursors.get('right'));
+                this.addBuzz(this.cursors.get('left'));
+                this.addBuzz(this.cursors.get('right'));
             }
         }
         const r = this.distanceToClosest(this.closestPos);
@@ -2877,10 +2801,7 @@ class Stellar {
         console.log('Initialize World');
         const assets = await assets_1.Assets.load();
         console.log('Assets loaded.');
-        if (!this.sound) {
-            throw new Error('Sound not initialized yet!');
-        }
-        this.stars = new stars_1.Stars(assets, this.controls, this.cursors, this.sound);
+        this.stars = new stars_1.Stars(assets, this.controls, this.cursors);
         file_1.File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
         this.universe.add(this.stars);
         this.allPoints.add(this.stars);
@@ -2940,17 +2861,15 @@ class System extends THREE.Object3D {
     assets;
     controls;
     cursors;
-    sound;
     asteroids = new pointCloud_1.PointCloud(false);
     planets = new pointCloud_1.PointCloud(false);
     star;
     activeAsteroids = new Map();
-    constructor(assets, controls, cursors, sound) {
+    constructor(assets, controls, cursors) {
         super();
         this.assets = assets;
         this.controls = controls;
         this.cursors = cursors;
-        this.sound = sound;
         this.star = new star_1.Star();
         this.add(this.star);
         this.add(this.asteroids);
@@ -2999,7 +2918,7 @@ class System extends THREE.Object3D {
         for (const k of this.tmpSet) {
             if (!this.activeAsteroids.has(k)) {
                 console.log(`Asteroid count: ${this.activeAsteroids.size}`);
-                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors, this.sound);
+                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors);
                 const name = `Asteroid:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
                 file_1.File.load(asteroid, name, k);
                 this.activeAsteroids.set(k, asteroid);
