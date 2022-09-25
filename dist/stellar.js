@@ -2744,9 +2744,9 @@ class Stellar {
         this.camera.add(this.listener);
     }
     updateSound(deltaS) {
-        for (const b of this.buzzes.values()) {
-            b.updateMatrixWorld(true);
-        }
+        // for (const b of this.buzzes.values()) {
+        //   b.updateMatrixWorld(true);
+        // }
     }
     tmpV = new THREE.Vector3();
     distanceToClosest(closestPos) {

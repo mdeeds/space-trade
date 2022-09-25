@@ -112,9 +112,9 @@ export class Stellar {
   }
 
   private updateSound(deltaS: number) {
-    for (const b of this.buzzes.values()) {
-      b.updateMatrixWorld(true);
-    }
+    // for (const b of this.buzzes.values()) {
+    //   b.updateMatrixWorld(true);
+    // }
   }
 
   private tmpV = new THREE.Vector3();
