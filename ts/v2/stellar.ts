@@ -30,7 +30,7 @@ export class Stellar {
   private leftPosition = new IsoTransform();
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
-  private buzzes = new Map<THREE.XRHandedness, PositionalDelayAudio>();
+  private buzzes = new Map<THREE.XRHandedness, GainNode>();
 
   constructor() {
     this.scene.add(this.playerGroup);
@@ -116,9 +116,9 @@ export class Stellar {
   private updateSound(deltaS: number) {
     for (const [hand, b] of this.buzzes.entries()) {
       if (this.cursors.get(hand).isHolding()) {
-        b.gain.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
+        b.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
       } else {
-        b.gain.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
+        b.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
       }
     }
   }
@@ -130,17 +130,17 @@ export class Stellar {
     return this.allPoints.getClosestDistance(this.tmpV, closestPos);
   }
 
-  private addBuzz(sourceObject: THREE.Object3D): PositionalDelayAudio {
+  private addBuzz(sourceObject: THREE.Object3D, hz: number): GainNode {
     Log.once("addBuzz");
     const source = new PositionalDelayAudio(this.listener);
     sourceObject.add(source);
     Log.once("newBuzz");
-    const buzz = new Buzz(this.listener.context);
+    const buzz = new Buzz(this.listener.context, hz);
     // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
     // audio source.
-    source.setNodeSource(buzz.getOutput() as AudioBufferSourceNode)
+    buzz.getGain().connect(source.panner);
     Log.once('returning source');
-    return source;
+    return buzz.getGain();
   }
 
   private velocityVector = new THREE.Vector3();
@@ -210,8 +210,8 @@ export class Stellar {
     this.cursors.set('right', new Cursor(assets));
     this.playerGroup.add(this.cursors.get('left'));
     this.playerGroup.add(this.cursors.get('right'));
-    this.buzzes.set('left', this.addBuzz(this.cursors.get('left')));
-    this.buzzes.set('right', this.addBuzz(this.cursors.get('right')));
+    this.buzzes.set('left', this.addBuzz(this.cursors.get('left'), 64));
+    this.buzzes.set('right', this.addBuzz(this.cursors.get('right'), 64));
 
     File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
     setInterval(() => { File.save(this.player, 'Player') }, 1000);

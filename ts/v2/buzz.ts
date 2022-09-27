@@ -4,17 +4,16 @@ export class Buzz {
   private gain: GainNode;
   private osc: OscillatorNode;
   private filter: BiquadFilterNode;
-  constructor(ctx: AudioContext) {
+  constructor(ctx: AudioContext, hz: number) {
     this.gain = ctx.createGain();
     this.osc = ctx.createOscillator();
     this.filter = ctx.createBiquadFilter();
 
-    this.osc.frequency.setValueAtTime(64, ctx.currentTime);
+    this.osc.frequency.setValueAtTime(hz, ctx.currentTime);
     this.osc.type = 'square';
     this.filter.type = 'lowpass';
-    this.filter.frequency.setValueAtTime(256, ctx.currentTime);
+    this.filter.frequency.setValueAtTime(hz * 4, ctx.currentTime);
     this.gain.gain.setValueAtTime(0.15, ctx.currentTime);
-
     this.osc.connect(this.filter);
     this.filter.connect(this.gain);
 
@@ -25,7 +24,7 @@ export class Buzz {
     this.gain.connect(target);
   }
 
-  public getOutput(): AudioNode {
+  public getGain(): GainNode {
     return this.gain;
   }
 }
