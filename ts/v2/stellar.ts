@@ -30,7 +30,7 @@ export class Stellar {
   private leftPosition = new IsoTransform();
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
-  private buzzes = new Map<THREE.XRHandedness, GainNode>();
+  private buzzes = new Map<THREE.XRHandedness, Buzz>();
 
   constructor() {
     this.scene.add(this.playerGroup);
@@ -115,11 +115,7 @@ export class Stellar {
 
   private updateSound(deltaS: number) {
     for (const [hand, b] of this.buzzes.entries()) {
-      if (this.cursors.get(hand).isHolding()) {
-        b.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
-      } else {
-        b.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
-      }
+      b.setState(this.cursors.get(hand).isHolding());
     }
   }
 
@@ -130,17 +126,14 @@ export class Stellar {
     return this.allPoints.getClosestDistance(this.tmpV, closestPos);
   }
 
-  private addBuzz(sourceObject: THREE.Object3D, hz: number): GainNode {
-    Log.once("addBuzz");
+  private addBuzz(sourceObject: THREE.Object3D, hz: number): Buzz {
     const source = new PositionalDelayAudio(this.listener);
     sourceObject.add(source);
-    Log.once("newBuzz");
     const buzz = new Buzz(this.listener.context, hz);
     // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
     // audio source.
     buzz.getGain().connect(source.panner);
-    Log.once('returning source');
-    return buzz.getGain();
+    return buzz;
   }
 
   private velocityVector = new THREE.Vector3();
@@ -152,7 +145,6 @@ export class Stellar {
       const session = this.renderer.xr.getSession();
       if (session) {
         this.controls.setSession(session);
-        Log.once('setting session');
       }
     }
     const r = this.distanceToClosest(this.closestPos);
@@ -211,7 +203,7 @@ export class Stellar {
     this.playerGroup.add(this.cursors.get('left'));
     this.playerGroup.add(this.cursors.get('right'));
     this.buzzes.set('left', this.addBuzz(this.cursors.get('left'), 64));
-    this.buzzes.set('right', this.addBuzz(this.cursors.get('right'), 64));
+    this.buzzes.set('right', this.addBuzz(this.cursors.get('right'), 80));
 
     File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
     setInterval(() => { File.save(this.player, 'Player') }, 1000);

@@ -679,10 +679,14 @@ exports.AstroTools = AstroTools;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Buzz = void 0;
 class Buzz {
+    ctx;
+    hz;
     gain;
     osc;
     filter;
     constructor(ctx, hz) {
+        this.ctx = ctx;
+        this.hz = hz;
         this.gain = ctx.createGain();
         this.osc = ctx.createOscillator();
         this.filter = ctx.createBiquadFilter();
@@ -690,7 +694,7 @@ class Buzz {
         this.osc.type = 'square';
         this.filter.type = 'lowpass';
         this.filter.frequency.setValueAtTime(hz * 4, ctx.currentTime);
-        this.gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        this.gain.gain.setValueAtTime(0.0, ctx.currentTime);
         this.osc.connect(this.filter);
         this.filter.connect(this.gain);
         this.osc.start();
@@ -700,6 +704,22 @@ class Buzz {
     }
     getGain() {
         return this.gain;
+    }
+    isOn = false;
+    setState(on) {
+        if (on != this.isOn) {
+            if (on) {
+                this.gain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime);
+                this.gain.gain.exponentialRampToValueAtTime(0.02, this.ctx.currentTime + 0.3);
+                this.filter.frequency.setValueAtTime(this.hz * 4, this.ctx.currentTime);
+                this.filter.frequency.setTargetAtTime(this.hz * 1.5, this.ctx.currentTime + 0.05, 2.0);
+            }
+            else {
+                this.gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1.0);
+                this.filter.frequency.setTargetAtTime(this.hz, this.ctx.currentTime, 0.5);
+            }
+        }
+        this.isOn = on;
     }
 }
 exports.Buzz = Buzz;
@@ -2362,7 +2382,6 @@ class PositionalDelayAudio extends THREE.Audio {
     _quaternion = /*@__PURE__*/ new THREE.Quaternion();
     _scale = /*@__PURE__*/ new THREE.Vector3();
     _orientation = /*@__PURE__*/ new THREE.Vector3();
-    // public panner: PannerNode;
     panner;
     leftDelay;
     rightDelay;
@@ -2371,8 +2390,6 @@ class PositionalDelayAudio extends THREE.Audio {
     constructor(listener) {
         super(listener);
         try {
-            // this.panner = this.context.createPanner();
-            // this.panner.panningModel = 'HRTF';
             this.panner = this.context.createGain();
             this.leftGain = this.context.createGain();
             this.rightGain = this.context.createGain();
@@ -2380,89 +2397,22 @@ class PositionalDelayAudio extends THREE.Audio {
             this.panner.connect(this.rightGain);
             this.leftDelay = listener.context.createDelay(1.0);
             this.rightDelay = listener.context.createDelay(1.0);
-            const splitter = listener.context.createChannelSplitter(2);
             const merger = listener.context.createChannelMerger(2);
             this.leftDelay.delayTime.setValueAtTime(0.0, listener.context.currentTime);
             this.rightDelay.delayTime.setValueAtTime(0.0, listener.context.currentTime);
-            // this.panner.connect(splitter);
-            // splitter.connect(this.leftDelay, 0, 0);
-            // splitter.connect(this.rightDelay, 1, 0);
             this.leftGain.connect(this.leftDelay);
             this.rightGain.connect(this.rightDelay);
             this.leftDelay.connect(merger, 0, 0);
             this.rightDelay.connect(merger, 0, 1);
             merger.connect(this.gain);
-            // this.panner.connect(this.gain);
         }
         catch (e) {
             log_1.Log.info(e);
         }
     }
-    disconnect() {
-        super.disconnect();
-        this.panner.disconnect(this.gain);
-        return this;
-    }
-    // setNodeSource(audioNode: AudioNode) {
-    //   this.hasPlaybackControl = false;
-    //   this.sourceType = 'audioNode';
-    //   this.source = audioNode as AudioBufferSourceNode;
-    //   audioNode.connect(this.panner);
-    //   return this;
-    // }
-    connect() {
-        super.connect();
-        // if (this.filters.length > 0) {
-        //   this.source.connect(this.filters[0]);
-        //   for (let i = 1, l = this.filters.length; i < l; i++) {
-        //     this.filters[i - 1].connect(this.filters[i]);
-        //   }
-        //   this.filters[this.filters.length - 1].connect(this.getOutput());
-        // } else {
-        this.source.connect(this.panner);
-        // }
-        log_1.Log.once('connected');
-        // this._connected = true;
-        return this;
-    }
     getOutput() {
         return this.gain;
     }
-    // getRefDistance(): number {
-    //   return this.panner.refDistance;
-    // }
-    // setRefDistance(value: number) {
-    //   this.panner.refDistance = value;
-    //   return this;
-    // }
-    // getRolloffFactor(): number {
-    //   return this.panner.rolloffFactor;
-    // }
-    // setRolloffFactor(value: number) {
-    //   this.panner.rolloffFactor = value;
-    //   return this;
-    // }
-    // getDistanceModel(): DistanceModelType {
-    //   return this.panner.distanceModel;
-    // }
-    // setDistanceModel(value: DistanceModelType) {
-    //   this.panner.distanceModel = value;
-    //   return this;
-    // }
-    // getMaxDistance(): number {
-    //   return this.panner.maxDistance;
-    // }
-    // setMaxDistance(value: number): this {
-    //   this.panner.maxDistance = value;
-    //   return this;
-    // }
-    // setDirectionalCone(coneInnerAngle: number,
-    //   coneOuterAngle: number, coneOuterGain: number) {
-    //   this.panner.coneInnerAngle = coneInnerAngle;
-    //   this.panner.coneOuterAngle = coneOuterAngle;
-    //   this.panner.coneOuterGain = coneOuterGain;
-    //   return this;
-    // }
     leftEar = new THREE.Vector3(-0.07, 0, 0);
     rightEar = new THREE.Vector3(0.07, 0, 0);
     d = new THREE.Vector3();
@@ -2471,12 +2421,6 @@ class PositionalDelayAudio extends THREE.Audio {
         this.matrixWorld.decompose(this._position, this._quaternion, this._scale);
         this._orientation.set(0, 0, 1).applyQuaternion(this._quaternion);
         this.listener.worldToLocal(this._position);
-        // const th = Math.PI * 2 * ((window.performance.now() / 4000) % 1);
-        // const r = 3 * Math.sin(th * 2);
-        // const x = r * Math.cos(th);
-        // const z = r * Math.sin(th);
-        // this._position.x = x;
-        // this._position.z = z;
         this.d.copy(this._position);
         this.d.sub(this.leftEar);
         const leftDistance = this.d.length();
@@ -2487,22 +2431,8 @@ class PositionalDelayAudio extends THREE.Audio {
         this.d.normalize();
         this.leftGain.gain.setTargetAtTime(Math.min(1, Math.max(0, 1 - this.d.x)), this.context.currentTime, this.listener.timeDelta);
         this.rightGain.gain.setTargetAtTime(Math.min(1, Math.max(0, this.d.x + 1)), this.context.currentTime, this.listener.timeDelta);
-        const endTime = this.context.currentTime + this.listener.timeDelta;
         this.leftDelay.delayTime.setTargetAtTime(leftDistance / 343, this.context.currentTime, this.listener.timeDelta);
         this.rightDelay.delayTime.setTargetAtTime(rightDistance / 343, this.context.currentTime, this.listener.timeDelta);
-        // const panner = this.panner;
-        // if (panner.positionX) {
-        //   // code path for Chrome and Firefox (see #14393)
-        //   panner.positionX.linearRampToValueAtTime(this._position.x, endTime);
-        //   panner.positionY.linearRampToValueAtTime(this._position.y, endTime);
-        //   panner.positionZ.linearRampToValueAtTime(this._position.z, endTime);
-        //   panner.orientationX.linearRampToValueAtTime(this._orientation.x, endTime);
-        //   panner.orientationY.linearRampToValueAtTime(this._orientation.y, endTime);
-        //   panner.orientationZ.linearRampToValueAtTime(this._orientation.z, endTime);
-        // } else {
-        //   panner.setPosition(this._position.x, this._position.y, this._position.z);
-        //   panner.setOrientation(this._orientation.x, this._orientation.y, this._orientation.z);
-        // }
     }
 }
 exports.PositionalDelayAudio = PositionalDelayAudio;
@@ -2882,7 +2812,6 @@ const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
 const buzz_1 = __webpack_require__(2437);
 const positionalDelayAudio_1 = __webpack_require__(1050);
-const log_1 = __webpack_require__(4920);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2966,12 +2895,7 @@ class Stellar {
     }
     updateSound(deltaS) {
         for (const [hand, b] of this.buzzes.entries()) {
-            if (this.cursors.get(hand).isHolding()) {
-                b.gain.linearRampToValueAtTime(0.15, this.listener.context.currentTime + deltaS);
-            }
-            else {
-                b.gain.linearRampToValueAtTime(0, this.listener.context.currentTime + deltaS);
-            }
+            b.setState(this.cursors.get(hand).isHolding());
         }
     }
     tmpV = new THREE.Vector3();
@@ -2981,16 +2905,13 @@ class Stellar {
         return this.allPoints.getClosestDistance(this.tmpV, closestPos);
     }
     addBuzz(sourceObject, hz) {
-        log_1.Log.once("addBuzz");
         const source = new positionalDelayAudio_1.PositionalDelayAudio(this.listener);
         sourceObject.add(source);
-        log_1.Log.once("newBuzz");
         const buzz = new buzz_1.Buzz(this.listener.context, hz);
         // This is a bug in @types for THREE.  It wants an AudioNode, not a buffer
         // audio source.
         buzz.getGain().connect(source.panner);
-        log_1.Log.once('returning source');
-        return buzz.getGain();
+        return buzz;
     }
     velocityVector = new THREE.Vector3();
     q = new THREE.Quaternion();
@@ -3001,7 +2922,6 @@ class Stellar {
             const session = this.renderer.xr.getSession();
             if (session) {
                 this.controls.setSession(session);
-                log_1.Log.once('setting session');
             }
         }
         const r = this.distanceToClosest(this.closestPos);
@@ -3050,7 +2970,7 @@ class Stellar {
         this.playerGroup.add(this.cursors.get('left'));
         this.playerGroup.add(this.cursors.get('right'));
         this.buzzes.set('left', this.addBuzz(this.cursors.get('left'), 64));
-        this.buzzes.set('right', this.addBuzz(this.cursors.get('right'), 64));
+        this.buzzes.set('right', this.addBuzz(this.cursors.get('right'), 80));
         file_1.File.load(this.player, 'Player', new THREE.Vector3(0, 0, 0));
         setInterval(() => { file_1.File.save(this.player, 'Player'); }, 1000);
         return;
