@@ -210,6 +210,13 @@ class Log {
         d.innerHTML = message;
         Log.container.appendChild(d);
     }
+    static loggedMessages = new Set();
+    static once(message) {
+        if (!Log.loggedMessages.has(message)) {
+            Log.loggedMessages.add(message);
+            Log.info(message);
+        }
+    }
     static clear() {
         if (!Log.container) {
             Log.initialize();

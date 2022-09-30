@@ -1,45 +1,45 @@
 export class Compounds {
   constructor() {
-    // Class-S
-    this.addUpgrade(['borosilicate', 'glass', 'glass-rod', 'glass-cone', 'glass-large-cylinder', 'glass-cube']);
-    this.addUpgrade(['lithium-silicate', 'silicone', '', 'silicone-point', 'silicone-wedge', 'silicon-lopped', 'silicon-cube']);
+    // Silicone
+    this.addUpgrade(['borosilicate', 'glass', 'glass-corner', 'glass-wedge', 'glass-cube']);
 
-    // Class-M
-    this.addUpgrade(['iron-chondrite', 'iron', 'steel-corner', 'steel-wedge', 'iron-cube'])
+    // Water
+    this.addUpgrade(['phylosilicate', 'water-ice', 'polyoxide-corner', 'polyoxide-wedge', 'polyoxide-cube']);
 
-    // Class-C
+    // Iron
+    this.addUpgrade(['iron-chondrite', 'iron', 'iron-corner', 'iron-wedge', 'iron-cube'])
+
+    // Carbon
     this.addUpgrade(['carbon-chondrite', 'carbon-fiber',
       'carbon-fiber-corner', 'carbon-fiber-wedge', 'carbon-fiber-cube']);
 
-    // Right slice
-    this.add('iron-chondrite', 'carbon-chondrite', 'Cube.001');
-    this.add('iron', 'carbon-fiber', 'fuel');
-    this.add('steel-corner', 'carbon-fiber-corner', 'cluster-jet');
-    this.add('steel-wedge', 'carbon-fiber-wedge', 'chair');
+    // Architect Iron+Carbon
+    this.add('iron-chondrite', 'carbon-chondrite', 'point');
+    this.add('iron', 'carbon-fiber', 'rod');
+    this.add('iron-corner', 'carbon-fiber-corner', 'cone');
+    this.add('iron-wedge', 'carbon-fiber-wedge', 'cylinder');
+    this.add('iron-cube', 'carbon-fiber-cube', 'habitat');
 
-    // Front slice
-    this.add('borosilicate', 'iron-chondrite', 'nutrient');
-    this.add('glass', 'iron', 'Cube.013');
-    this.add('glass-rod', 'steel-corner', 'composite-slab');
-    this.add('glass-cone', 'steel-wedge', 'thruster-jet');
-    this.add('glass-large-cylinder', 'iron-cube', 'factory');
+    // Farmer Water+Carbon
+    this.add('borosilicate', 'carbon-chondrite', 'mud');
+    this.add('silicone', 'carbon-fiber', 'food');
+    this.add('glass-corner', 'carbon-fiber-corner', 'composite-slab');
+    this.add('glass-wedge', 'carbon-fiber-wedge', 'thruster-jet');
+    this.add('glass-cube', 'carbon-fiber-cube', 'fuel');
 
-    // Middle slice
-    this.add('Cube.005', 'Cube.001', 'food');
-    this.add('fuel-tank', 'fuel', 'full-tank');
+    // Pilot Iron+Silicon
+    this.add('iron-chondrite', 'carbon-chondrite', 'point');
+    this.add('iron', 'carbon-fiber', 'rod');
+    this.add('iron-corner', 'carbon-fiber-corner', 'cluster-jet');
+    this.add('iron-wedge', 'carbon-fiber-wedge', 'chair');
+    this.add('iron-cube', 'carbon-fiber-cube', 'thruster');
 
-    // Back slice
-    this.add('lithium-silicate', 'carbon-chondrite', 'organics');
-    this.add('silicone', 'carbon-fiber', 'Cube.010');
-    this.add('silicone-point', 'carbon-fiber-corner', 'wheel');
-    this.add('silicon-lopped', 'carbon-fiber-cube', 'computer');
-
-    // Left slice
-    this.add('lithium-silicate', 'borosilicate', 'Cube.005');
-    this.add('silicone', 'glass', 'fuel-tank');
-    this.add('silicone-point', 'glass-rod', 'scanner');
-    this.add('silicone-wedge', 'glass-cone', 'solar-panel');
-    this.add('silicon-lopped', 'glass-large-cylinder', 'conveyer');
+    // Engineer Silicon+Water
+    this.add('borosilicate', 'phylosilicate', 'scaffold');
+    this.add('silicone', 'water-ice', 'Cube.010');
+    this.add('glass-corner', 'polyoxide-corner', 'wheel');
+    this.add('glass-wedge', 'polyoxide-wedge', 'conveyor');
+    this.add('glass-cube', 'polyoxide-cube', 'factory');
   }
 
 

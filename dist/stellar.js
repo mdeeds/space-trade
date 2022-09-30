@@ -101,7 +101,11 @@ exports.Tick = Tick;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -171,17 +175,42 @@ class Assets {
     static async load() {
         const namedMeshes = new Map();
         const modelNames = [
-            'accordion', 'chrome-wedge', 'Cube.013', 'guide', 'organics', 'solar-panel',
-            'arm', 'chromium', 'cube', 'habitat', 'port', 'steel-corner',
-            'borosilicate', 'chromium-ore', 'doped-silicon', 'ht-steel-cylinder', 'producer', 'steel-cylinder',
-            'carbon-chondrite', 'clay', 'doping', 'ice', 'refined-silicon', 'steel-wedge',
-            'carbon-fiber-cube', 'cluster-jet', 'factory', 'iron-chondrite', 'salt-common', 'tank',
-            'carbon-fiber', 'composite-slab', 'flight computer', 'iron', 'salt-rare', 'thruster-jet',
-            'carbon-fiber-wedge', 'computer', 'food', 'light-blue', 'scaffold', 'untitled',
-            'chair', 'console', 'fuel', 'lithium', 'ship', 'wedge 2',
-            'chopped corner', 'conveyer', 'fuel-tank', 'lithium-silicate', 'silicate-rock', 'wedge',
-            'chrome-corner', 'corner', 'glass-cone', 'metal-common', 'silicon-crystalized', 'window-slope',
-            'chrome-cube', 'glass-rod', 'metal-rare', 'silicon', 'wonk',
+            'borosilicate',
+            'carbon-chondrite',
+            'carbon-fiber-corner',
+            'carbon-fiber-cube',
+            'carbon-fiber-wedge',
+            'carbon-fiber',
+            'chair',
+            'cluster-jet',
+            'cone',
+            'conveyor',
+            'cube',
+            'cylinder',
+            'factory',
+            'food',
+            'fuel',
+            'glass-corner',
+            'glass-cube',
+            'glass-wedge',
+            'guide',
+            'habitat',
+            'iron-chondrite',
+            'iron-corner',
+            'iron-cube',
+            'iron',
+            'ironl-wedge',
+            'mud',
+            'phylosilicate',
+            'point',
+            'polyoxide-corner',
+            'polyoxide-cube',
+            'polyoxide-wedge',
+            'rod',
+            'scaffold',
+            'silicone',
+            'thruster-jet',
+            'water-ice',
         ];
         for (const modelName of modelNames) {
             // Log.info(`Loading '${modelName}'`);
@@ -205,7 +234,11 @@ exports.Assets = Assets;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -313,7 +346,11 @@ exports.Asteroid = Asteroid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -735,39 +772,39 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Compounds = void 0;
 class Compounds {
     constructor() {
-        // Class-S
-        this.addUpgrade(['borosilicate', 'glass', 'glass-rod', 'glass-cone', 'glass-large-cylinder', 'glass-cube']);
-        this.addUpgrade(['lithium-silicate', 'silicone', '', 'silicone-point', 'silicone-wedge', 'silicon-lopped', 'silicon-cube']);
-        // Class-M
-        this.addUpgrade(['iron-chondrite', 'iron', 'steel-corner', 'steel-wedge', 'iron-cube']);
-        // Class-C
+        // Silicone
+        this.addUpgrade(['borosilicate', 'glass', 'glass-corner', 'glass-wedge', 'glass-cube']);
+        // Water
+        this.addUpgrade(['phylosilicate', 'water-ice', 'polyoxide-corner', 'polyoxide-wedge', 'polyoxide-cube']);
+        // Iron
+        this.addUpgrade(['iron-chondrite', 'iron', 'iron-corner', 'iron-wedge', 'iron-cube']);
+        // Carbon
         this.addUpgrade(['carbon-chondrite', 'carbon-fiber',
             'carbon-fiber-corner', 'carbon-fiber-wedge', 'carbon-fiber-cube']);
-        // Right slice
-        this.add('iron-chondrite', 'carbon-chondrite', 'Cube.001');
-        this.add('iron', 'carbon-fiber', 'fuel');
-        this.add('steel-corner', 'carbon-fiber-corner', 'cluster-jet');
-        this.add('steel-wedge', 'carbon-fiber-wedge', 'chair');
-        // Front slice
-        this.add('borosilicate', 'iron-chondrite', 'nutrient');
-        this.add('glass', 'iron', 'Cube.013');
-        this.add('glass-rod', 'steel-corner', 'composite-slab');
-        this.add('glass-cone', 'steel-wedge', 'thruster-jet');
-        this.add('glass-large-cylinder', 'iron-cube', 'factory');
-        // Middle slice
-        this.add('Cube.005', 'Cube.001', 'food');
-        this.add('fuel-tank', 'fuel', 'full-tank');
-        // Back slice
-        this.add('lithium-silicate', 'carbon-chondrite', 'organics');
-        this.add('silicone', 'carbon-fiber', 'Cube.010');
-        this.add('silicone-point', 'carbon-fiber-corner', 'wheel');
-        this.add('silicon-lopped', 'carbon-fiber-cube', 'computer');
-        // Left slice
-        this.add('lithium-silicate', 'borosilicate', 'Cube.005');
-        this.add('silicone', 'glass', 'fuel-tank');
-        this.add('silicone-point', 'glass-rod', 'scanner');
-        this.add('silicone-wedge', 'glass-cone', 'solar-panel');
-        this.add('silicon-lopped', 'glass-large-cylinder', 'conveyer');
+        // Architect Iron+Carbon
+        this.add('iron-chondrite', 'carbon-chondrite', 'point');
+        this.add('iron', 'carbon-fiber', 'rod');
+        this.add('iron-corner', 'carbon-fiber-corner', 'cone');
+        this.add('iron-wedge', 'carbon-fiber-wedge', 'cylinder');
+        this.add('iron-cube', 'carbon-fiber-cube', 'habitat');
+        // Farmer Water+Carbon
+        this.add('borosilicate', 'carbon-chondrite', 'mud');
+        this.add('silicone', 'carbon-fiber', 'food');
+        this.add('glass-corner', 'carbon-fiber-corner', 'composite-slab');
+        this.add('glass-wedge', 'carbon-fiber-wedge', 'thruster-jet');
+        this.add('glass-cube', 'carbon-fiber-cube', 'fuel');
+        // Pilot Iron+Silicon
+        this.add('iron-chondrite', 'carbon-chondrite', 'point');
+        this.add('iron', 'carbon-fiber', 'rod');
+        this.add('iron-corner', 'carbon-fiber-corner', 'cluster-jet');
+        this.add('iron-wedge', 'carbon-fiber-wedge', 'chair');
+        this.add('iron-cube', 'carbon-fiber-cube', 'thruster');
+        // Engineer Silicon+Water
+        this.add('borosilicate', 'phylosilicate', 'scaffold');
+        this.add('silicone', 'water-ice', 'Cube.010');
+        this.add('glass-corner', 'polyoxide-corner', 'wheel');
+        this.add('glass-wedge', 'polyoxide-wedge', 'conveyor');
+        this.add('glass-cube', 'polyoxide-cube', 'factory');
     }
     combinations = new Map();
     breaks = new Map();
@@ -826,7 +863,11 @@ exports.Compounds = Compounds;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1046,7 +1087,11 @@ exports.Controls = Controls;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1171,7 +1216,11 @@ exports.File = File;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1265,7 +1314,11 @@ exports.Grid = Grid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1317,7 +1370,11 @@ exports.IsoTransform = IsoTransform;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1486,7 +1543,11 @@ exports.Log = Log;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1761,7 +1822,11 @@ exports.NeighborCount = NeighborCount;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2066,7 +2131,11 @@ exports.PointMapOctoTree = PointMapOctoTree;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2122,7 +2191,11 @@ exports.Player = Player;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2302,7 +2375,11 @@ exports.PointCloud = PointCloud;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2356,7 +2433,11 @@ exports.PointCloudUnion = PointCloudUnion;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2446,7 +2527,11 @@ exports.PositionalDelayAudio = PositionalDelayAudio;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2546,7 +2631,11 @@ exports.SimpleLocationMap = SimpleLocationMap;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2659,7 +2748,11 @@ exports.Star = Star;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2779,7 +2872,11 @@ exports.Stars = Stars;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2993,7 +3090,11 @@ document.body.appendChild(startButton);
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -3143,7 +3244,11 @@ exports.System = System;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -95336,28 +95441,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DEG2RAD": () => (/* binding */ DEG2RAD),
 /* harmony export */   "RAD2DEG": () => (/* binding */ RAD2DEG),
-/* harmony export */   "generateUUID": () => (/* binding */ generateUUID),
+/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
 /* harmony export */   "clamp": () => (/* binding */ clamp),
-/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
-/* harmony export */   "mapLinear": () => (/* binding */ mapLinear),
-/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
-/* harmony export */   "lerp": () => (/* binding */ lerp),
 /* harmony export */   "damp": () => (/* binding */ damp),
+/* harmony export */   "degToRad": () => (/* binding */ degToRad),
+/* harmony export */   "denormalize": () => (/* binding */ denormalize),
+/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
+/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
+/* harmony export */   "generateUUID": () => (/* binding */ generateUUID),
+/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
+/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
+/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "mapLinear": () => (/* binding */ mapLinear),
+/* harmony export */   "normalize": () => (/* binding */ normalize),
 /* harmony export */   "pingpong": () => (/* binding */ pingpong),
-/* harmony export */   "smoothstep": () => (/* binding */ smoothstep),
-/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
-/* harmony export */   "randInt": () => (/* binding */ randInt),
+/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
 /* harmony export */   "randFloat": () => (/* binding */ randFloat),
 /* harmony export */   "randFloatSpread": () => (/* binding */ randFloatSpread),
+/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "seededRandom": () => (/* binding */ seededRandom),
-/* harmony export */   "degToRad": () => (/* binding */ degToRad),
-/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
-/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
-/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
-/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "setQuaternionFromProperEuler": () => (/* binding */ setQuaternionFromProperEuler),
-/* harmony export */   "normalize": () => (/* binding */ normalize),
-/* harmony export */   "denormalize": () => (/* binding */ denormalize)
+/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
+/* harmony export */   "smoothstep": () => (/* binding */ smoothstep)
 /* harmony export */ });
 const _lut = [];
 
