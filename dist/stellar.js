@@ -101,11 +101,7 @@ exports.Tick = Tick;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -234,11 +230,7 @@ exports.Assets = Assets;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -346,11 +338,7 @@ exports.Asteroid = Asteroid;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -881,11 +869,7 @@ exports.Compounds = Compounds;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1105,11 +1089,7 @@ exports.Controls = Controls;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1234,11 +1214,7 @@ exports.File = File;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1352,18 +1328,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Hud = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const warble_1 = __webpack_require__(5292);
 class Hud extends THREE.Object3D {
+    listener;
     canvas;
     texture;
     mesh;
-    constructor() {
+    warble;
+    constructor(listener) {
         super();
+        this.listener = listener;
         this.canvas = document.createElement('canvas');
         this.canvas.width = 1024;
         this.canvas.height = 1024;
+        this.warble = new warble_1.Warble(listener.getInput());
         this.texture = new THREE.CanvasTexture(this.canvas);
-        // HUD will be 1m from the player and 2m wide.  This makes it take
-        // up 90 degrees of the view frustrum.
+        // HUD will be 1.5m from the player and 2m wide.  This makes it take
+        // up about 60 degrees of the view frustrum.  Text at the top and bottom
+        // is hard to read.
         this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.5), new THREE.MeshBasicMaterial({
             color: '#fff',
             map: this.texture,
@@ -1373,20 +1355,51 @@ class Hud extends THREE.Object3D {
             side: THREE.DoubleSide,
         }));
         this.add(this.mesh);
-        this.init();
+        this.display();
     }
-    init() {
+    display() {
         const ctx = this.canvas.getContext('2d');
         ctx.clearRect(0, 0, 1024, 1024);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#0f04';
-        ctx.strokeRect(2, 2, 1020, 1020);
+        // ctx.lineWidth = 2;
+        // ctx.strokeStyle = '#0f04';
+        // ctx.strokeRect(2, 2, 1020, 1020);
         ctx.fillStyle = '#0f0f';
-        // ctx.strokeStyle = '#000';
         ctx.font = '32px monospace';
-        // ctx.strokeText('Greetings', 16, 32);
-        ctx.fillText('Greetings, Reso.', 16, 32);
+        ctx.fillText(this.postedMessage, 32, 1024 * 0.7);
         this.texture.needsUpdate = true;
+    }
+    pendingMessage = '';
+    postedMessage = '';
+    totalElapsedS = 0;
+    pushMessage(text) {
+        this.postedMessage = '';
+        this.pendingMessage = text;
+        this.totalElapsedS = 0;
+        this.clearTime = Infinity;
+        this.display();
+    }
+    clearTime = Infinity;
+    tick(t) {
+        if (this.postedMessage.length > 0 && t.elapsedS > this.clearTime) {
+            this.postedMessage = '';
+            this.pendingMessage = '';
+            this.warble.intone('.');
+            this.clearTime = Infinity;
+            this.display();
+        }
+        if (this.postedMessage.length >= this.pendingMessage.length) {
+            return;
+        }
+        this.totalElapsedS += t.deltaS;
+        const desiredCharCount = Math.round(this.totalElapsedS * 12);
+        if (desiredCharCount > this.postedMessage.length) {
+            this.postedMessage = this.pendingMessage.substring(0, desiredCharCount);
+            this.warble.intone(this.pendingMessage.charAt(desiredCharCount - 1));
+            this.display();
+        }
+        if (this.pendingMessage.length == this.postedMessage.length) {
+            this.clearTime = t.elapsedS + 1.5;
+        }
     }
 }
 exports.Hud = Hud;
@@ -1400,11 +1413,7 @@ exports.Hud = Hud;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1456,11 +1465,7 @@ exports.IsoTransform = IsoTransform;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1629,11 +1634,7 @@ exports.Log = Log;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -1908,11 +1909,7 @@ exports.NeighborCount = NeighborCount;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2217,11 +2214,7 @@ exports.PointMapOctoTree = PointMapOctoTree;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2277,11 +2270,7 @@ exports.Player = Player;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2461,11 +2450,7 @@ exports.PointCloud = PointCloud;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2519,11 +2504,7 @@ exports.PointCloudUnion = PointCloudUnion;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2607,17 +2588,102 @@ exports.PositionalDelayAudio = PositionalDelayAudio;
 
 /***/ }),
 
+/***/ 5292:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Warble = void 0;
+class Intonation {
+    cutoff;
+    gain;
+    fundamental;
+    constructor(f, cutoff, gain) {
+        this.cutoff = cutoff;
+        this.gain = gain;
+        this.fundamental = Math.pow(2, f);
+    }
+    inflect(basHz, osc, gain, filter) {
+        const ctx = osc.context;
+        osc.frequency.setTargetAtTime(basHz * this.fundamental, ctx.currentTime, 0.05);
+        gain.gain.setTargetAtTime(this.gain * 0.1, ctx.currentTime, 0.05);
+        filter.frequency.setTargetAtTime(basHz * this.cutoff, ctx.currentTime, 0.05);
+    }
+}
+class Warble {
+    osc;
+    gain;
+    filter;
+    toneMap = new Map();
+    constructor(target) {
+        const ctx = target.context;
+        this.osc = ctx.createOscillator();
+        this.osc.frequency.setValueAtTime(170, ctx.currentTime);
+        this.osc.type = 'square';
+        this.filter = ctx.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.Q.setValueAtTime(1.5, ctx.currentTime);
+        this.gain = ctx.createGain();
+        this.gain.gain.setValueAtTime(0, ctx.currentTime);
+        this.osc.connect(this.filter);
+        this.filter.connect(this.gain);
+        this.gain.connect(target);
+        this.initTones();
+        this.osc.start();
+    }
+    intone(ch) {
+        let tone;
+        if (this.toneMap.has(ch)) {
+            tone = this.toneMap.get(ch);
+        }
+        else {
+            tone = this.toneMap.get(' ');
+        }
+        tone.inflect(170, this.osc, this.gain, this.filter);
+    }
+    initTones() {
+        this.toneMap.set('a', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('b', new Intonation(-0.3, 3.0, 1.0));
+        this.toneMap.set('c', new Intonation(0.3, 3.0, 1.0));
+        this.toneMap.set('d', new Intonation(0.0, 3.0, 1.0));
+        this.toneMap.set('e', new Intonation(-0.2, 4.0, 1.0));
+        this.toneMap.set('f', new Intonation(0.1, 4.0, 1.0));
+        this.toneMap.set('g', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('h', new Intonation(0.0, 3.0, 1.0));
+        this.toneMap.set('i', new Intonation(0.3, 4.0, 1.0));
+        this.toneMap.set('j', new Intonation(0.3, 4.0, 1.0));
+        this.toneMap.set('k', new Intonation(0.0, 3.0, 1.0));
+        this.toneMap.set('l', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('m', new Intonation(-0.4, 4.0, 1.0));
+        this.toneMap.set('n', new Intonation(-0.3, 3.0, 1.0));
+        this.toneMap.set('o', new Intonation(0.2, 3.0, 1.0));
+        this.toneMap.set('p', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('q', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('r', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('s', new Intonation(-0.1, 3.0, 1.0));
+        this.toneMap.set('t', new Intonation(-0.2, 3.0, 1.0));
+        this.toneMap.set('u', new Intonation(0.3, 4.0, 1.0));
+        this.toneMap.set('v', new Intonation(0.4, 4.0, 1.0));
+        this.toneMap.set('w', new Intonation(-0.2, 4.0, 1.0));
+        this.toneMap.set('x', new Intonation(-0.3, 4.0, 1.0));
+        this.toneMap.set('y', new Intonation(0.4, 4.0, 1.0));
+        this.toneMap.set('z', new Intonation(0.0, 4.0, 1.0));
+        this.toneMap.set('.', new Intonation(0.0, 0.5, 0));
+        this.toneMap.set(' ', new Intonation(0.0, 4.0, 0));
+    }
+}
+exports.Warble = Warble;
+//# sourceMappingURL=warble.js.map
+
+/***/ }),
+
 /***/ 6125:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2717,11 +2783,7 @@ exports.SimpleLocationMap = SimpleLocationMap;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2834,11 +2896,7 @@ exports.Star = Star;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2958,11 +3016,7 @@ exports.Stars = Stars;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -2995,6 +3049,7 @@ const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
 const buzz_1 = __webpack_require__(2437);
 const positionalDelayAudio_1 = __webpack_require__(1050);
+const log_1 = __webpack_require__(4920);
 const hud_1 = __webpack_require__(1835);
 class Stellar {
     scene = new THREE.Scene();
@@ -3010,6 +3065,7 @@ class Stellar {
     rightPosition = new isoTransform_1.IsoTransform();
     controls = undefined;
     buzzes = new Map();
+    hud;
     constructor() {
         this.scene.add(this.playerGroup);
         this.scene.add(this.universe);
@@ -3019,6 +3075,7 @@ class Stellar {
         this.initializeGraphics();
         this.initializeSound();
         await this.initializeWorld();
+        this.initalizeHud();
         // Set up animation loop last - after everything is loaded.
         const clock = new THREE.Clock();
         let elapsedS = 0;
@@ -3065,7 +3122,6 @@ class Stellar {
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);
-        this.camera.add(new hud_1.Hud());
         this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         this.renderer.setSize(800, 800);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -3077,6 +3133,15 @@ class Stellar {
     initializeSound() {
         this.listener = new THREE.AudioListener();
         this.camera.add(this.listener);
+    }
+    initalizeHud() {
+        if (!this.listener) {
+            log_1.Log.info('Fatal: Must initialize sound first.');
+            throw new Error('Must initialize sound first.');
+        }
+        this.hud = new hud_1.Hud(this.listener);
+        this.camera.add(this.hud);
+        this.hud.pushMessage('Hello, Reso.  We\'re happy to have you here.');
     }
     updateSound(deltaS) {
         for (const [hand, b] of this.buzzes.entries()) {
@@ -3178,11 +3243,7 @@ document.body.appendChild(startButton);
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -3332,11 +3393,7 @@ exports.System = System;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -95529,28 +95586,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DEG2RAD": () => (/* binding */ DEG2RAD),
 /* harmony export */   "RAD2DEG": () => (/* binding */ RAD2DEG),
-/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
-/* harmony export */   "clamp": () => (/* binding */ clamp),
-/* harmony export */   "damp": () => (/* binding */ damp),
-/* harmony export */   "degToRad": () => (/* binding */ degToRad),
-/* harmony export */   "denormalize": () => (/* binding */ denormalize),
-/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
-/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "generateUUID": () => (/* binding */ generateUUID),
-/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
-/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
-/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "clamp": () => (/* binding */ clamp),
+/* harmony export */   "euclideanModulo": () => (/* binding */ euclideanModulo),
 /* harmony export */   "mapLinear": () => (/* binding */ mapLinear),
-/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "inverseLerp": () => (/* binding */ inverseLerp),
+/* harmony export */   "lerp": () => (/* binding */ lerp),
+/* harmony export */   "damp": () => (/* binding */ damp),
 /* harmony export */   "pingpong": () => (/* binding */ pingpong),
-/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "smoothstep": () => (/* binding */ smoothstep),
+/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
+/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "randFloat": () => (/* binding */ randFloat),
 /* harmony export */   "randFloatSpread": () => (/* binding */ randFloatSpread),
-/* harmony export */   "randInt": () => (/* binding */ randInt),
 /* harmony export */   "seededRandom": () => (/* binding */ seededRandom),
+/* harmony export */   "degToRad": () => (/* binding */ degToRad),
+/* harmony export */   "radToDeg": () => (/* binding */ radToDeg),
+/* harmony export */   "isPowerOfTwo": () => (/* binding */ isPowerOfTwo),
+/* harmony export */   "ceilPowerOfTwo": () => (/* binding */ ceilPowerOfTwo),
+/* harmony export */   "floorPowerOfTwo": () => (/* binding */ floorPowerOfTwo),
 /* harmony export */   "setQuaternionFromProperEuler": () => (/* binding */ setQuaternionFromProperEuler),
-/* harmony export */   "smootherstep": () => (/* binding */ smootherstep),
-/* harmony export */   "smoothstep": () => (/* binding */ smoothstep)
+/* harmony export */   "normalize": () => (/* binding */ normalize),
+/* harmony export */   "denormalize": () => (/* binding */ denormalize)
 /* harmony export */ });
 const _lut = [];
 

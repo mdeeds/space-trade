@@ -42,9 +42,9 @@ export class Hud extends THREE.Object3D implements Ticker {
   private display() {
     const ctx = this.canvas.getContext('2d');
     ctx.clearRect(0, 0, 1024, 1024);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#0f04';
-    ctx.strokeRect(2, 2, 1020, 1020);
+    // ctx.lineWidth = 2;
+    // ctx.strokeStyle = '#0f04';
+    // ctx.strokeRect(2, 2, 1020, 1020);
 
     ctx.fillStyle = '#0f0f';
     ctx.font = '32px monospace'
@@ -59,10 +59,19 @@ export class Hud extends THREE.Object3D implements Ticker {
     this.postedMessage = '';
     this.pendingMessage = text;
     this.totalElapsedS = 0;
+    this.clearTime = Infinity;
     this.display();
   }
 
+  private clearTime: number = Infinity;
   public tick(t: Tick) {
+    if (this.postedMessage.length > 0 && t.elapsedS > this.clearTime) {
+      this.postedMessage = '';
+      this.pendingMessage = '';
+      this.warble.intone('.');
+      this.clearTime = Infinity;
+      this.display();
+    }
     if (this.postedMessage.length >= this.pendingMessage.length) {
       return;
     }
@@ -72,6 +81,9 @@ export class Hud extends THREE.Object3D implements Ticker {
       this.postedMessage = this.pendingMessage.substring(0, desiredCharCount);
       this.warble.intone(this.pendingMessage.charAt(desiredCharCount - 1));
       this.display();
+    }
+    if (this.pendingMessage.length == this.postedMessage.length) {
+      this.clearTime = t.elapsedS + 1.5;
     }
   }
 }
