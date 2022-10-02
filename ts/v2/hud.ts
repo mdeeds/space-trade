@@ -1,17 +1,21 @@
 import * as THREE from "three";
 import { Tick, Ticker } from "../tick";
 import { Log } from "./log";
+import { Warble } from "./sfx/warble";
 
 export class Hud extends THREE.Object3D implements Ticker {
   private canvas: HTMLCanvasElement;
   private texture: THREE.CanvasTexture;
   private mesh: THREE.Mesh;
+  private warble: Warble;
 
   constructor(private listener: THREE.AudioListener) {
     super();
     this.canvas = document.createElement('canvas');
     this.canvas.width = 1024;
     this.canvas.height = 1024;
+
+    this.warble = new Warble(listener.getInput());
 
     this.texture = new THREE.CanvasTexture(this.canvas);
 
@@ -66,6 +70,7 @@ export class Hud extends THREE.Object3D implements Ticker {
     const desiredCharCount = Math.round(this.totalElapsedS * 12);
     if (desiredCharCount > this.postedMessage.length) {
       this.postedMessage = this.pendingMessage.substring(0, desiredCharCount);
+      this.warble.intone(this.pendingMessage.charAt(desiredCharCount - 1));
       this.display();
     }
   }
