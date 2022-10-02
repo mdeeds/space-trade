@@ -170,15 +170,30 @@ export class AstroGen {
     xOffset: number, yOffset: number, zOffset: number) {
 
     let items = [];
-    switch (randInt(0, 2)) {
+    switch (randInt(0, 7)) {
       case 0:
         items = ['iron-chondrite', 'carbon-chondrite', 'iron'];
         break;
       case 1:
-        items = ['carbon-chondrite', 'iron', 'fuel'];
+        items = ['iron-chondrite', 'carbon-chondrite', 'carbon-fiber'];
         break;
       case 2:
-        items = ['lithium-silicate', 'borosilicate', 'silicon'];
+        items = ['phylosilicate', 'carbon-chondrite', 'water-ice'];
+        break;
+      case 3:
+        items = ['phylosilicate', 'carbon-chondrite', 'carbon-fiber'];
+        break;
+      case 4:
+        items = ['iron-chondrite', 'borosilicate', 'iron'];
+        break;
+      case 5:
+        items = ['iron-chondrite', 'borosilicate', 'silicon'];
+        break;
+      case 6:
+        items = ['borosilicate', 'phylosilicate', 'silicone'];
+        break;
+      case 7:
+        items = ['borosilicate', 'phylosilicate', 'water-ice'];
         break;
     }
 
@@ -186,13 +201,13 @@ export class AstroGen {
     at.density = 0.9;
     let spurs = Math.ceil(r / 3);
     for (let i = 0; i < spurs; i++) {
-      at.randomWalk(new Vector3(xOffset, yOffset, zOffset), r * 3, items[0]);
+      at.randomWalk(new Vector3(xOffset, yOffset, zOffset), r * 3, items[2]);
     }
     at.density = 0.5
     let layers = Math.ceil(r / 3);
     for (let i = 0; i < layers; i++) {
+      at.dialate(items[0])
       at.dialate(items[1])
-      at.dialate(items[2])
     }
     at.addToConstruction(this.construction);
 
@@ -201,15 +216,18 @@ export class AstroGen {
   bulidBallAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
     let items = [];
-    switch (randInt(0, 2)) {
+    switch (randInt(0, 7)) {
       case 0:
         items = ['iron-chondrite', 'carbon-chondrite'];
         break;
-      case 1:
-        items = ['iron', 'fuel'];
+      case 3:
+        items = ['phylosilicate', 'carbon-chondrite'];
         break;
-      case 2:
-        items = ['lithium-silicate', 'borosilicate'];
+      case 5:
+        items = ['iron-chondrite', 'borosilicate'];
+        break;
+      case 7:
+        items = ['borosilicate', 'phylosilicate'];
         break;
     }
     for (let x = -r; x < r; x++) {

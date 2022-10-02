@@ -514,42 +514,60 @@ class AstroGen {
     }
     buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset) {
         let items = [];
-        switch ((0, MathUtils_1.randInt)(0, 2)) {
+        switch ((0, MathUtils_1.randInt)(0, 7)) {
             case 0:
                 items = ['iron-chondrite', 'carbon-chondrite', 'iron'];
                 break;
             case 1:
-                items = ['carbon-chondrite', 'iron', 'fuel'];
+                items = ['iron-chondrite', 'carbon-chondrite', 'carbon-fiber'];
                 break;
             case 2:
-                items = ['lithium-silicate', 'borosilicate', 'silicon'];
+                items = ['phylosilicate', 'carbon-chondrite', 'water-ice'];
+                break;
+            case 3:
+                items = ['phylosilicate', 'carbon-chondrite', 'carbon-fiber'];
+                break;
+            case 4:
+                items = ['iron-chondrite', 'borosilicate', 'iron'];
+                break;
+            case 5:
+                items = ['iron-chondrite', 'borosilicate', 'silicon'];
+                break;
+            case 6:
+                items = ['borosilicate', 'phylosilicate', 'silicone'];
+                break;
+            case 7:
+                items = ['borosilicate', 'phylosilicate', 'water-ice'];
                 break;
         }
         let at = new astroTools_1.AstroTools();
         at.density = 0.9;
         let spurs = Math.ceil(r / 3);
         for (let i = 0; i < spurs; i++) {
-            at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), r * 3, items[0]);
+            at.randomWalk(new three_1.Vector3(xOffset, yOffset, zOffset), r * 3, items[2]);
         }
         at.density = 0.5;
         let layers = Math.ceil(r / 3);
         for (let i = 0; i < layers; i++) {
+            at.dialate(items[0]);
             at.dialate(items[1]);
-            at.dialate(items[2]);
         }
         at.addToConstruction(this.construction);
     }
     bulidBallAsteroid(r, xOffset, yOffset, zOffset) {
         let items = [];
-        switch ((0, MathUtils_1.randInt)(0, 2)) {
+        switch ((0, MathUtils_1.randInt)(0, 7)) {
             case 0:
                 items = ['iron-chondrite', 'carbon-chondrite'];
                 break;
-            case 1:
-                items = ['iron', 'fuel'];
+            case 3:
+                items = ['phylosilicate', 'carbon-chondrite'];
                 break;
-            case 2:
-                items = ['lithium-silicate', 'borosilicate'];
+            case 5:
+                items = ['iron-chondrite', 'borosilicate'];
+                break;
+            case 7:
+                items = ['borosilicate', 'phylosilicate'];
                 break;
         }
         for (let x = -r; x < r; x++) {
@@ -773,7 +791,7 @@ exports.Compounds = void 0;
 class Compounds {
     constructor() {
         // Silicone
-        this.addUpgrade(['borosilicate', 'glass', 'glass-corner', 'glass-wedge', 'glass-cube']);
+        this.addUpgrade(['borosilicate', 'silicone', 'glass-corner', 'glass-wedge', 'glass-cube']);
         // Water
         this.addUpgrade(['phylosilicate', 'water-ice', 'polyoxide-corner', 'polyoxide-wedge', 'polyoxide-cube']);
         // Iron
@@ -788,17 +806,17 @@ class Compounds {
         this.add('iron-wedge', 'carbon-fiber-wedge', 'cylinder');
         this.add('iron-cube', 'carbon-fiber-cube', 'habitat');
         // Farmer Water+Carbon
-        this.add('borosilicate', 'carbon-chondrite', 'mud');
-        this.add('silicone', 'carbon-fiber', 'food');
-        this.add('glass-corner', 'carbon-fiber-corner', 'composite-slab');
-        this.add('glass-wedge', 'carbon-fiber-wedge', 'thruster-jet');
-        this.add('glass-cube', 'carbon-fiber-cube', 'fuel');
+        this.add('phylosilicate', 'carbon-chondrite', 'mud');
+        this.add('water-ice', 'carbon-fiber', 'food');
+        this.add('polyoxide-corner', 'carbon-fiber-corner', 'composite-slab');
+        this.add('polyoxide-wedge', 'carbon-fiber-wedge', 'thruster-jet');
+        this.add('polyoxide-cube', 'carbon-fiber-cube', 'fuel');
         // Pilot Iron+Silicon
-        this.add('iron-chondrite', 'carbon-chondrite', 'point');
-        this.add('iron', 'carbon-fiber', 'rod');
-        this.add('iron-corner', 'carbon-fiber-corner', 'cluster-jet');
-        this.add('iron-wedge', 'carbon-fiber-wedge', 'chair');
-        this.add('iron-cube', 'carbon-fiber-cube', 'thruster');
+        this.add('iron-chondrite', 'borosilicate', 'point');
+        this.add('iron', 'silicone', 'rod');
+        this.add('iron-corner', 'glass-corner', 'cluster-jet');
+        this.add('iron-wedge', 'glass-wedge', 'chair');
+        this.add('iron-cube', 'glass-cube', 'thruster-jet');
         // Engineer Silicon+Water
         this.add('borosilicate', 'phylosilicate', 'scaffold');
         this.add('silicone', 'water-ice', 'Cube.010');
