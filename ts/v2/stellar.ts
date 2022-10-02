@@ -32,6 +32,7 @@ export class Stellar {
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
   private buzzes = new Map<THREE.XRHandedness, Buzz>();
+  private hud: Hud;
 
   constructor() {
     this.scene.add(this.playerGroup);
@@ -43,6 +44,7 @@ export class Stellar {
     this.initializeGraphics();
     this.initializeSound();
     await this.initializeWorld();
+    this.initalizeHud();
 
     // Set up animation loop last - after everything is loaded.
     const clock = new THREE.Clock();
@@ -99,7 +101,6 @@ export class Stellar {
     this.camera.position.set(0, 1.7, 0);
     this.camera.lookAt(0, 1.7, -1.5);
     this.playerGroup.add(this.camera);
-    this.camera.add(new Hud());
 
     this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
     this.renderer.setSize(800, 800);
@@ -113,6 +114,16 @@ export class Stellar {
   private initializeSound() {
     this.listener = new THREE.AudioListener();
     this.camera.add(this.listener);
+  }
+
+  private initalizeHud() {
+    if (!this.listener) {
+      Log.info('Fatal: Must initialize sound first.');
+      throw new Error('Must initialize sound first.');
+    }
+    this.hud = new Hud(this.listener);
+    this.camera.add(this.hud);
+    this.hud.pushMessage('Hello, Reso.  We\'re happy to have you here.');
   }
 
   private updateSound(deltaS: number) {
