@@ -1326,6 +1326,74 @@ exports.Grid = Grid;
 
 /***/ }),
 
+/***/ 1835:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Hud = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class Hud extends THREE.Object3D {
+    canvas;
+    texture;
+    mesh;
+    constructor() {
+        super();
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 1024;
+        this.canvas.height = 1024;
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        // HUD will be 1m from the player and 2m wide.  This makes it take
+        // up 90 degrees of the view frustrum.
+        this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.5), new THREE.MeshBasicMaterial({
+            color: '#fff',
+            map: this.texture,
+            transparent: true,
+            depthTest: false,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+        }));
+        this.add(this.mesh);
+        this.init();
+    }
+    init() {
+        const ctx = this.canvas.getContext('2d');
+        ctx.clearRect(0, 0, 1024, 1024);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#0f04';
+        ctx.strokeRect(2, 2, 1020, 1020);
+        ctx.fillStyle = '#0f0f';
+        // ctx.strokeStyle = '#000';
+        ctx.font = '32px monospace';
+        // ctx.strokeText('Greetings', 16, 32);
+        ctx.fillText('Greetings, Reso.', 16, 32);
+        this.texture.needsUpdate = true;
+    }
+}
+exports.Hud = Hud;
+//# sourceMappingURL=hud.js.map
+
+/***/ }),
+
 /***/ 3265:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -2927,6 +2995,7 @@ const tick_1 = __webpack_require__(5544);
 const isoTransform_1 = __webpack_require__(3265);
 const buzz_1 = __webpack_require__(2437);
 const positionalDelayAudio_1 = __webpack_require__(1050);
+const hud_1 = __webpack_require__(1835);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -2996,6 +3065,7 @@ class Stellar {
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);
+        this.camera.add(new hud_1.Hud());
         this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
         this.renderer.setSize(800, 800);
         this.renderer.outputEncoding = THREE.sRGBEncoding;

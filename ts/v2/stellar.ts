@@ -15,6 +15,7 @@ import { IsoTransform } from "./isoTransform";
 import { Buzz } from "./buzz";
 import { PositionalDelayAudio } from "./sfx/positionalDelayAudio";
 import { Log } from "./log";
+import { Hud } from "./hud";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -98,6 +99,7 @@ export class Stellar {
     this.camera.position.set(0, 1.7, 0);
     this.camera.lookAt(0, 1.7, -1.5);
     this.playerGroup.add(this.camera);
+    this.camera.add(new Hud());
 
     this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
     this.renderer.setSize(800, 800);
