@@ -76,7 +76,7 @@ export class Assets {
       'iron-corner',
       'iron-cube',
       'iron',
-      'ironl-wedge',
+      'iron-wedge',
       'mud',
       'phylosilicate',
       'point',
