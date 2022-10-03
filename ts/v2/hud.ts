@@ -46,9 +46,14 @@ export class Hud extends THREE.Object3D implements Ticker {
     // ctx.strokeStyle = '#0f04';
     // ctx.strokeRect(2, 2, 1020, 1020);
 
+    ctx.font = '22px monospace'
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#000';
+    ctx.strokeText(this.postedMessage, 64, 1024 * 0.7);
     ctx.fillStyle = '#0f0f';
-    ctx.font = '32px monospace'
-    ctx.fillText(this.postedMessage, 32, 1024 * 0.7);
+    ctx.fillText(this.postedMessage, 64, 1024 * 0.7);
+
+
     this.texture.needsUpdate = true;
   }
 
