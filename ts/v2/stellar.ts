@@ -123,7 +123,7 @@ export class Stellar {
     }
     this.hud = new Hud(this.listener);
     this.camera.add(this.hud);
-    this.hud.pushMessage('Hello, Reso.  We\'re happy to have you here.');
+    this.hud.pushMessage(':: : Hello, Reso.  We\'re happy to have you here.');
   }
 
   private updateSound(deltaS: number) {
