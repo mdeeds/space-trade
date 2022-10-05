@@ -2844,35 +2844,35 @@ class Warble {
         tone.inflect(170, this.osc, this.gain, this.filter, this.noiseLevel);
     }
     initTones() {
-        this.toneMap.set('a', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('b', new Intonation(-0.3, 3.0, 1.0, 0.1));
-        this.toneMap.set('c', new Intonation(0.3, 3.0, 1.0, 0.1));
-        this.toneMap.set('d', new Intonation(0.0, 3.0, 1.0, 0.1));
-        this.toneMap.set('e', new Intonation(-0.2, 4.0, 1.0, 0.1));
-        this.toneMap.set('f', new Intonation(0.1, 4.0, 1.0, 0.1));
-        this.toneMap.set('g', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('h', new Intonation(0.0, 3.0, 1.0, 0.1));
-        this.toneMap.set('i', new Intonation(0.3, 4.0, 1.0, 0.1));
-        this.toneMap.set('j', new Intonation(0.3, 4.0, 1.0, 0.1));
-        this.toneMap.set('k', new Intonation(0.0, 3.0, 1.0, 0.1));
-        this.toneMap.set('l', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('m', new Intonation(-0.4, 4.0, 1.0, 0.1));
-        this.toneMap.set('n', new Intonation(-0.3, 3.0, 1.0, 0.1));
-        this.toneMap.set('o', new Intonation(0.2, 3.0, 1.0, 0.1));
-        this.toneMap.set('p', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('q', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('r', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set('s', new Intonation(-0.1, 3.0, 1.0, 0.1));
-        this.toneMap.set('t', new Intonation(-0.2, 3.0, 1.0, 0.1));
-        this.toneMap.set('u', new Intonation(0.3, 4.0, 1.0, 0.1));
-        this.toneMap.set('v', new Intonation(0.1, 4.0, 1.0, 0.1));
-        this.toneMap.set('w', new Intonation(-0.2, 4.0, 1.0, 0.1));
-        this.toneMap.set('x', new Intonation(-0.3, 4.0, 1.0, 0.1));
-        this.toneMap.set('y', new Intonation(0.4, 4.0, 1.0, 0.1));
-        this.toneMap.set('z', new Intonation(0.0, 4.0, 1.0, 0.1));
-        this.toneMap.set(':', new Intonation(0.0, 0.5, 0.5, 0.6));
+        this.toneMap.set('a', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('b', new Intonation(-0.3, 3.0, 1.0, 0.01));
+        this.toneMap.set('c', new Intonation(0.3, 3.0, 1.0, 0.01));
+        this.toneMap.set('d', new Intonation(0.0, 3.0, 1.0, 0.01));
+        this.toneMap.set('e', new Intonation(-0.2, 4.0, 1.0, 0.01));
+        this.toneMap.set('f', new Intonation(0.1, 4.0, 1.0, 0.01));
+        this.toneMap.set('g', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('h', new Intonation(0.0, 3.0, 1.0, 0.01));
+        this.toneMap.set('i', new Intonation(0.3, 4.0, 1.0, 0.01));
+        this.toneMap.set('j', new Intonation(0.3, 4.0, 1.0, 0.01));
+        this.toneMap.set('k', new Intonation(0.0, 3.0, 1.0, 0.01));
+        this.toneMap.set('l', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('m', new Intonation(-0.4, 4.0, 1.0, 0.01));
+        this.toneMap.set('n', new Intonation(-0.3, 3.0, 1.0, 0.01));
+        this.toneMap.set('o', new Intonation(0.2, 3.0, 1.0, 0.01));
+        this.toneMap.set('p', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('q', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('r', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('s', new Intonation(-0.1, 3.0, 1.0, 0.01));
+        this.toneMap.set('t', new Intonation(-0.2, 3.0, 1.0, 0.01));
+        this.toneMap.set('u', new Intonation(0.3, 4.0, 1.0, 0.01));
+        this.toneMap.set('v', new Intonation(0.1, 4.0, 1.0, 0.01));
+        this.toneMap.set('w', new Intonation(-0.2, 4.0, 1.0, 0.01));
+        this.toneMap.set('x', new Intonation(-0.3, 4.0, 1.0, 0.01));
+        this.toneMap.set('y', new Intonation(0.4, 4.0, 1.0, 0.01));
+        this.toneMap.set('z', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set(':', new Intonation(0.0, 0.5, 0.5, 0.06));
         this.toneMap.set('.', new Intonation(0.0, 0.5, 0, 0.0));
-        this.toneMap.set(' ', new Intonation(0.0, 4.0, 0, 0.1));
+        this.toneMap.set(' ', new Intonation(0.0, 4.0, 0, 0.01));
     }
 }
 exports.Warble = Warble;
@@ -3334,6 +3334,7 @@ class Stellar {
         // q - pgq = q + (-pgq)
         target.copy(this.playerGroup.quaternion);
         target.invert();
+        target.premultiply(this.player.rotation);
         target.premultiply(q);
     }
     initializeGraphics() {
