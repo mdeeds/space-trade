@@ -3209,11 +3209,12 @@ class Stellar {
         target.copy(pos);
         this.playerGroup.worldToLocal(target);
     }
-    setWorldToPlayerQ(target, q) {
+    setWorldToPlayerQ(q, target) {
         // We need to "subtract" the playerGroup quaternion from q.
         // q - pgq = q + (-pgq)
         target.copy(this.playerGroup.quaternion);
         target.invert();
+        target.premultiply(this.player.rotation);
         target.premultiply(q);
     }
     initializeGraphics() {
