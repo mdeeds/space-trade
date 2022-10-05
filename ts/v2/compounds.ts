@@ -1,15 +1,15 @@
 export class Compounds {
   constructor() {
-    // Silicone
+    // Silicone and Glass (Green)
     this.addUpgrade(['borosilicate', 'silicone', 'glass-corner', 'glass-wedge', 'glass-cube']);
 
-    // Water
+    // Water (Blue)
     this.addUpgrade(['phylosilicate', 'water-ice', 'polyoxide-corner', 'polyoxide-wedge', 'polyoxide-cube']);
 
-    // Iron
+    // Iron (Red)
     this.addUpgrade(['iron-chondrite', 'iron', 'iron-corner', 'iron-wedge', 'iron-cube'])
 
-    // Carbon
+    // Carbon (Yellow)
     this.addUpgrade(['carbon-chondrite', 'carbon-fiber',
       'carbon-fiber-corner', 'carbon-fiber-wedge', 'carbon-fiber-cube']);
 
