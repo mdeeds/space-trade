@@ -16,6 +16,7 @@ import { Buzz } from "./buzz";
 import { PositionalDelayAudio } from "./sfx/positionalDelayAudio";
 import { Log } from "./log";
 import { Hud } from "./hud";
+import { NebulaCloud } from "./nebulaCloud";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -210,6 +211,7 @@ export class Stellar {
     this.stars = new Stars(assets, this.controls, this.cursors);
     File.load(this.stars, 'Stellar', new THREE.Vector3(0, 0, 0));
     this.universe.add(this.stars);
+    this.universe.add(new NebulaCloud());
     this.allPoints.add(this.stars);
     this.cursors.set('left', new Cursor(assets));
     this.cursors.set('right', new Cursor(assets));
