@@ -4497,10 +4497,10 @@ class S {
         S.setDefault('ch', 0.7, 'Height of computer from the floor');
         S.setDefault('om', 0, 'Size of origin marker');
         S.setDefault('pv', 2, 'Point cloud version');
-        S.setDefault('nebn', 1000, 'Number of nebula points');
-        S.setDefault('nebs', 1e6, 'Size of each point (meters)');
-        S.setDefault('nebr', 10e9, 'Radius of the nebula');
-        S.setDefault('neba', 0.1, 'Alpha for each nebula instance');
+        S.setDefault('nebn', 3e3, 'Number of nebula points');
+        S.setDefault('nebs', 2e7, 'Size of each point (meters)');
+        S.setDefault('nebr', 1e8, 'Radius of the nebula');
+        S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
     }
     static float(name) {
         if (S.cache.has(name)) {
