@@ -1,13 +1,26 @@
 import * as THREE from "three";
 import { S } from "../settings";
+import { Log } from "./log";
 
 export class NebulaCloud extends THREE.Object3D {
   private material: THREE.ShaderMaterial;
   private geometry: THREE.BufferGeometry;
 
+  private tex: THREE.Texture;
+
   constructor() {
     super();
-    this.buildStars();
+
+    const loader = new THREE.ImageLoader();
+    loader.load('images/neb1.png',
+      (image: HTMLImageElement) => {
+        Log.info('Image loaded.');
+        this.tex = new THREE.Texture(image);
+        this.tex.needsUpdate = true;
+        this.buildStars();
+      },
+      null,
+      (e: ErrorEvent) => { Log.info(`Error: ${e.message}`) });
   }
 
   buildStars() {
@@ -31,9 +44,7 @@ export class NebulaCloud extends THREE.Object3D {
       index.push(o + 0, o + 1, o + 2, o + 2, o + 3, o + 0);
       for (let j = 0; j < 4; ++j) {
         pos.push(v.x, v.y, v.z);
-        col.push(0.5 * Math.sin(6.2 * v.x / radius) + 0.5,
-          0,
-          0.5 * Math.cos(7.7 * v.y / radius) * Math.sin(9 * v.z / radius) + 0.5);
+        col.push(1, 1, 1);
       }
       dxy.push(-1, -1, 1, -1, 1, 1, -1, 1);
       r.push(size, size, size, size);
@@ -54,6 +65,9 @@ export class NebulaCloud extends THREE.Object3D {
 
 
     this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        'tex': { value: this.tex },
+      },
       vertexShader: `
         attribute vec2 dxy;
         attribute float r;
@@ -71,17 +85,25 @@ export class NebulaCloud extends THREE.Object3D {
           vIntensity = smoothstep(${(size).toFixed(3)}, ${(size * 10).toFixed(3)}, distance);
           // float sizeScale = 1.0 / (distance * 500.0);
           vec4 mvPosition = viewMatrix * worldPosition;
-          mvPosition += r * vec4(dxy, 0.0, 0.0); 
+          if (vIntensity > 0.001) {
+            mvPosition += r * vec4(dxy, 0.0, 0.0); 
+          }
           gl_Position = projectionMatrix * mvPosition;
         }`,
       fragmentShader: `
         varying float vIntensity;
         varying vec3 vColor;
         varying vec2 vDxy;
+        uniform sampler2D tex;
         void main() {
-          float intensity = vIntensity * clamp(10.0 - 10.0 * length(vDxy),
-            0.0, 1.0);
-          gl_FragColor = vec4(vColor * intensity, ${S.float('neba').toFixed(3)});
+          // float intensity = vIntensity * smoothstep(1.0, 0.6, length(vDxy));
+          // gl_FragColor = vec4(vColor * intensity, ${alpha.toFixed(3)});
+
+          vec3 c1 = 1.0 - texture(tex, vDxy * 0.5 + 0.5).rga;
+          vec3 c2 = vec3(1, vDxy * 0.5 + 0.5);
+          vec3 col = c1; // + c2;
+
+          gl_FragColor = vec4(vColor * col, ${alpha.toFixed(3)});
         }`,
       blending: THREE.AdditiveBlending,
       depthTest: true,
@@ -93,6 +115,8 @@ export class NebulaCloud extends THREE.Object3D {
       clippingPlanes: [],
       side: THREE.DoubleSide,
     });
+
+    this.material.uniformsNeedUpdate = true;
 
     const points = new THREE.Mesh(this.geometry, this.material);
     this.add(points);
