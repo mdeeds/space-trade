@@ -43,6 +43,8 @@ export class Cursor extends THREE.Object3D {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     this.lineSegments = new LineSegments(geometry, material);
     this.add(this.lineSegments);
+
+    this.add(new THREE.AxesHelper());
   }
 
   public isHolding(): boolean {

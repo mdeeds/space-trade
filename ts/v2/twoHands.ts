@@ -33,6 +33,7 @@ export class TwoHands {
         this.leftSource = data;
         this.leftGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3),
           new THREE.MeshPhongMaterial({ color: '#88f' })));
+        this.leftGrip.add(new THREE.AxesHelper(0.4));
         ++this.numHands;
         if (this.numHands == 2) {
           doneCallback(this);
@@ -42,6 +43,7 @@ export class TwoHands {
         this.rightSource = data;
         this.rightGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3),
           new THREE.MeshPhongMaterial({ color: '#f88' })));
+        this.rightGrip.add(new THREE.AxesHelper(0.4));
         ++this.numHands;
         if (this.numHands == 2) {
           doneCallback(this);
