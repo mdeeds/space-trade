@@ -39,8 +39,11 @@ export class Warble {
     const sampleBuffer = ctx.createBuffer(
       1, ctx.sampleRate * 5, ctx.sampleRate);
     const buffer = sampleBuffer.getChannelData(0);
+    let val = 0;
     for (let i = 0; i < buffer.length; ++i) {
-      buffer[i] = Math.random() * 2 - 1;
+      val += 0.2 * (Math.random() * 2 - 1);
+      val = Math.min(1, Math.max(0, val));
+      buffer[i] = val;
     }
     this.noise.buffer = sampleBuffer;
     this.noise.loop = true;
