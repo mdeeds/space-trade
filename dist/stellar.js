@@ -1174,6 +1174,7 @@ class Cursor extends THREE.Object3D {
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         this.lineSegments = new three_1.LineSegments(geometry, material);
         this.add(this.lineSegments);
+        this.add(new THREE.AxesHelper());
     }
     isHolding() {
         return !!this.hold;
@@ -2830,8 +2831,11 @@ class Warble {
         this.noise = ctx.createBufferSource();
         const sampleBuffer = ctx.createBuffer(1, ctx.sampleRate * 5, ctx.sampleRate);
         const buffer = sampleBuffer.getChannelData(0);
+        let val = 0;
         for (let i = 0; i < buffer.length; ++i) {
-            buffer[i] = Math.random() * 2 - 1;
+            val += 0.07 * (Math.random() * 2 - 1);
+            val = Math.min(1, Math.max(0, val));
+            buffer[i] = val;
         }
         this.noise.buffer = sampleBuffer;
         this.noise.loop = true;
@@ -2864,35 +2868,35 @@ class Warble {
         tone.inflect(170, this.osc, this.gain, this.filter, this.noiseLevel);
     }
     initTones() {
-        this.toneMap.set('a', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('b', new Intonation(-0.3, 3.0, 1.0, 0.01));
-        this.toneMap.set('c', new Intonation(0.3, 3.0, 1.0, 0.01));
-        this.toneMap.set('d', new Intonation(0.0, 3.0, 1.0, 0.01));
-        this.toneMap.set('e', new Intonation(-0.2, 4.0, 1.0, 0.01));
-        this.toneMap.set('f', new Intonation(0.1, 4.0, 1.0, 0.01));
-        this.toneMap.set('g', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('h', new Intonation(0.0, 3.0, 1.0, 0.01));
-        this.toneMap.set('i', new Intonation(0.3, 4.0, 1.0, 0.01));
-        this.toneMap.set('j', new Intonation(0.3, 4.0, 1.0, 0.01));
-        this.toneMap.set('k', new Intonation(0.0, 3.0, 1.0, 0.01));
-        this.toneMap.set('l', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('m', new Intonation(-0.4, 4.0, 1.0, 0.01));
-        this.toneMap.set('n', new Intonation(-0.3, 3.0, 1.0, 0.01));
-        this.toneMap.set('o', new Intonation(0.2, 3.0, 1.0, 0.01));
-        this.toneMap.set('p', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('q', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('r', new Intonation(0.0, 4.0, 1.0, 0.01));
-        this.toneMap.set('s', new Intonation(-0.1, 3.0, 1.0, 0.01));
-        this.toneMap.set('t', new Intonation(-0.2, 3.0, 1.0, 0.01));
-        this.toneMap.set('u', new Intonation(0.3, 4.0, 1.0, 0.01));
-        this.toneMap.set('v', new Intonation(0.1, 4.0, 1.0, 0.01));
-        this.toneMap.set('w', new Intonation(-0.2, 4.0, 1.0, 0.01));
-        this.toneMap.set('x', new Intonation(-0.3, 4.0, 1.0, 0.01));
-        this.toneMap.set('y', new Intonation(0.4, 4.0, 1.0, 0.01));
-        this.toneMap.set('z', new Intonation(0.0, 4.0, 1.0, 0.01));
+        this.toneMap.set('a', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('b', new Intonation(-0.3, 3.0, 1.0, 0.05));
+        this.toneMap.set('c', new Intonation(0.3, 3.0, 1.0, 0.05));
+        this.toneMap.set('d', new Intonation(0.0, 3.0, 1.0, 0.05));
+        this.toneMap.set('e', new Intonation(-0.2, 4.0, 1.0, 0.05));
+        this.toneMap.set('f', new Intonation(0.1, 4.0, 1.0, 0.05));
+        this.toneMap.set('g', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('h', new Intonation(0.0, 3.0, 1.0, 0.05));
+        this.toneMap.set('i', new Intonation(0.3, 4.0, 1.0, 0.05));
+        this.toneMap.set('j', new Intonation(0.3, 4.0, 1.0, 0.05));
+        this.toneMap.set('k', new Intonation(0.0, 3.0, 1.0, 0.05));
+        this.toneMap.set('l', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('m', new Intonation(-0.4, 4.0, 1.0, 0.05));
+        this.toneMap.set('n', new Intonation(-0.3, 3.0, 1.0, 0.05));
+        this.toneMap.set('o', new Intonation(0.2, 3.0, 1.0, 0.05));
+        this.toneMap.set('p', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('q', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('r', new Intonation(0.0, 4.0, 1.0, 0.05));
+        this.toneMap.set('s', new Intonation(-0.1, 3.0, 1.0, 0.05));
+        this.toneMap.set('t', new Intonation(-0.2, 3.0, 1.0, 0.15));
+        this.toneMap.set('u', new Intonation(0.3, 4.0, 1.0, 0.05));
+        this.toneMap.set('v', new Intonation(0.1, 4.0, 1.0, 0.05));
+        this.toneMap.set('w', new Intonation(-0.2, 4.0, 1.0, 0.05));
+        this.toneMap.set('x', new Intonation(-0.3, 4.0, 1.0, 0.05));
+        this.toneMap.set('y', new Intonation(0.4, 4.0, 1.0, 0.05));
+        this.toneMap.set('z', new Intonation(0.0, 4.0, 1.0, 0.05));
         this.toneMap.set(':', new Intonation(0.0, 0.5, 0.5, 0.06));
         this.toneMap.set('.', new Intonation(0.0, 0.5, 0, 0.0));
-        this.toneMap.set(' ', new Intonation(0.0, 4.0, 0, 0.01));
+        this.toneMap.set(' ', new Intonation(0.0, 4.0, 0, 0.05));
     }
 }
 exports.Warble = Warble;
@@ -3685,6 +3689,7 @@ class TwoHands {
                 this.leftGrip = grip;
                 this.leftSource = data;
                 this.leftGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3), new THREE.MeshPhongMaterial({ color: '#88f' })));
+                this.leftGrip.add(new THREE.AxesHelper(0.4));
                 ++this.numHands;
                 if (this.numHands == 2) {
                     doneCallback(this);
@@ -3694,6 +3699,7 @@ class TwoHands {
                 this.rightGrip = grip;
                 this.rightSource = data;
                 this.rightGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3), new THREE.MeshPhongMaterial({ color: '#f88' })));
+                this.rightGrip.add(new THREE.AxesHelper(0.4));
                 ++this.numHands;
                 if (this.numHands == 2) {
                     doneCallback(this);
