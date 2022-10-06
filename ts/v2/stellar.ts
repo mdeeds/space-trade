@@ -92,7 +92,7 @@ export class Stellar {
     // q - pgq = q + (-pgq)
     target.copy(this.playerGroup.quaternion);
     target.invert();
-    target.premultiply(this.player.rotation);
+    target.multiply(this.player.rotation);
     target.premultiply(q)
   }
 
