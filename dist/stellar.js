@@ -3353,7 +3353,7 @@ class Stellar {
         // We need to "subtract" the playerGroup quaternion from q.
         // q - pgq = q + (-pgq)
         target.copy(q); //this.playerGroup.quaternion);
-        target.invert();
+        //target.invert();
         //target.multiply(this.playerGroup.quaternion)
     }
     initializeGraphics() {
