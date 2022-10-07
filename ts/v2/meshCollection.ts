@@ -35,7 +35,7 @@ export class MeshCollection extends THREE.Object3D
   private r = new THREE.Quaternion();
   private s = new THREE.Vector3();
 
-  constructor(assets: Assets, radius: number) {
+  constructor(assets: Assets, private radius: number) {
     super();
     const r = Math.ceil(radius);
     // Add a 5-cell padding.
@@ -104,6 +104,7 @@ export class MeshCollection extends THREE.Object3D
 
   public buildGeometry() {
     this.children.splice(0);
+    this.add(new THREE.AxesHelper(this.radius * 1.5));
     this.meshMap.clear();
 
     const nc = new NeighborCount();
