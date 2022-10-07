@@ -28,7 +28,7 @@ export class MeshCollection extends THREE.Object3D
   // The instances of InstancedMesh created for each item.
   private meshMap = new Map<string, THREE.InstancedMesh>();
 
-  private cubes: Latice<string>;
+  private cubes: SimpleLocationMap<string>;
   private quaternions = new SimpleLocationMap<THREE.Quaternion>();
 
   private t = new THREE.Vector3();
@@ -38,10 +38,7 @@ export class MeshCollection extends THREE.Object3D
   constructor(assets: Assets, private radius: number) {
     super();
     const r = Math.ceil(radius);
-    // Add a 5-cell padding.
-    const origin = new THREE.Vector3(-r - 5, -r - 5, -r - 5);
-    const edgeSize = 2 * r + 1 + 10;
-    this.cubes = new Latice<string>(origin, edgeSize);
+    this.cubes = new SimpleLocationMap<string>();
 
     for (const name of assets.names()) {
       const mesh = assets.getMesh(name);
@@ -78,16 +75,16 @@ export class MeshCollection extends THREE.Object3D
 
   private dirty = false;
   public addCube(name: string, tx: IsoTransform) {
-    this.cubes.Set(tx.position, name);
+    this.cubes.set(tx.position, name);
     this.rocks.add(tx.position, tx);
     this.quaternions.set(tx.position, tx.quaternion);
     this.dirty = true;
   }
 
   public removeCube(position: THREE.Vector3): string {
-    const name = this.cubes.Get(position);
+    const name = this.cubes.get(position);
     if (!!name) {
-      this.cubes.Set(position, null);
+      this.cubes.set(position, null);
       this.dirty = true;
       return name;
     }
@@ -95,11 +92,11 @@ export class MeshCollection extends THREE.Object3D
   }
 
   public cubeAt(p: THREE.Vector3): boolean {
-    return !!this.cubes.Get(p);
+    return !!this.cubes.get(p);
   }
 
   public get(p: THREE.Vector3): string {
-    return this.cubes.Get(p);
+    return this.cubes.get(p);
   }
 
   public buildGeometry() {
@@ -109,10 +106,10 @@ export class MeshCollection extends THREE.Object3D
 
     const nc = new NeighborCount();
     // console.log('Building mesh collection.');
-    for (const cubeEntry of this.cubes.Entries()) {
+    for (const [cubePosition, cubeName] of this.cubes.entries()) {
       let tx: IsoTransform = new IsoTransform(
-        cubeEntry.position, this.quaternions.get(cubeEntry.position));
-      nc.set(tx, cubeEntry.value);
+        cubePosition, this.quaternions.get(cubePosition));
+      nc.set(tx, cubeName);
     }
 
     // Populate the neighbor mesh
@@ -150,11 +147,9 @@ export class MeshCollection extends THREE.Object3D
   serialize(): Object {
     const o = {};
     const positionMap = new Map<string, Object[]>();
-    for (const laticeEntry of this.cubes.Entries()) {
-      const name = laticeEntry.value;
-      const p = laticeEntry.position;
-      if (!positionMap.has(name)) positionMap.set(name, []);
-      positionMap.get(name).push({ x: p.x, y: p.y, z: p.z });
+    for (const [cubePosition, cubeName] of this.cubes.entries()) {
+      if (!positionMap.has(cubeName)) positionMap.set(cubeName, []);
+      positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
     }
     for (const [name, rockPositions] of positionMap.entries()) {
       o[`${name}Positions`] = rockPositions;
