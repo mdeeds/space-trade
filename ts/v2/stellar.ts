@@ -94,7 +94,7 @@ export class Stellar {
     target.copy(q);
     this.tmpQ.copy(this.playerGroup.quaternion);
     this.tmpQ.invert();
-    target.multiply(this.tmpQ);
+    target.premultiply(this.tmpQ);
   }
 
   private initializeGraphics() {
