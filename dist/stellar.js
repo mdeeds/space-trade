@@ -1042,6 +1042,8 @@ class Controls {
         this.scaleTen(physicalPosition.position, this.tmp);
     }
     tmp = new THREE.Vector3();
+    // Sets left and right to be the positions of the left and right
+    // cursors in World space.
     setPositions(left, right, camera) {
         if (this.twoHands) {
             this.twoHands.getLeftPosition(left);
@@ -1054,6 +1056,7 @@ class Controls {
             left.position.copy(this.raycaster.ray.direction);
             left.position.multiplyScalar(10);
             left.position.add(this.raycaster.ray.origin);
+            this.camera.getWorldQuaternion(left.quaternion);
             right.position.set(0, 0, 0);
             right.quaternion.copy(grid_1.Grid.notRotated);
         }
@@ -3353,12 +3356,14 @@ class Stellar {
         target.copy(pos);
         this.playerGroup.worldToLocal(target);
     }
+    tmpQ = new THREE.Quaternion();
     setWorldToPlayerQ(q, target) {
         // We need to "subtract" the playerGroup quaternion from q.
         // q - pgq = q + (-pgq)
-        target.copy(q); //this.playerGroup.quaternion);
-        //target.invert();
-        //target.multiply(this.playerGroup.quaternion)
+        target.copy(q);
+        this.tmpQ.copy(this.playerGroup.quaternion);
+        this.tmpQ.invert();
+        target.multiply(this.tmpQ);
     }
     initializeGraphics() {
         document.body.innerHTML = '';
