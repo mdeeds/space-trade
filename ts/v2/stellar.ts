@@ -162,22 +162,37 @@ export class Stellar {
       }
     }
     const r = this.distanceToClosest(this.closestPos);
+    let targetVelocity = new THREE.Vector3();
     if (r < 1.0) {
-      this.velocityVector.copy(this.player.position);
-      this.velocityVector.sub(this.closestPos);
-      this.velocityVector.setLength(5.0);
+      targetVelocity.copy(this.player.position);
+      targetVelocity.sub(this.closestPos);
+      targetVelocity.setLength(5.0);
     } else {
       const velocity = S.float('rv') * r;
-      this.velocityVector.set(
+      targetVelocity.set(
         this.controls.leftRight(),
         this.controls.upDown(),
         this.controls.forwardBack());
-      this.velocityVector.multiplyScalar(velocity);
+      targetVelocity.multiplyScalar(velocity);
     }
+    // mag is the percentage of the target velocity applied to the current velocity.  (exponential averaging)
+    // a smaller mag (short for magnitude) will make the controls feel more sluggish.  Like driving a boat or flying an airplane)
+    // the mag is proportional to deltaS because longer times mean more change in velocity.
+    // a mag of 1 would mean that the velocity immediately reaches the target velocity, so mag cannot be greater than 1.
+    const mag: number = Math.min(1.0, deltaS * 10);
+
+    // v = (1-mag) * v + (mag) * target
+    this.velocityVector.multiplyScalar(1 - mag);
+    targetVelocity.multiplyScalar(mag);
+    this.velocityVector.add(targetVelocity);
+
+    //this.velocityVector = targetVelocity;
+
     if (this.velocityVector.lengthSq() > 0) {
-      this.velocityVector.multiplyScalar(deltaS);
-      this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
-      this.player.position.add(this.velocityVector);
+      let worldVelocity: THREE.Vector3 = this.velocityVector.clone();
+      worldVelocity.multiplyScalar(deltaS);
+      worldVelocity.applyQuaternion(this.playerGroup.quaternion);
+      this.player.position.add(worldVelocity);
     }
 
     const spinRate = this.controls.spinLeftRight();

@@ -20,6 +20,8 @@ export class Forces {
   private rightPosition = new IsoTransform();
   private controls: Controls = undefined;
 
+  private currentVelocity: number = 0.0;
+
   constructor() {
     this.scene.add(this.playerGroup);
     this.scene.add(this.universe);
@@ -90,13 +92,16 @@ export class Forces {
         this.controls.setSession(session);
       }
     }
-    const velocity = 1.0;
+    const target_velocity = this.controls.leftRight() + this.controls.upDown() + this.controls.forwardBack();
+    const mag = Math.max(deltaS / 100, 1)
+    this.currentVelocity = (1 - mag) * this.currentVelocity + mag * target_velocity
+
     this.velocityVector.set(
       this.controls.leftRight(),
       this.controls.upDown(),
       this.controls.forwardBack());
     if (this.velocityVector.lengthSq() > 0) {
-      this.velocityVector.multiplyScalar(velocity * deltaS);
+      this.velocityVector.multiplyScalar(this.currentVelocity * deltaS);
       this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
       this.playerFrame.position.add(this.velocityVector);
     }

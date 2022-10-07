@@ -477,6 +477,7 @@ class Forces {
     leftPosition = new isoTransform_1.IsoTransform();
     rightPosition = new isoTransform_1.IsoTransform();
     controls = undefined;
+    currentVelocity = 0.0;
     constructor() {
         this.scene.add(this.playerGroup);
         this.scene.add(this.universe);
@@ -539,10 +540,12 @@ class Forces {
                 this.controls.setSession(session);
             }
         }
-        const velocity = 1.0;
+        const target_velocity = this.controls.leftRight() + this.controls.upDown() + this.controls.forwardBack();
+        const mag = Math.max(deltaS / 100, 1);
+        this.currentVelocity = (1 - mag) * this.currentVelocity + mag * target_velocity;
         this.velocityVector.set(this.controls.leftRight(), this.controls.upDown(), this.controls.forwardBack());
         if (this.velocityVector.lengthSq() > 0) {
-            this.velocityVector.multiplyScalar(velocity * deltaS);
+            this.velocityVector.multiplyScalar(this.currentVelocity * deltaS);
             this.velocityVector.applyQuaternion(this.playerGroup.quaternion);
             this.playerFrame.position.add(this.velocityVector);
         }
@@ -885,6 +888,7 @@ class TwoHands {
                 this.leftGrip = grip;
                 this.leftSource = data;
                 this.leftGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3), new THREE.MeshPhongMaterial({ color: '#88f' })));
+                this.leftGrip.add(new THREE.AxesHelper(0.4));
                 ++this.numHands;
                 if (this.numHands == 2) {
                     doneCallback(this);
@@ -894,6 +898,7 @@ class TwoHands {
                 this.rightGrip = grip;
                 this.rightSource = data;
                 this.rightGrip.add(new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.05, 3), new THREE.MeshPhongMaterial({ color: '#f88' })));
+                this.rightGrip.add(new THREE.AxesHelper(0.4));
                 ++this.numHands;
                 if (this.numHands == 2) {
                     doneCallback(this);
