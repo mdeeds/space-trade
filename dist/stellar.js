@@ -3233,7 +3233,7 @@ class Stellar {
         if (Math.random() < 0.02) {
             log_1.Log.once(`forward: ${[e1.x, e1.y, e1.z]}; backward: ${[e2.x, e2.y, e2.z]}`);
         }
-        target.multiply(this.tmpQ);
+        target.premultiply(this.tmpQ);
     }
     initializeGraphics() {
         document.body.innerHTML = '';
