@@ -87,12 +87,14 @@ export class Stellar {
     this.playerGroup.worldToLocal(target);
   }
 
+  private tmpQ = new THREE.Quaternion();
   private setWorldToPlayerQ(q: THREE.Quaternion, target: THREE.Quaternion) {
     // We need to "subtract" the playerGroup quaternion from q.
     // q - pgq = q + (-pgq)
-    target.copy(q); //this.playerGroup.quaternion);
-    //target.invert();
-    //target.multiply(this.playerGroup.quaternion)
+    target.copy(q);
+    this.tmpQ.copy(this.playerGroup.quaternion);
+    this.tmpQ.invert();
+    target.multiply(this.tmpQ);
   }
 
   private initializeGraphics() {

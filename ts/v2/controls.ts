@@ -144,6 +144,8 @@ export class Controls {
   }
 
   private tmp = new THREE.Vector3();
+  // Sets left and right to be the positions of the left and right
+  // cursors in World space.
   public setPositions(left: IsoTransform, right: IsoTransform,
     camera: THREE.PerspectiveCamera) {
     if (this.twoHands) {
@@ -156,6 +158,8 @@ export class Controls {
       left.position.copy(this.raycaster.ray.direction);
       left.position.multiplyScalar(10);
       left.position.add(this.raycaster.ray.origin);
+      this.camera.getWorldQuaternion(left.quaternion);
+
       right.position.set(0, 0, 0);
       right.quaternion.copy(Grid.notRotated);
     }
