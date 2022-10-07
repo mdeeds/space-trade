@@ -3224,8 +3224,15 @@ class Stellar {
         // We need to "subtract" the playerGroup quaternion from q.
         // q - pgq = q + (-pgq)
         target.copy(q);
+        const e1 = new THREE.Euler();
+        const e2 = new THREE.Euler();
         this.tmpQ.copy(this.playerGroup.quaternion);
+        e1.setFromQuaternion(this.tmpQ);
         this.tmpQ.invert();
+        e2.setFromQuaternion(this.tmpQ);
+        if (Math.random() < 0.02) {
+            log_1.Log.once(`forward: ${[e1.x, e1.y, e1.z]}; backward: ${[e2.x, e2.y, e2.z]}`);
+        }
         target.multiply(this.tmpQ);
     }
     initializeGraphics() {
