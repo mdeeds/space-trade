@@ -185,9 +185,10 @@ class Assets extends THREE.Object3D {
     }
     static async LoadAllModels() {
         const modelNames = [
-            'accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'guide', 'ice', 'light-blue',
-            'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-            'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
+            "guide",
+            "iron-corner", "iron-wedge", "iron-cube",
+            "carbon-fiber-corner", "carbon-fiber-wedge", "carbon-fiber-cube",
+            "point", "rod", "cone", "cylinder", "habitat"
         ];
         for (const modelName of modelNames) {
             // console.log(`Loading ${modelName}`);
@@ -204,44 +205,43 @@ class Assets extends THREE.Object3D {
         }
     }
     static initItems() {
-        const paintableItems = [
-            'cube', 'wedge', 'arm', 'cluster-jet', 'scaffold',
-            'thruster', 'tank', 'light-blue',
-            'corner'
-        ];
+        // const paintableItems = [
+        //   'cube', 'wedge', 'arm', 'cluster-jet', 'scaffold',
+        //   'thruster', 'tank', 'light-blue',
+        //   'corner']
         Assets.items = [];
         for (const [key, value] of Assets.meshes.entries()) {
             const i = Item.make(key, "A wonderful item.", 0, key);
-            if (paintableItems.includes(key)) {
-                i.paintable = true;
-            }
-            else {
-                i.paintable = false;
-            }
+            // if (paintableItems.includes(key)) {
+            //   i.paintable = true;
+            // }
+            // else {
+            i.paintable = false;
+            // }
             Assets.items.push(i);
             this.itemsByName.set(key, i);
         }
-        const producers = ['accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'ice', 'light-blue',
-            'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-            'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
-        ];
-        for (const [key, value] of Assets.meshes.entries()) {
-            if (producers.includes(key)) {
-                let originalMesh = this.meshes.get(key);
-                let geo = originalMesh.geometry.clone();
-                geo.scale(originalMesh.scale.x, originalMesh.scale.y, originalMesh.scale.z);
-                geo.scale(0.5, 0.5, 0.5);
-                const producerMesh = Assets.meshes.get('producer').clone();
-                const prototype = new THREE.Mesh(geo, originalMesh.material);
-                producerMesh.add(prototype);
-                let meshName = key.concat("Producer");
-                this.meshes.set(meshName, producerMesh);
-                const i = Item.make(meshName, `Producer of ${key}`, 0, meshName);
-                Assets.items.push(i);
-                this.itemsByName.set(meshName, i);
-            }
-        }
-        ;
+        // const producers = ['accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'ice', 'light-blue',
+        //   'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
+        //   'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
+        // ]
+        // for (const [key, value] of Assets.meshes.entries()) {
+        //   if (producers.includes(key)) {
+        //     let originalMesh = this.meshes.get(key);
+        //     let geo = originalMesh.geometry.clone();
+        //     geo.scale(originalMesh.scale.x, originalMesh.scale.y, originalMesh.scale.z)
+        //     geo.scale(0.5, 0.5, 0.5);
+        //     const producerMesh = Assets.meshes.get('producer').clone();
+        //     const prototype = new THREE.Mesh(
+        //       geo, originalMesh.material);
+        //     producerMesh.add(prototype);
+        //     let meshName = key.concat("Producer");
+        //     this.meshes.set(meshName, producerMesh);
+        //     const i = Item.make(meshName, `Producer of ${key}`, 0, meshName);
+        //     Assets.items.push(i);
+        //     this.itemsByName.set(meshName, i);
+        //   }
+        // };
     }
 }
 exports.Assets = Assets;
@@ -629,19 +629,14 @@ const place_1 = __webpack_require__(9151);
 const debug_1 = __webpack_require__(8756);
 const assets_1 = __webpack_require__(7398);
 const construction_1 = __webpack_require__(3844);
+const astroGen_1 = __webpack_require__(419);
 const settings_1 = __webpack_require__(6451);
 const player_1 = __webpack_require__(7507);
 const gripLike_1 = __webpack_require__(8875);
-const computer_1 = __webpack_require__(885);
 const skyBox_1 = __webpack_require__(4813);
-const pointCloud_1 = __webpack_require__(9996);
-const pointCloud2_1 = __webpack_require__(9386);
-const modelCloud_1 = __webpack_require__(9879);
-const starSystem_1 = __webpack_require__(8445);
 const universe_1 = __webpack_require__(670);
 const system_1 = __webpack_require__(1855);
 const exchange_1 = __webpack_require__(1253);
-const astroGenWFC_1 = __webpack_require__(9394);
 class BlockBuild {
     scene = new THREE.Scene();
     camera;
@@ -684,11 +679,11 @@ class BlockBuild {
         system.addBody(station);
         this.universe.systems.set(system.getName(), system);
         this.construction = new construction_1.ObjectConstruction(this.place.universeGroup, this.renderer);
-        //let ag = new AstroGen(this.construction);
-        let agwfc = new astroGenWFC_1.AstroGenWFC(1000);
-        agwfc.makeExample();
-        agwfc.makeRules();
-        agwfc.build();
+        let ag = new astroGen_1.AstroGen(this.construction);
+        // let agwfc = new AstroGenWFC(1000);
+        // agwfc.makeExample();
+        // agwfc.makeRules();
+        // agwfc.build();
         // if (S.float('bai')) {
         //   ag.buildAllItems();
         // } else {
@@ -719,7 +714,7 @@ class BlockBuild {
         //     Math.floor(Math.random() * 500) - 250,
         //     Math.floor(Math.random() * 500) - 250);
         // }
-        // ag.buildOriginMarker(S.float('om'));
+        ag.buildOriginMarker(settings_1.S.float('om'));
         // ag.buildTest();
         //ab.buildRandomItems(10, 100);
         if (!settings_1.S.float('bai')) {
@@ -794,20 +789,20 @@ class BlockBuild {
         if (this.keysDown.has('Digit6')) {
             this.keysDown.delete('Digit6');
             // create an AudioListener and add it to the camera
-            const listener = new THREE.AudioListener();
-            this.computer.add(listener);
+            //const listener = new THREE.AudioListener();
+            //this.computer.add(listener);
             // create a global audio source
-            const sound = new THREE.Audio(listener);
-            // load a sound and set it as the Audio object's buffer
-            const audioLoader = new THREE.AudioLoader();
-            const num = Math.ceil(Math.random() * 5).toFixed(0);
-            const soundname = `sounds/mine${num}.ogg`;
-            audioLoader.load(soundname, (buffer) => {
-                sound.setBuffer(buffer);
-                sound.setLoop(false);
-                sound.setVolume(0.5);
-                sound.play();
-            });
+            //const sound = new THREE.Audio(listener);
+            // // load a sound and set it as the Audio object's buffer
+            // const audioLoader = new THREE.AudioLoader();
+            // const num = Math.ceil(Math.random() * 5).toFixed(0);
+            // const soundname = `sounds/mine${num}.ogg`;
+            // audioLoader.load(soundname, (buffer) => {
+            //   sound.setBuffer(buffer);
+            //   sound.setLoop(false);
+            //   sound.setVolume(0.5);
+            //   sound.play();
+            // });
         }
         for (const f of this.factories) {
             f.tick(t);
@@ -822,19 +817,22 @@ class BlockBuild {
         this.camera = new THREE.PerspectiveCamera(75, 1.0, 0.1, 2000);
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
-        if (settings_1.S.float('pv') === 2) {
-            const starCloud = new pointCloud2_1.PointCloud2(0, settings_1.S.float('sr'), settings_1.S.float('sr') / 10, settings_1.S.float('ns'), new THREE.Color('#fff'), settings_1.S.float('ss'), 
-            /*visibleDistance=*/ settings_1.S.float('sr'), /*includeOrigin=*/ true, 
-            /*initialIntensity=*/ 4.0);
-            this.stars = new modelCloud_1.ModelCloud((pos) => {
-                return new starSystem_1.StarSystem(this.camera);
-            }, starCloud, /*showRadius=*/ settings_1.S.float('sp'), this.camera);
-        }
-        else {
-            this.stars = new pointCloud_1.PointCloud1(0, settings_1.S.float('sr'), settings_1.S.float('sr') / 10, settings_1.S.float('ns'), new THREE.Color('#ddd'), /*pointRadius=*/ 1e4, 
-            /*visibleDistance=*/ settings_1.S.float('sr'), /*includeOrigin=*/ true);
-        }
-        this.universeGroup.add(this.stars);
+        // if (S.float('pv') === 2) {
+        //   const starCloud = new PointCloud2(
+        //     0, S.float('sr'), S.float('sr') / 10, S.float('ns'),
+        //     new THREE.Color('#fff'), S.float('ss'),
+        //     /*visibleDistance=*/S.float('sr'), /*includeOrigin=*/true,
+        //     /*initialIntensity=*/4.0);
+        //   this.stars = new ModelCloud((pos: THREE.Vector3) => {
+        //     return new StarSystem(this.camera);
+        //   }, starCloud, /*showRadius=*/S.float('sp'), this.camera);
+        // } else {
+        //   this.stars = new PointCloud1(
+        //     0, S.float('sr'), S.float('sr') / 10, S.float('ns'),
+        //     new THREE.Color('#ddd'), /*pointRadius=*/1e4,
+        //     /*visibleDistance=*/S.float('sr'), /*includeOrigin=*/true);
+        // }
+        // this.universeGroup.add(this.stars);
         const sky = new skyBox_1.SkyBox();
         this.scene.add(sky);
         this.playerGroup.add(this.camera);
@@ -858,12 +856,12 @@ class BlockBuild {
         const debugPanel = new debug_1.Debug();
         debugPanel.position.set(0, 0, -3);
         this.universeGroup.add(debugPanel);
-        this.computer = await computer_1.Computer.make(this.player, this.universe);
+        //this.computer = await Computer.make(this.player, this.universe);
         //this.computer.translateY(S.float('ch'));
         //this.computer.translateZ(-0.3);
         //this.computer.rotateX(Math.PI / 4);
-        const computerScale = settings_1.S.float('cs');
-        this.computer.scale.set(computerScale, computerScale, computerScale);
+        // const computerScale = S.float('cs');
+        // this.computer.scale.set(computerScale, computerScale, computerScale);
         // ButtonDispatcher.registerButton(this.computer, new THREE.Vector3(0, 0, 0),
         //   0.1, () => {
         //     if (this.computer.scale.x > 2) {
@@ -887,7 +885,7 @@ class BlockBuild {
         //   sound.play();
         // });
         debug_1.Debug.log("Three Version=" + THREE.REVISION);
-        debug_1.Debug.log("Factory Example");
+        debug_1.Debug.log("Just Blockbuild");
         // const controls = new OrbitControls(this.camera, this.renderer.domElement);
         // controls.target.set(0, 0, -5);
         // controls.update();
@@ -918,10 +916,10 @@ class BlockBuild {
             if (settings_1.S.float('mouse') == i) {
                 console.assert(!!this.canvas);
                 grip = new gripLike_1.MouseGrip(this.canvas, this.camera, this.keysDown);
-                this.computer.translateY(1.7);
-                this.computer.translateZ(-0.4);
-                this.computer.rotateX(Math.PI / 2);
-                this.playerGroup.add(this.computer);
+                // this.computer.translateY(1.7);
+                // this.computer.translateZ(-0.4);
+                // this.computer.rotateX(Math.PI / 2);
+                //this.playerGroup.add(this.computer);
             }
             else {
                 grip = new gripLike_1.GripGrip(i, this.renderer.xr);
@@ -935,7 +933,7 @@ class BlockBuild {
             // Note: adding the model to the Hand will remove it from the Scene
             // It's still in memory.
             // Assets.blocks[i].position.set(0, 0, 0);
-            new hand_1.Hand(grip, assets_1.Assets.itemsByName.get('guide'), i, this.renderer.xr, this.place, this.keysDown, this.construction, this.player.inventory, this.computer);
+            new hand_1.Hand(grip, assets_1.Assets.itemsByName.get('guide'), i, this.renderer.xr, this.place, this.keysDown, this.construction, this.player.inventory); //, this.computer);
         }
     }
 }
@@ -1147,286 +1145,6 @@ class Codec {
 }
 exports.Codec = Codec;
 //# sourceMappingURL=codec.js.map
-
-/***/ }),
-
-/***/ 885:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Computer = void 0;
-const THREE = __importStar(__webpack_require__(5232));
-const assets_1 = __webpack_require__(7398);
-const buttonDispatcher_1 = __webpack_require__(9770);
-const debug_1 = __webpack_require__(8756);
-class RowText {
-    rowText = [];
-    dirty;
-    constructor() { }
-    clear() {
-        this.dirty = true;
-        for (let i = 0; i < 15; i++) {
-            this.rowText[i] = "";
-        }
-    }
-    empty() {
-        this.dirty = true;
-        this.rowText.length = 0;
-    }
-    length() {
-        return this.rowText.length;
-    }
-    get() {
-        this.dirty = false;
-        return this.rowText;
-    }
-    set(i, value) {
-        this.dirty = true;
-        this.rowText[i] = value;
-    }
-    isDirty() {
-        return this.dirty;
-    }
-}
-class Computer extends THREE.Object3D {
-    model;
-    player;
-    universe;
-    canvas = document.createElement('canvas');
-    ctx = this.canvas.getContext('2d');
-    rowText = new RowText();
-    texture = new THREE.CanvasTexture(this.canvas);
-    material = new THREE.MeshBasicMaterial();
-    buttonCallbacks = new Map();
-    topButtonLabels = [];
-    bottomButtonLabels = [];
-    listener = new THREE.AudioListener();
-    sound;
-    audioLoader = new THREE.AudioLoader();
-    currentDisplay = this.showInventory;
-    currentParameters = "";
-    selectedItemIndex = 0;
-    constructor(model, player, universe) {
-        super();
-        this.model = model;
-        this.player = player;
-        this.universe = universe;
-        this.add(model);
-        this.canvas.width = 1056;
-        this.canvas.height = 544;
-        this.material.map = this.texture;
-        this.add(this.listener);
-        this.sound = new THREE.Audio(this.listener);
-        this.labels();
-        this.updateDisplay();
-        model.children.forEach(o => {
-            const m = o;
-            if (m.name == "display") {
-                m.material = this.material;
-            }
-        });
-        this.showInventory();
-    }
-    tick(t) {
-        if (t.frameCount % 10 === 0) {
-            if (this.currentDisplay) {
-                this.currentDisplay();
-            }
-            else {
-                this.show404();
-            }
-        }
-    }
-    static async make(player, universe) {
-        const model = await assets_1.ModelLoader.loadModel(`Model/flight computer.glb`);
-        return new Computer(model, player, universe);
-    }
-    findChildByName(name, model) {
-        let retvalue = new THREE.Object3D();
-        for (const m of model.children) {
-            if (m.name == name) {
-                retvalue = m;
-                break;
-            }
-        }
-        return retvalue;
-    }
-    clearRowText() {
-        this.rowText.clear();
-    }
-    labels() {
-        this.clearRowText();
-        this.topButtonLabels = ["", "", "", "", "", "", "", ""];
-        this.bottomButtonLabels = ["INV", "NAV", "", "", "", "", "", ""];
-        this.buttonCallbacks.set("B0", this.showInventory);
-        this.buttonCallbacks.set("B1", this.showNavigation);
-        for (let i = 0; i < 8; i++) {
-            let label = "T" + i.toFixed(0);
-            let m = this.findChildByName(label, this.model);
-            buttonDispatcher_1.ButtonDispatcher.registerButton(m, m.position, 0.015, () => {
-                this.playRandomSound("key-press", 4);
-                this.currentDisplay = this.buttonCallbacks.get(label);
-            });
-        }
-        for (let i = 0; i < 8; i++) {
-            let label = "B" + i.toFixed(0);
-            let m = this.findChildByName(label, this.model);
-            buttonDispatcher_1.ButtonDispatcher.registerButton(m, m.position, 0.015, () => {
-                this.playRandomSound("key-press", 4);
-                this.currentDisplay = this.buttonCallbacks.get(label);
-            });
-        }
-        for (let i = 0; i < 15; i++) {
-            let label = "R" + i.toFixed(0);
-            let m = this.findChildByName(label, this.model);
-            buttonDispatcher_1.ButtonDispatcher.registerButton(this, m.position, 0.005, () => {
-                this.playRandomSound("key-press", 4);
-                this.currentDisplay = this.buttonCallbacks.get(label);
-            });
-        }
-    }
-    playRandomSound(name, max) {
-        const num = Math.floor(Math.random() * max + 1).toFixed(0);
-        const soundname = `sounds/${name}${num}.ogg`;
-        debug_1.Debug.log(`playing ${soundname}`);
-        this.audioLoader.load(soundname, (buffer) => {
-            this.sound.setBuffer(buffer);
-            this.sound.setLoop(false);
-            this.sound.setVolume(0.5);
-            this.sound.play();
-        });
-    }
-    updateDisplay() {
-        if (!this.rowText.isDirty()) {
-            return;
-        }
-        // clear display and add green bars
-        this.createGreenBars();
-        // update rows
-        const middleOfRow = this.canvas.height / 17 / 2;
-        const rowText = this.rowText.get();
-        for (let i = 0; i < this.rowText.length(); i++) {
-            this.ctx.fillStyle = 'green';
-            this.ctx.font = '24px monospace';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText(rowText[i], 0, (i * this.canvas.height / 17) + 3 * middleOfRow);
-        }
-        //update buttons
-        const gridUnit = (this.canvas.width / 33);
-        const middleOfColumn = gridUnit * 2.5;
-        const columnSpacing = gridUnit * 4;
-        for (let i = 0; i < 8; i++) {
-            this.ctx.fillStyle = 'green';
-            this.ctx.font = '24px monospace';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.topButtonLabels[i], columnSpacing * i + middleOfColumn, middleOfRow);
-            this.ctx.fillText(this.bottomButtonLabels[i], columnSpacing * i + middleOfColumn, this.canvas.height - middleOfRow);
-        }
-        this.texture.needsUpdate = true;
-    }
-    startRow = 0;
-    showInventory() {
-        const inv = this.player.inventory.getItemQtyMap();
-        const qtys = Array.from(inv.values());
-        const items = Array.from(inv.keys());
-        this.rowText.empty();
-        let i = 0;
-        for (let i = 0; i < 15; i++) {
-            if (this.startRow + i >= items.length) {
-                break;
-            }
-            else {
-                let item = items[i + this.startRow];
-                let qty = qtys[i + this.startRow];
-                this.rowText.set(i, `${item.name} ${qty}`);
-                this.buttonCallbacks.set(`R${i.toFixed(0)}`, () => {
-                    this.showItemDetails(item, qty);
-                    //Debug.log(`Item.name=${item.name}, qty=${qty}`);
-                });
-            }
-        }
-        // this.topButtonLabels[0] = "v ^";
-        // this.buttonCallbacks.set("T0", () => { this.player.inventory.sortByName});
-        // this.topButtonLabels[1] = "v ^";
-        if (this.startRow > 0) {
-            this.bottomButtonLabels[6] = "back";
-            this.buttonCallbacks.set("B6", () => {
-                debug_1.Debug.log("Back Pressed.");
-                this.startRow -= 15;
-                this.currentDisplay = this.showInventory;
-            });
-        }
-        if (this.startRow + 14 < items.length) {
-            this.bottomButtonLabels[7] = "next";
-            this.buttonCallbacks.set("B7", () => {
-                debug_1.Debug.log("Next Pressed.");
-                this.startRow += 15;
-                this.currentDisplay = this.showInventory;
-            });
-        }
-        this.updateDisplay();
-    }
-    showNavigation() {
-        this.clearRowText();
-        this.rowText.set(0, "You are somewhere.");
-        this.updateDisplay();
-    }
-    showItemDetails(item, qty) {
-        this.clearRowText();
-        this.rowText.set(0, item.name);
-        this.rowText.set(1, item.description);
-        this.rowText.set(2, item.baseValue.toFixed(0));
-        this.rowText.set(3, qty.toFixed(0));
-        if (item.paintable) {
-            this.rowText.set(4, "Can be painted.");
-        }
-        else {
-            this.rowText.set(4, "not paintable.");
-        }
-        this.updateDisplay();
-    }
-    show404() {
-        this.clearRowText();
-        this.rowText.set(0, "Page not found (404)");
-        this.updateDisplay();
-    }
-    createGreenBars() {
-        this.ctx.fillStyle = '#003300';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = 'black';
-        for (let y = 0; y < this.canvas.height; y += this.canvas.height / 8.5) {
-            this.ctx.fillRect(0, y, this.canvas.width, this.canvas.height / 17);
-        }
-    }
-}
-exports.Computer = Computer;
-//# sourceMappingURL=computer.js.map
 
 /***/ }),
 
@@ -2218,7 +1936,6 @@ class Hand extends THREE.Object3D {
     keysDown;
     construction;
     inventory;
-    computer;
     cube;
     debug;
     debugMaterial;
@@ -2227,11 +1944,11 @@ class Hand extends THREE.Object3D {
         new THREE.Vector3(), new THREE.Vector3()
     ];
     line = new THREE.Line(this.lineGeometry, new THREE.LineBasicMaterial({ color: '#aa9' }));
-    computerAdded = false;
+    //private computerAdded = false;
     listener = new THREE.AudioListener();
     sound;
     audioLoader = new THREE.AudioLoader();
-    constructor(grip, item, index, xr, place, keysDown, construction, inventory, computer) {
+    constructor(grip, item, index, xr, place, keysDown, construction, inventory) {
         super();
         this.grip = grip;
         this.item = item;
@@ -2241,7 +1958,6 @@ class Hand extends THREE.Object3D {
         this.keysDown = keysDown;
         this.construction = construction;
         this.inventory = inventory;
-        this.computer = computer;
         // If you want to see where the "grip" is, uncomment this code.
         this.debug = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(0.005, 3), new THREE.MeshPhongMaterial({ color: 'pink' }));
         this.add(this.debug);
@@ -2320,13 +2036,13 @@ class Hand extends THREE.Object3D {
             }
         }
         if (this.source) {
-            if (this.grip.getHandedness() === 'left' && !this.computerAdded) {
-                this.add(this.computer);
-                this.computer.translateX(0.0);
-                this.computer.translateY(0.2);
-                this.computer.rotateZ(-Math.PI / 4);
-                this.computerAdded = true;
-            }
+            //   if (this.grip.getHandedness() === 'left' && !this.computerAdded) {
+            //     this.add(this.computer);
+            //     this.computer.translateX(0.0);
+            //     this.computer.translateY(0.2);
+            //     this.computer.rotateZ(-Math.PI / 4);
+            //     this.computerAdded = true;
+            //   }
             //this.debugMaterial.color = new THREE.Color('blue');
             const rateUpDown = 5;
             const rateMove = 10;
@@ -4893,259 +4609,6 @@ class Universe {
 }
 exports.Universe = Universe;
 //# sourceMappingURL=universe.js.map
-
-/***/ }),
-
-/***/ 9394:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AstroGenWFC = void 0;
-const THREE = __importStar(__webpack_require__(5232));
-const simpleLocationMap_1 = __webpack_require__(6125);
-// class Rule {
-//     cnt: number = 1;
-//     constructor(public location: THREE.Vector3, public item: number) {
-//     }
-// }
-class AstroGenWFC {
-    maxRadius;
-    // is: Map<THREE.Vector3, number> = new Map();
-    // canBe: Map<THREE.Vector3, number[]> = new Map();
-    // rules: Map<number, Rule[]> = new Map();
-    // example: Map<THREE.Vector3, number> = new Map();
-    is = new simpleLocationMap_1.SimpleLocationMap();
-    canBe = new simpleLocationMap_1.SimpleLocationMap();
-    rules = new Map();
-    example = new simpleLocationMap_1.SimpleLocationMap();
-    ruleOffset = [];
-    constructor(maxRadius) {
-        this.maxRadius = maxRadius;
-        this.ruleOffset.push(new THREE.Vector3(0, 0, 1));
-        this.ruleOffset.push(new THREE.Vector3(0, 0, -1));
-        this.ruleOffset.push(new THREE.Vector3(0, 1, 0));
-        this.ruleOffset.push(new THREE.Vector3(0, -1, 0));
-        this.ruleOffset.push(new THREE.Vector3(1, 0, 0));
-        this.ruleOffset.push(new THREE.Vector3(-1, 0, 0));
-    }
-    makeExample() {
-        this.example.set(new THREE.Vector3(0, 0, 0), 1);
-        this.example.set(new THREE.Vector3(0, 1, 0), 1);
-    }
-    getRandomInt(max) {
-        return Math.floor(Math.random() * max);
-    }
-    makeRules() {
-        for (const [pos, item] of this.example.entries()) {
-            if (!this.rules.has(item)) {
-                this.rules.set(item, new simpleLocationMap_1.SimpleLocationMap());
-            }
-            for (const offset of this.ruleOffset) {
-                const checkPos = new THREE.Vector3();
-                checkPos.add(pos);
-                checkPos.add(offset);
-                let ruleItem = 0;
-                if (this.example.has(checkPos)) {
-                    ruleItem = this.example.get(checkPos);
-                }
-                if (!this.rules.get(item).has(offset)) {
-                    this.rules.get(item).set(offset, []);
-                }
-                let items = this.rules.get(item).get(offset);
-                if (!items.includes(ruleItem)) {
-                    items.push(ruleItem);
-                }
-                this.rules.get(item)?.set(offset, items);
-            }
-        }
-    }
-    mergeItems(a, b) {
-        let newItems = [];
-        for (const item of a) {
-            if (b.includes(item)) {
-                newItems.push(item);
-            }
-        }
-        return newItems;
-    }
-    randomItemFromExample() {
-        return 1;
-    }
-    build() {
-        // start with one block at the origin
-        let item = this.randomItemFromExample();
-        let pos = new THREE.Vector3(0, 0, 0);
-        this.addAndUpdateRules(pos, item);
-        while (true) {
-            // find the lowest entropy
-            let minPos;
-            let minItems;
-            let minLength = 999;
-            for (const [pos, items] of this.canBe.entries()) {
-                if (items.length < minLength) {
-                    minPos = pos;
-                    minItems = items;
-                    minLength = items.length;
-                }
-            }
-            if (!!minItems) {
-                item = minItems[this.getRandomInt(minItems.length)];
-                this.addAndUpdateRules(minPos, item);
-            }
-            else {
-                break;
-            }
-        }
-    }
-    addAndUpdateRules(pos, item) {
-        this.is.set(pos, item);
-        this.canBe.delete(pos);
-        if (this.rules.has(item)) {
-            for (let [offset, cellCanBe] of this.rules.get(item).entries()) {
-                const setPos = new THREE.Vector3();
-                setPos.add(pos);
-                setPos.add(offset);
-                if (setPos.manhattanLength() <= this.maxRadius &&
-                    !this.is.has(setPos)) {
-                    if (this.canBe.has(setPos)) {
-                        cellCanBe = this.mergeItems(this.canBe.get(setPos), cellCanBe);
-                    }
-                    this.canBe.set(setPos, cellCanBe);
-                }
-            }
-        }
-    }
-}
-exports.AstroGenWFC = AstroGenWFC;
-//# sourceMappingURL=astroGenWFC.js.map
-
-/***/ }),
-
-/***/ 6125:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SimpleLocationMap = void 0;
-const THREE = __importStar(__webpack_require__(5232));
-class SimpleLocationMap {
-    vectors = new Map();
-    data = new Map();
-    constructor() { }
-    // Perhaps premature, but we cache the previous key for the somewhat
-    // common case of calling "has" and then "delete"
-    previousV = new THREE.Vector3();
-    previousKey = this.toKey3(0, 0, 0);
-    toKey(position) {
-        if (position.equals(this.previousV)) {
-            return this.previousKey;
-        }
-        this.previousV.copy(position);
-        this.previousKey = this.toKey3(position.x, position.y, position.z);
-        return this.previousKey;
-    }
-    toKey3(x, y, z) {
-        return x.toFixed(0) + "," + y.toFixed(0) + "," + z.toFixed(0);
-    }
-    has(position) {
-        return this.data.has(this.toKey(position));
-    }
-    has3(x, y, z) {
-        return this.data.has(this.toKey3(x, y, z));
-    }
-    set(position, value) {
-        const key = this.toKey(position);
-        this.data.set(key, value);
-        if (!this.vectors.has(key)) {
-            const v = new THREE.Vector3(position.x, position.y, position.z);
-            this.vectors.set(key, v);
-        }
-    }
-    set3(x, y, z, value) {
-        const key = this.toKey3(x, y, z);
-        this.data.set(key, value);
-        if (!this.vectors.has(key)) {
-            const v = new THREE.Vector3(x, y, z);
-            this.vectors.set(key, v);
-        }
-    }
-    get(position) {
-        return this.data.get(this.toKey(position));
-    }
-    get3(x, y, z) {
-        return this.data.get(this.toKey3(x, y, z));
-    }
-    delete(position) {
-        return this.data.delete(this.toKey(position));
-    }
-    *values() {
-        yield* this.data.values();
-    }
-    *entries() {
-        for (const [key, value] of this.data.entries()) {
-            yield [this.vectors.get(key), value];
-        }
-    }
-    getSize() {
-        return this.data.size;
-    }
-    clone() {
-        const result = new SimpleLocationMap();
-        for (const [pos, value] of this.entries()) {
-            result.set(pos, value);
-        }
-        return result;
-    }
-}
-exports.SimpleLocationMap = SimpleLocationMap;
-//# sourceMappingURL=simpleLocationMap.js.map
 
 /***/ }),
 
