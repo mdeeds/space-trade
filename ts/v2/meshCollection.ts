@@ -1,11 +1,9 @@
 import * as THREE from "three";
-import { Matrix4 } from "three";
 import { Tick, Ticker } from "../tick";
 import { Assets } from "./assets";
 import { Construction } from "./construction";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
-import { Latice } from "./latice";
 import { LocationMap } from "./locationMap";
 import { NeighborCount } from "./neighborCount";
 import { PointMapOctoTree } from "./octoTree";
@@ -109,7 +107,7 @@ export class MeshCollection extends THREE.Object3D
     for (const [cubePosition, cubeName] of this.cubes.entries()) {
       let tx: IsoTransform = new IsoTransform(
         cubePosition, this.quaternions.get(cubePosition));
-      nc.set(tx, cubeName);
+      nc.set(cubePosition, cubeName);
     }
 
     // Populate the neighbor mesh
@@ -122,12 +120,15 @@ export class MeshCollection extends THREE.Object3D
       this.add(instancedMesh);
     }
 
+    const tx = new IsoTransform();
     for (const mav of nc.externalElements()) {
       const name = mav.value;
-      const tx = mav.tx;
+      const pos = mav.pos;
       const instancedMesh = this.meshMap.get(name);
       if (instancedMesh) {
         const i = instancedMesh.count++;
+        tx.position.copy(pos);
+        tx.quaternion.copy(this.quaternions.get(pos));
         instancedMesh.setMatrixAt(i, tx.MakeMatrix());
       } else {
         console.log(`Error: no mesh for ${name}`);

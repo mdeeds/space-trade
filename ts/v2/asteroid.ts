@@ -10,12 +10,17 @@ import { Codeable } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
 import { MeshCollection } from "./meshCollection";
+import { PointSet } from "./pointSet";
 import { Sound } from "./sfx/sound";
 
-export class Asteroid extends MeshCollection implements Codeable {
+export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
+  private meshCollection: MeshCollection;
+
   constructor(assets: Assets, controls: Controls,
     private cursors: Map<THREE.XRHandedness, Cursor>) {
-    super(assets, S.float('as') * 1.2);
+    super();
+    this.meshCollection = new MeshCollection(assets, S.float('as') * 1.2);
+    this.add(this.meshCollection);
 
     controls.setStartStopCallback((ev: StartStopEvent) => {
       if (ev.state == 'start') {
@@ -30,7 +35,7 @@ export class Asteroid extends MeshCollection implements Codeable {
           this.handleDrop(pos, cursor);
           // this.sound.playOnObject(cursor, 'boop');
         } else {
-          const removed = this.removeCube(pos.position);
+          const removed = this.meshCollection.removeCube(pos.position);
           if (!removed && this.cursorsAreTogether()) {
             this.handleSplit();
           } else {
@@ -65,24 +70,37 @@ export class Asteroid extends MeshCollection implements Codeable {
   private compounds = new Compounds();
 
   private handleDrop(pos: IsoTransform, cursor: Cursor) {
-    if (!this.cubeAt(pos.position)) {
-      this.addCube(cursor.getHold(), pos);
+    if (!this.meshCollection.cubeAt(pos.position)) {
+      this.meshCollection.addCube(cursor.getHold(), pos);
       cursor.setHold(null);
     } else {
-      const existingCube = this.get(pos.position);
+      const existingCube = this.meshCollection.get(pos.position);
       const combo = this.compounds.combine(existingCube, cursor.getHold());
       if (!!combo) {
-        this.removeCube(pos.position);
-        this.addCube(combo, pos);
+        this.meshCollection.removeCube(pos.position);
+        this.meshCollection.addCube(combo, pos);
         cursor.setHold(null);
       }
     }
   }
 
-  fallback(p: THREE.Vector3) {
-    const gen = new AstroGen(this);
-    gen.buildAsteroid(S.float('as'), 0, 0, 0);
-    this.buildGeometry();
+  serialize(): Object {
+    return this.meshCollection.serialize();
+  }
+
+  deserialize(serialized: Object): this {
+    this.meshCollection.deserialize(serialized);
     return this;
+  }
+
+  fallback(p: THREE.Vector3) {
+    const gen = new AstroGen(this.meshCollection);
+    gen.buildAsteroid(S.float('as'), 0, 0, 0);
+    this.meshCollection.buildGeometry();
+    return this;
+  }
+
+  public getClosestDistance(p: THREE.Vector3): number {
+    return this.meshCollection.getClosestDistance(p);
   }
 }

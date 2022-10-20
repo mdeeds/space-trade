@@ -1,7 +1,5 @@
 import * as THREE from "three";
 
-import { Grid } from "./grid";
-import { IsoTransform } from "./isoTransform";
 import { NeighborCount } from "./neighborCount";
 
 const nc = new NeighborCount();
@@ -9,9 +7,8 @@ const nc = new NeighborCount();
 for (let i = -10; i <= 10; ++i) {
   for (let j = -10; j <= 10; ++j) {
     for (let k = -10; k <= 10; ++k) {
-      const tx = new IsoTransform(
-        new THREE.Vector3(i, j, k), Grid.notRotated);
-      nc.set(tx, `${[i, j, k]}`);
+      const pos = new THREE.Vector3(i, j, k);
+      nc.set(pos, `${[i, j, k]}`);
     }
   }
 }

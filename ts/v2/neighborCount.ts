@@ -4,7 +4,7 @@ import { LocationMap } from "./locationMap";
 import { SimpleLocationMap } from "./simpleLocationMap";
 
 export class TxAnd<T> {
-  constructor(readonly tx: IsoTransform, readonly value: T) { }
+  constructor(readonly pos: THREE.Vector3, readonly value: T) { }
 }
 
 export class NeighborCount {
@@ -34,42 +34,41 @@ export class NeighborCount {
     }
   }
 
-  private applyDelta(tx: IsoTransform, delta: number) {
+  private applyDelta(tx: THREE.Vector3, delta: number) {
     this.addOrChange3(
-      tx.position.x, tx.position.y, tx.position.z + 1,
+      tx.x, tx.y, tx.z + 1,
       this.neighborCount, delta);
     this.addOrChange3(
-      tx.position.x, tx.position.y, tx.position.z - 1,
+      tx.x, tx.y, tx.z - 1,
       this.neighborCount, delta);
     this.addOrChange3(
-      tx.position.x, tx.position.y + 1, tx.position.z,
+      tx.x, tx.y + 1, tx.z,
       this.neighborCount, delta);
     this.addOrChange3(
-      tx.position.x, tx.position.y - 1, tx.position.z,
+      tx.x, tx.y - 1, tx.z,
       this.neighborCount, delta);
     this.addOrChange3(
-      tx.position.x + 1, tx.position.y, tx.position.z,
+      tx.x + 1, tx.y, tx.z,
       this.neighborCount, delta);
     this.addOrChange3(
-      tx.position.x - 1, tx.position.y, tx.position.z,
+      tx.x - 1, tx.y, tx.z,
       this.neighborCount, delta);
   }
 
-  public set(tx: IsoTransform, value: string) {
-    const pos = tx.position;
+  public set(pos: THREE.Vector3, value: string) {
     const hasKey = this.data.has(pos);
-    this.data.set(pos, new TxAnd<string>(tx, value));
+    this.data.set(pos, new TxAnd<string>(pos, value));
     if (hasKey) {
       const prevValue = this.data.get(pos).value;
       this.addOrChange(prevValue, this.valueCount, -1);
     } else {
-      this.applyDelta(tx, 1);
+      this.applyDelta(pos, 1);
     }
     this.addOrChange(value, this.valueCount, 1);
   }
 
-  public delete(tx: IsoTransform) {
-    if (this.data.delete(tx.position)) this.applyDelta(tx, -1);
+  public delete(tx: THREE.Vector3) {
+    if (this.data.delete(tx)) this.applyDelta(tx, -1);
   }
 
   public getCount(value: string): number {
