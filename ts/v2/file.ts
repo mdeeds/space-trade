@@ -7,11 +7,38 @@ export interface Codeable {
 }
 
 export class File {
+  static saveButtons = new Map<string, HTMLElement>();
+
+  static makeSaveButton(o: Object, target: string) {
+    const div = document.createElement('div');
+    //<a href="path_to_file" download="proposed_file_name">Download</a>
+    const anchor = document.createElement('a');
+    anchor.href = "data:application/json;base64," + btoa(JSON.stringify(o));
+    anchor.innerText = target;
+
+    JSON.stringify(o);
+    anchor.download = `${target}.json`;
+    anchor.target = '_blank';
+
+    div.appendChild(anchor);
+    return div;
+  }
+
+  static refreshLink(o: Object, target: string) {
+    if (File.saveButtons.get(target)) {
+      document.body.removeChild(File.saveButtons.get(target));
+    }
+
+    const button = File.makeSaveButton(o, target);
+    document.body.appendChild(button);
+    File.saveButtons.set(target, button);
+  }
+
   static save(value: Codeable, target: string) {
     const o = value.serialize();
     window.localStorage.setItem(target, JSON.stringify(o));
-
     // File.saveToCloud(value, target);
+    File.refreshLink(o, target);
   }
 
   static load(target: Codeable, source: string, p: THREE.Vector3) {
@@ -19,6 +46,7 @@ export class File {
     if (saved) {
       console.log(`Loading saved file: ${source}`);
       const o = JSON.parse(saved);
+      File.refreshLink(o, source);
       return target.deserialize(o);
     } else {
       console.log('Regenerating data.');
