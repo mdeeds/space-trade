@@ -35,14 +35,16 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
 
         const cursor = cursors.get(ev.handedness);
         if (cursor.isHolding()) {
-          this.handleDrop(pos, cursor);
+          this.handleDrop(pos, cursor, (ev.type == 'grip'));
           // this.sound.playOnObject(cursor, 'boop');
         } else {
           const removed = this.meshCollection.removeCube(pos.position);
-          if (!removed && this.cursorsAreTogether()) {
-            this.handleSplit();
-          } else {
-            cursor.setHold(removed);
+          if ((ev.type == 'grip')) {
+            if (!removed && this.cursorsAreTogether()) {
+              this.handleSplit();
+            } else {
+              cursor.setHold(removed);
+            }
           }
         }
       }
@@ -72,17 +74,21 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
 
   private compounds = new Compounds();
 
-  private handleDrop(pos: IsoTransform, cursor: Cursor) {
+  private handleDrop(pos: IsoTransform, cursor: Cursor, removeFromHand: boolean = true) {
     if (!this.meshCollection.cubeAt(pos.position)) {
       this.meshCollection.addCube(cursor.getHold(), pos);
-      cursor.setHold(null);
+      if (removeFromHand) {
+        cursor.setHold(null);
+      }
     } else {
       const existingCube = this.meshCollection.get(pos.position);
       const combo = this.compounds.combine(existingCube, cursor.getHold());
       if (!!combo) {
         this.meshCollection.removeCube(pos.position);
         this.meshCollection.addCube(combo, pos);
-        cursor.setHold(null);
+        if (removeFromHand) {
+          cursor.setHold(null);
+        }
       }
     }
   }

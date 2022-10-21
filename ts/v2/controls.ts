@@ -205,6 +205,24 @@ export class Controls {
           new StartStopEvent(side, 'end', 'grip', p));
       }
     });
+    grip.addEventListener('squeezestart', (ev) => {
+      if (!!this.startStopCallback) {
+        gripLocation.getWorldPosition(p.position);
+        gripLocation.getWorldQuaternion(p.quaternion);
+        this.setCursorPosition(p);
+        this.startStopCallback(
+          new StartStopEvent(side, 'start', 'squeeze', p));
+      }
+    });
+    grip.addEventListener('selectend', (ev) => {
+      if (!!this.startStopCallback) {
+        gripLocation.getWorldPosition(p.position);
+        gripLocation.getWorldQuaternion(p.quaternion);
+        this.setCursorPosition(p);
+        this.startStopCallback(
+          new StartStopEvent(side, 'end', 'squeeze', p));
+      }
+    });
   }
 
   public hasSession(): boolean {
