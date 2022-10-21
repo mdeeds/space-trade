@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { MarchingCubes } from "../graphics/marchingCubes";
 import { S } from "../settings";
 import { Assets } from "./assets";
 import { AstroGen } from "./astroGen";
@@ -15,6 +16,8 @@ import { Sound } from "./sfx/sound";
 
 export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
   private meshCollection: MeshCollection;
+  private surface: MarchingCubes = undefined;
+  private surfaceMesh: THREE.Mesh;
 
   constructor(assets: Assets, controls: Controls,
     private cursors: Map<THREE.XRHandedness, Cursor>) {
@@ -84,12 +87,30 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     }
   }
 
+  private buildCubes() {
+    if (this.surfaceMesh) {
+      this.remove(this.surfaceMesh);
+    }
+    const radius = 10.0;
+    const partitions = radius * 2;
+    const center = new THREE.Vector3(0, 0, 0);
+    this.surface = new MarchingCubes((pos: THREE.Vector3) => {
+      // TODO look into this.meshCollection, return 1 if it's inside.
+      return pos.length() - 8.0;
+    }, radius, center, partitions);
+    this.surfaceMesh = new THREE.Mesh(
+      this.surface, new THREE.MeshPhongMaterial({ color: '#fdd' })
+    );
+    this.add(this.surfaceMesh);
+  }
+
   serialize(): Object {
     return this.meshCollection.serialize();
   }
 
   deserialize(serialized: Object): this {
     this.meshCollection.deserialize(serialized);
+    // this.buildCubes();
     return this;
   }
 
@@ -97,6 +118,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     const gen = new AstroGen(this.meshCollection);
     gen.buildAsteroid(S.float('as'), 0, 0, 0);
     this.meshCollection.buildGeometry();
+    // this.buildCubes();
     return this;
   }
 
