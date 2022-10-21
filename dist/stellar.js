@@ -268,11 +268,14 @@ const compounds_1 = __webpack_require__(6772);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
-class Asteroid extends meshCollection_1.MeshCollection {
+class Asteroid extends THREE.Object3D {
     cursors;
+    meshCollection;
     constructor(assets, controls, cursors) {
-        super(assets, settings_1.S.float('as') * 1.2);
+        super();
         this.cursors = cursors;
+        this.meshCollection = new meshCollection_1.MeshCollection(assets, settings_1.S.float('as') * 1.2);
+        this.add(this.meshCollection);
         controls.setStartStopCallback((ev) => {
             if (ev.state == 'start') {
                 const pos = new isoTransform_1.IsoTransform();
@@ -286,7 +289,7 @@ class Asteroid extends meshCollection_1.MeshCollection {
                     // this.sound.playOnObject(cursor, 'boop');
                 }
                 else {
-                    const removed = this.removeCube(pos.position);
+                    const removed = this.meshCollection.removeCube(pos.position);
                     if (!removed && this.cursorsAreTogether()) {
                         this.handleSplit();
                     }
@@ -318,25 +321,35 @@ class Asteroid extends meshCollection_1.MeshCollection {
     }
     compounds = new compounds_1.Compounds();
     handleDrop(pos, cursor) {
-        if (!this.cubeAt(pos.position)) {
-            this.addCube(cursor.getHold(), pos);
+        if (!this.meshCollection.cubeAt(pos.position)) {
+            this.meshCollection.addCube(cursor.getHold(), pos);
             cursor.setHold(null);
         }
         else {
-            const existingCube = this.get(pos.position);
+            const existingCube = this.meshCollection.get(pos.position);
             const combo = this.compounds.combine(existingCube, cursor.getHold());
             if (!!combo) {
-                this.removeCube(pos.position);
-                this.addCube(combo, pos);
+                this.meshCollection.removeCube(pos.position);
+                this.meshCollection.addCube(combo, pos);
                 cursor.setHold(null);
             }
         }
     }
-    fallback(p) {
-        const gen = new astroGen_1.AstroGen(this);
-        gen.buildAsteroid(settings_1.S.float('as'), 0, 0, 0);
-        this.buildGeometry();
+    serialize() {
+        return this.meshCollection.serialize();
+    }
+    deserialize(serialized) {
+        this.meshCollection.deserialize(serialized);
         return this;
+    }
+    fallback(p) {
+        const gen = new astroGen_1.AstroGen(this.meshCollection);
+        gen.buildAsteroid(settings_1.S.float('as'), 0, 0, 0);
+        this.meshCollection.buildGeometry();
+        return this;
+    }
+    getClosestDistance(p) {
+        return this.meshCollection.getClosestDistance(p);
     }
 }
 exports.Asteroid = Asteroid;
@@ -1662,7 +1675,7 @@ class MeshCollection extends THREE.Object3D {
         // console.log('Building mesh collection.');
         for (const [cubePosition, cubeName] of this.cubes.entries()) {
             let tx = new isoTransform_1.IsoTransform(cubePosition, this.quaternions.get(cubePosition));
-            nc.set(tx, cubeName);
+            nc.set(cubePosition, cubeName);
         }
         // Populate the neighbor mesh
         for (const [name, material] of this.materialMap.entries()) {
@@ -1671,12 +1684,15 @@ class MeshCollection extends THREE.Object3D {
             this.meshMap.set(name, instancedMesh);
             this.add(instancedMesh);
         }
+        const tx = new isoTransform_1.IsoTransform();
         for (const mav of nc.externalElements()) {
             const name = mav.value;
-            const tx = mav.tx;
+            const pos = mav.pos;
             const instancedMesh = this.meshMap.get(name);
             if (instancedMesh) {
                 const i = instancedMesh.count++;
+                tx.position.copy(pos);
+                tx.quaternion.copy(this.quaternions.get(pos));
                 instancedMesh.setMatrixAt(i, tx.MakeMatrix());
             }
             else {
@@ -1875,10 +1891,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NeighborCount = exports.TxAnd = void 0;
 const simpleLocationMap_1 = __webpack_require__(6125);
 class TxAnd {
-    tx;
+    pos;
     value;
-    constructor(tx, value) {
-        this.tx = tx;
+    constructor(pos, value) {
+        this.pos = pos;
         this.value = value;
     }
 }
@@ -1907,28 +1923,27 @@ class NeighborCount {
         }
     }
     applyDelta(tx, delta) {
-        this.addOrChange3(tx.position.x, tx.position.y, tx.position.z + 1, this.neighborCount, delta);
-        this.addOrChange3(tx.position.x, tx.position.y, tx.position.z - 1, this.neighborCount, delta);
-        this.addOrChange3(tx.position.x, tx.position.y + 1, tx.position.z, this.neighborCount, delta);
-        this.addOrChange3(tx.position.x, tx.position.y - 1, tx.position.z, this.neighborCount, delta);
-        this.addOrChange3(tx.position.x + 1, tx.position.y, tx.position.z, this.neighborCount, delta);
-        this.addOrChange3(tx.position.x - 1, tx.position.y, tx.position.z, this.neighborCount, delta);
+        this.addOrChange3(tx.x, tx.y, tx.z + 1, this.neighborCount, delta);
+        this.addOrChange3(tx.x, tx.y, tx.z - 1, this.neighborCount, delta);
+        this.addOrChange3(tx.x, tx.y + 1, tx.z, this.neighborCount, delta);
+        this.addOrChange3(tx.x, tx.y - 1, tx.z, this.neighborCount, delta);
+        this.addOrChange3(tx.x + 1, tx.y, tx.z, this.neighborCount, delta);
+        this.addOrChange3(tx.x - 1, tx.y, tx.z, this.neighborCount, delta);
     }
-    set(tx, value) {
-        const pos = tx.position;
+    set(pos, value) {
         const hasKey = this.data.has(pos);
-        this.data.set(pos, new TxAnd(tx, value));
+        this.data.set(pos, new TxAnd(pos, value));
         if (hasKey) {
             const prevValue = this.data.get(pos).value;
             this.addOrChange(prevValue, this.valueCount, -1);
         }
         else {
-            this.applyDelta(tx, 1);
+            this.applyDelta(pos, 1);
         }
         this.addOrChange(value, this.valueCount, 1);
     }
     delete(tx) {
-        if (this.data.delete(tx.position))
+        if (this.data.delete(tx))
             this.applyDelta(tx, -1);
     }
     getCount(value) {
@@ -3224,15 +3239,8 @@ class Stellar {
         // We need to "subtract" the playerGroup quaternion from q.
         // q - pgq = q + (-pgq)
         target.copy(q);
-        const e1 = new THREE.Euler();
-        const e2 = new THREE.Euler();
         this.tmpQ.copy(this.playerGroup.quaternion);
-        e1.setFromQuaternion(this.tmpQ);
         this.tmpQ.invert();
-        e2.setFromQuaternion(this.tmpQ);
-        if (Math.random() < 0.02) {
-            log_1.Log.once(`forward: ${[e1.x, e1.y, e1.z]}; backward: ${[e2.x, e2.y, e2.z]}`);
-        }
         target.premultiply(this.tmpQ);
     }
     initializeGraphics() {
