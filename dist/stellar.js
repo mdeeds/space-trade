@@ -285,7 +285,7 @@ class Asteroid extends THREE.Object3D {
                 grid_1.Grid.roundRotation(pos.quaternion);
                 const cursor = cursors.get(ev.handedness);
                 if (cursor.isHolding()) {
-                    this.handleDrop(pos, cursor);
+                    this.handleDrop(pos, cursor, (ev.type == 'grip'));
                     // this.sound.playOnObject(cursor, 'boop');
                 }
                 else {
@@ -320,10 +320,12 @@ class Asteroid extends THREE.Object3D {
         }
     }
     compounds = new compounds_1.Compounds();
-    handleDrop(pos, cursor) {
+    handleDrop(pos, cursor, removeFromHand = true) {
         if (!this.meshCollection.cubeAt(pos.position)) {
             this.meshCollection.addCube(cursor.getHold(), pos);
-            cursor.setHold(null);
+            if (removeFromHand) {
+                cursor.setHold(null);
+            }
         }
         else {
             const existingCube = this.meshCollection.get(pos.position);
@@ -331,7 +333,9 @@ class Asteroid extends THREE.Object3D {
             if (!!combo) {
                 this.meshCollection.removeCube(pos.position);
                 this.meshCollection.addCube(combo, pos);
-                cursor.setHold(null);
+                if (removeFromHand) {
+                    cursor.setHold(null);
+                }
             }
         }
     }
@@ -1107,6 +1111,22 @@ class Controls {
                 gripLocation.getWorldQuaternion(p.quaternion);
                 this.setCursorPosition(p);
                 this.startStopCallback(new StartStopEvent(side, 'end', 'grip', p));
+            }
+        });
+        grip.addEventListener('squeezestart', (ev) => {
+            if (!!this.startStopCallback) {
+                gripLocation.getWorldPosition(p.position);
+                gripLocation.getWorldQuaternion(p.quaternion);
+                this.setCursorPosition(p);
+                this.startStopCallback(new StartStopEvent(side, 'start', 'squeeze', p));
+            }
+        });
+        grip.addEventListener('selectend', (ev) => {
+            if (!!this.startStopCallback) {
+                gripLocation.getWorldPosition(p.position);
+                gripLocation.getWorldQuaternion(p.quaternion);
+                this.setCursorPosition(p);
+                this.startStopCallback(new StartStopEvent(side, 'end', 'squeeze', p));
             }
         });
     }
