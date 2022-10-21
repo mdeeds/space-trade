@@ -36,10 +36,12 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
           // this.sound.playOnObject(cursor, 'boop');
         } else {
           const removed = this.meshCollection.removeCube(pos.position);
-          if (!removed && this.cursorsAreTogether()) {
-            this.handleSplit();
-          } else {
-            cursor.setHold(removed);
+          if ((ev.type == 'grip')) {
+            if (!removed && this.cursorsAreTogether()) {
+              this.handleSplit();
+            } else {
+              cursor.setHold(removed);
+            }
           }
         }
       }
