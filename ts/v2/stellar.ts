@@ -99,7 +99,7 @@ export class Stellar {
 
   private initializeGraphics() {
     document.body.innerHTML = '';
-    this.camera = new THREE.PerspectiveCamera(75,
+    this.camera = new THREE.PerspectiveCamera(S.float('fov'),
       1.0, /*near=*/0.1, /*far=*/20e9);
     this.camera.position.set(0, 1.7, 0);
     this.camera.lookAt(0, 1.7, -1.5);
@@ -213,6 +213,11 @@ export class Stellar {
     const canvas = document.getElementsByTagName('canvas')[0];
     this.controls = new Controls(this.camera, canvas,
       this.renderer.xr, this.playerGroup);
+
+    if (S.float('fov') < 75) {
+      this.scene.background = new THREE.Color(0x005500);
+    }
+
 
     const light = new THREE.DirectionalLight(new THREE.Color('#fff'),
       1.0);

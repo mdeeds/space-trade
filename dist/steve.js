@@ -4217,6 +4217,7 @@ class S {
         S.setDefault('nebs', 2e7, 'Size of each point (meters)');
         S.setDefault('nebr', 1e8, 'Radius of the nebula');
         S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
+        S.setDefault('fov', 75, 'Field of View');
     }
     static float(name) {
         if (S.cache.has(name)) {
