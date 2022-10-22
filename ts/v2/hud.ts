@@ -31,6 +31,7 @@ export class Hud extends THREE.Object3D implements Ticker {
         depthTest: false,
         depthWrite: false,
         side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
       })
     );
 
