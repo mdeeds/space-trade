@@ -1,7 +1,9 @@
 import * as THREE from "three";
+import { Quaternion } from "three";
 import { Tick, Ticker } from "../tick";
 import { Assets } from "./assets";
 import { Construction } from "./construction";
+import { Codeable } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
 import { LocationMap } from "./locationMap";
@@ -16,7 +18,7 @@ class NameAndRotation {
 }
 
 export class MeshCollection extends THREE.Object3D
-  implements PointSet, Construction, Ticker {
+  implements PointSet, Construction, Ticker, Codeable {
   private rocks = new PointMapOctoTree<IsoTransform>(Grid.zero, 1e3);
 
   // Maps item names to corresponding materials and geometry.
@@ -60,6 +62,9 @@ export class MeshCollection extends THREE.Object3D
       geometry.scale(this.s.x, this.s.y, this.s.z);
       this.defineItem(name, geometry, newMaterial);
     }
+  }
+  fallback(p: THREE.Vector3): this {
+    throw new Error("Method not implemented.");
   }
 
   private tmpV = new THREE.Vector3();
@@ -148,9 +153,13 @@ export class MeshCollection extends THREE.Object3D
   serialize(): Object {
     const o = {};
     const positionMap = new Map<string, Object[]>();
+    const rotationMap = new Map<THREE.Vector3, Object[]>();
     for (const [cubePosition, cubeName] of this.cubes.entries()) {
       if (!positionMap.has(cubeName)) positionMap.set(cubeName, []);
       positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
+      //if (!rotationMap.has(cubePosition)) rotationMap.set(cubePosition, []);
+      //let q: Quaternion = this.quaternions.get(cubePosition)
+      //rotationMap.get(cubePosition).push({ x: q.x, y: q.y, z: q.z, w: q.w });
     }
     for (const [name, rockPositions] of positionMap.entries()) {
       o[`${name}Positions`] = rockPositions;

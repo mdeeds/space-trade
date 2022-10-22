@@ -2,6 +2,372 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 5627:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MarchingCubes = void 0;
+const THREE = __importStar(__webpack_require__(5232));
+class MarchingCubes extends THREE.BufferGeometry {
+    constructor(sdf, radius, center, partitions) {
+        super();
+        const vertices = [];
+        const cellRadius = radius / partitions;
+        const gridCell = new Float32Array(8);
+        const protoCorners = [];
+        protoCorners.push(new THREE.Vector3(-cellRadius, -cellRadius, -cellRadius));
+        protoCorners.push(new THREE.Vector3(cellRadius, -cellRadius, -cellRadius));
+        protoCorners.push(new THREE.Vector3(cellRadius, -cellRadius, cellRadius));
+        protoCorners.push(new THREE.Vector3(-cellRadius, -cellRadius, cellRadius));
+        protoCorners.push(new THREE.Vector3(-cellRadius, cellRadius, -cellRadius));
+        protoCorners.push(new THREE.Vector3(cellRadius, cellRadius, -cellRadius));
+        protoCorners.push(new THREE.Vector3(cellRadius, cellRadius, cellRadius));
+        protoCorners.push(new THREE.Vector3(-cellRadius, cellRadius, cellRadius));
+        const cubeCorners = [];
+        for (let i = 0; i < 8; ++i) {
+            cubeCorners.push(new THREE.Vector3);
+        }
+        console.time('March');
+        const cellCenter = new THREE.Vector3();
+        for (let i = 0; i < partitions; ++i) {
+            for (let j = 0; j < partitions; ++j) {
+                for (let k = 0; k < partitions; ++k) {
+                    cellCenter.copy(center);
+                    cellCenter.x += 2 * i * cellRadius - radius;
+                    cellCenter.y += 2 * j * cellRadius - radius;
+                    cellCenter.z += 2 * k * cellRadius - radius;
+                    for (let c = 0; c < 8; ++c) {
+                        cubeCorners[c].copy(cellCenter);
+                        cubeCorners[c].add(protoCorners[c]);
+                        gridCell[c] = sdf(cubeCorners[c]);
+                    }
+                    MarchingCubes.addTriangles(gridCell, /*threshold=*/ 0, cubeCorners, vertices);
+                }
+            }
+        }
+        console.timeEnd('March');
+        console.log(`Positions: ${vertices.length}`);
+        this.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+    }
+    static cornerIndexAFromEdge = [0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3];
+    static cornerIndexBFromEdge = [1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7];
+    // http://paulbourke.net/geometry/polygonise/
+    static triangleTable = [
+        [],
+        [0, 8, 3],
+        [0, 1, 9],
+        [1, 8, 3, 9, 8, 1],
+        [1, 2, 10],
+        [0, 8, 3, 1, 2, 10],
+        [9, 2, 10, 0, 2, 9],
+        [2, 8, 3, 2, 10, 8, 10, 9, 8],
+        [3, 11, 2],
+        [0, 11, 2, 8, 11, 0],
+        [1, 9, 0, 2, 3, 11],
+        [1, 11, 2, 1, 9, 11, 9, 8, 11],
+        [3, 10, 1, 11, 10, 3],
+        [0, 10, 1, 0, 8, 10, 8, 11, 10],
+        [3, 9, 0, 3, 11, 9, 11, 10, 9],
+        [9, 8, 10, 10, 8, 11],
+        [4, 7, 8],
+        [4, 3, 0, 7, 3, 4],
+        [0, 1, 9, 8, 4, 7],
+        [4, 1, 9, 4, 7, 1, 7, 3, 1],
+        [1, 2, 10, 8, 4, 7],
+        [3, 4, 7, 3, 0, 4, 1, 2, 10],
+        [9, 2, 10, 9, 0, 2, 8, 4, 7],
+        [2, 10, 9, 2, 9, 7, 2, 7, 3, 7, 9, 4],
+        [8, 4, 7, 3, 11, 2],
+        [11, 4, 7, 11, 2, 4, 2, 0, 4],
+        [9, 0, 1, 8, 4, 7, 2, 3, 11],
+        [4, 7, 11, 9, 4, 11, 9, 11, 2, 9, 2, 1],
+        [3, 10, 1, 3, 11, 10, 7, 8, 4],
+        [1, 11, 10, 1, 4, 11, 1, 0, 4, 7, 11, 4],
+        [4, 7, 8, 9, 0, 11, 9, 11, 10, 11, 0, 3],
+        [4, 7, 11, 4, 11, 9, 9, 11, 10],
+        [9, 5, 4],
+        [9, 5, 4, 0, 8, 3],
+        [0, 5, 4, 1, 5, 0],
+        [8, 5, 4, 8, 3, 5, 3, 1, 5],
+        [1, 2, 10, 9, 5, 4],
+        [3, 0, 8, 1, 2, 10, 4, 9, 5],
+        [5, 2, 10, 5, 4, 2, 4, 0, 2],
+        [2, 10, 5, 3, 2, 5, 3, 5, 4, 3, 4, 8],
+        [9, 5, 4, 2, 3, 11],
+        [0, 11, 2, 0, 8, 11, 4, 9, 5],
+        [0, 5, 4, 0, 1, 5, 2, 3, 11],
+        [2, 1, 5, 2, 5, 8, 2, 8, 11, 4, 8, 5],
+        [10, 3, 11, 10, 1, 3, 9, 5, 4],
+        [4, 9, 5, 0, 8, 1, 8, 10, 1, 8, 11, 10],
+        [5, 4, 0, 5, 0, 11, 5, 11, 10, 11, 0, 3],
+        [5, 4, 8, 5, 8, 10, 10, 8, 11],
+        [9, 7, 8, 5, 7, 9],
+        [9, 3, 0, 9, 5, 3, 5, 7, 3],
+        [0, 7, 8, 0, 1, 7, 1, 5, 7],
+        [1, 5, 3, 3, 5, 7],
+        [9, 7, 8, 9, 5, 7, 10, 1, 2],
+        [10, 1, 2, 9, 5, 0, 5, 3, 0, 5, 7, 3],
+        [8, 0, 2, 8, 2, 5, 8, 5, 7, 10, 5, 2],
+        [2, 10, 5, 2, 5, 3, 3, 5, 7],
+        [7, 9, 5, 7, 8, 9, 3, 11, 2],
+        [9, 5, 7, 9, 7, 2, 9, 2, 0, 2, 7, 11],
+        [2, 3, 11, 0, 1, 8, 1, 7, 8, 1, 5, 7],
+        [11, 2, 1, 11, 1, 7, 7, 1, 5],
+        [9, 5, 8, 8, 5, 7, 10, 1, 3, 10, 3, 11],
+        [5, 7, 0, 5, 0, 9, 7, 11, 0, 1, 0, 10, 11, 10, 0],
+        [11, 10, 0, 11, 0, 3, 10, 5, 0, 8, 0, 7, 5, 7, 0],
+        [11, 10, 5, 7, 11, 5],
+        [10, 6, 5],
+        [0, 8, 3, 5, 10, 6],
+        [9, 0, 1, 5, 10, 6],
+        [1, 8, 3, 1, 9, 8, 5, 10, 6],
+        [1, 6, 5, 2, 6, 1],
+        [1, 6, 5, 1, 2, 6, 3, 0, 8],
+        [9, 6, 5, 9, 0, 6, 0, 2, 6],
+        [5, 9, 8, 5, 8, 2, 5, 2, 6, 3, 2, 8],
+        [2, 3, 11, 10, 6, 5],
+        [11, 0, 8, 11, 2, 0, 10, 6, 5],
+        [0, 1, 9, 2, 3, 11, 5, 10, 6],
+        [5, 10, 6, 1, 9, 2, 9, 11, 2, 9, 8, 11],
+        [6, 3, 11, 6, 5, 3, 5, 1, 3],
+        [0, 8, 11, 0, 11, 5, 0, 5, 1, 5, 11, 6],
+        [3, 11, 6, 0, 3, 6, 0, 6, 5, 0, 5, 9],
+        [6, 5, 9, 6, 9, 11, 11, 9, 8],
+        [5, 10, 6, 4, 7, 8],
+        [4, 3, 0, 4, 7, 3, 6, 5, 10],
+        [1, 9, 0, 5, 10, 6, 8, 4, 7],
+        [10, 6, 5, 1, 9, 7, 1, 7, 3, 7, 9, 4],
+        [6, 1, 2, 6, 5, 1, 4, 7, 8],
+        [1, 2, 5, 5, 2, 6, 3, 0, 4, 3, 4, 7],
+        [8, 4, 7, 9, 0, 5, 0, 6, 5, 0, 2, 6],
+        [7, 3, 9, 7, 9, 4, 3, 2, 9, 5, 9, 6, 2, 6, 9],
+        [3, 11, 2, 7, 8, 4, 10, 6, 5],
+        [5, 10, 6, 4, 7, 2, 4, 2, 0, 2, 7, 11],
+        [0, 1, 9, 4, 7, 8, 2, 3, 11, 5, 10, 6],
+        [9, 2, 1, 9, 11, 2, 9, 4, 11, 7, 11, 4, 5, 10, 6],
+        [8, 4, 7, 3, 11, 5, 3, 5, 1, 5, 11, 6],
+        [5, 1, 11, 5, 11, 6, 1, 0, 11, 7, 11, 4, 0, 4, 11],
+        [0, 5, 9, 0, 6, 5, 0, 3, 6, 11, 6, 3, 8, 4, 7],
+        [6, 5, 9, 6, 9, 11, 4, 7, 9, 7, 11, 9],
+        [10, 4, 9, 6, 4, 10],
+        [4, 10, 6, 4, 9, 10, 0, 8, 3],
+        [10, 0, 1, 10, 6, 0, 6, 4, 0],
+        [8, 3, 1, 8, 1, 6, 8, 6, 4, 6, 1, 10],
+        [1, 4, 9, 1, 2, 4, 2, 6, 4],
+        [3, 0, 8, 1, 2, 9, 2, 4, 9, 2, 6, 4],
+        [0, 2, 4, 4, 2, 6],
+        [8, 3, 2, 8, 2, 4, 4, 2, 6],
+        [10, 4, 9, 10, 6, 4, 11, 2, 3],
+        [0, 8, 2, 2, 8, 11, 4, 9, 10, 4, 10, 6],
+        [3, 11, 2, 0, 1, 6, 0, 6, 4, 6, 1, 10],
+        [6, 4, 1, 6, 1, 10, 4, 8, 1, 2, 1, 11, 8, 11, 1],
+        [9, 6, 4, 9, 3, 6, 9, 1, 3, 11, 6, 3],
+        [8, 11, 1, 8, 1, 0, 11, 6, 1, 9, 1, 4, 6, 4, 1],
+        [3, 11, 6, 3, 6, 0, 0, 6, 4],
+        [6, 4, 8, 11, 6, 8],
+        [7, 10, 6, 7, 8, 10, 8, 9, 10],
+        [0, 7, 3, 0, 10, 7, 0, 9, 10, 6, 7, 10],
+        [10, 6, 7, 1, 10, 7, 1, 7, 8, 1, 8, 0],
+        [10, 6, 7, 10, 7, 1, 1, 7, 3],
+        [1, 2, 6, 1, 6, 8, 1, 8, 9, 8, 6, 7],
+        [2, 6, 9, 2, 9, 1, 6, 7, 9, 0, 9, 3, 7, 3, 9],
+        [7, 8, 0, 7, 0, 6, 6, 0, 2],
+        [7, 3, 2, 6, 7, 2],
+        [2, 3, 11, 10, 6, 8, 10, 8, 9, 8, 6, 7],
+        [2, 0, 7, 2, 7, 11, 0, 9, 7, 6, 7, 10, 9, 10, 7],
+        [1, 8, 0, 1, 7, 8, 1, 10, 7, 6, 7, 10, 2, 3, 11],
+        [11, 2, 1, 11, 1, 7, 10, 6, 1, 6, 7, 1],
+        [8, 9, 6, 8, 6, 7, 9, 1, 6, 11, 6, 3, 1, 3, 6],
+        [0, 9, 1, 11, 6, 7],
+        [7, 8, 0, 7, 0, 6, 3, 11, 0, 11, 6, 0],
+        [7, 11, 6],
+        [7, 6, 11],
+        [3, 0, 8, 11, 7, 6],
+        [0, 1, 9, 11, 7, 6],
+        [8, 1, 9, 8, 3, 1, 11, 7, 6],
+        [10, 1, 2, 6, 11, 7],
+        [1, 2, 10, 3, 0, 8, 6, 11, 7],
+        [2, 9, 0, 2, 10, 9, 6, 11, 7],
+        [6, 11, 7, 2, 10, 3, 10, 8, 3, 10, 9, 8],
+        [7, 2, 3, 6, 2, 7],
+        [7, 0, 8, 7, 6, 0, 6, 2, 0],
+        [2, 7, 6, 2, 3, 7, 0, 1, 9],
+        [1, 6, 2, 1, 8, 6, 1, 9, 8, 8, 7, 6],
+        [10, 7, 6, 10, 1, 7, 1, 3, 7],
+        [10, 7, 6, 1, 7, 10, 1, 8, 7, 1, 0, 8],
+        [0, 3, 7, 0, 7, 10, 0, 10, 9, 6, 10, 7],
+        [7, 6, 10, 7, 10, 8, 8, 10, 9],
+        [6, 8, 4, 11, 8, 6],
+        [3, 6, 11, 3, 0, 6, 0, 4, 6],
+        [8, 6, 11, 8, 4, 6, 9, 0, 1],
+        [9, 4, 6, 9, 6, 3, 9, 3, 1, 11, 3, 6],
+        [6, 8, 4, 6, 11, 8, 2, 10, 1],
+        [1, 2, 10, 3, 0, 11, 0, 6, 11, 0, 4, 6],
+        [4, 11, 8, 4, 6, 11, 0, 2, 9, 2, 10, 9],
+        [10, 9, 3, 10, 3, 2, 9, 4, 3, 11, 3, 6, 4, 6, 3],
+        [8, 2, 3, 8, 4, 2, 4, 6, 2],
+        [0, 4, 2, 4, 6, 2],
+        [1, 9, 0, 2, 3, 4, 2, 4, 6, 4, 3, 8],
+        [1, 9, 4, 1, 4, 2, 2, 4, 6],
+        [8, 1, 3, 8, 6, 1, 8, 4, 6, 6, 10, 1],
+        [10, 1, 0, 10, 0, 6, 6, 0, 4],
+        [4, 6, 3, 4, 3, 8, 6, 10, 3, 0, 3, 9, 10, 9, 3],
+        [10, 9, 4, 6, 10, 4],
+        [4, 9, 5, 7, 6, 11],
+        [0, 8, 3, 4, 9, 5, 11, 7, 6],
+        [5, 0, 1, 5, 4, 0, 7, 6, 11],
+        [11, 7, 6, 8, 3, 4, 3, 5, 4, 3, 1, 5],
+        [9, 5, 4, 10, 1, 2, 7, 6, 11],
+        [6, 11, 7, 1, 2, 10, 0, 8, 3, 4, 9, 5],
+        [7, 6, 11, 5, 4, 10, 4, 2, 10, 4, 0, 2],
+        [3, 4, 8, 3, 5, 4, 3, 2, 5, 10, 5, 2, 11, 7, 6],
+        [7, 2, 3, 7, 6, 2, 5, 4, 9],
+        [9, 5, 4, 0, 8, 6, 0, 6, 2, 6, 8, 7],
+        [3, 6, 2, 3, 7, 6, 1, 5, 0, 5, 4, 0],
+        [6, 2, 8, 6, 8, 7, 2, 1, 8, 4, 8, 5, 1, 5, 8],
+        [9, 5, 4, 10, 1, 6, 1, 7, 6, 1, 3, 7],
+        [1, 6, 10, 1, 7, 6, 1, 0, 7, 8, 7, 0, 9, 5, 4],
+        [4, 0, 10, 4, 10, 5, 0, 3, 10, 6, 10, 7, 3, 7, 10],
+        [7, 6, 10, 7, 10, 8, 5, 4, 10, 4, 8, 10],
+        [6, 9, 5, 6, 11, 9, 11, 8, 9],
+        [3, 6, 11, 0, 6, 3, 0, 5, 6, 0, 9, 5],
+        [0, 11, 8, 0, 5, 11, 0, 1, 5, 5, 6, 11],
+        [6, 11, 3, 6, 3, 5, 5, 3, 1],
+        [1, 2, 10, 9, 5, 11, 9, 11, 8, 11, 5, 6],
+        [0, 11, 3, 0, 6, 11, 0, 9, 6, 5, 6, 9, 1, 2, 10],
+        [11, 8, 5, 11, 5, 6, 8, 0, 5, 10, 5, 2, 0, 2, 5],
+        [6, 11, 3, 6, 3, 5, 2, 10, 3, 10, 5, 3],
+        [5, 8, 9, 5, 2, 8, 5, 6, 2, 3, 8, 2],
+        [9, 5, 6, 9, 6, 0, 0, 6, 2],
+        [1, 5, 8, 1, 8, 0, 5, 6, 8, 3, 8, 2, 6, 2, 8],
+        [1, 5, 6, 2, 1, 6],
+        [1, 3, 6, 1, 6, 10, 3, 8, 6, 5, 6, 9, 8, 9, 6],
+        [10, 1, 0, 10, 0, 6, 9, 5, 0, 5, 6, 0],
+        [0, 3, 8, 5, 6, 10],
+        [10, 5, 6],
+        [11, 5, 10, 7, 5, 11],
+        [11, 5, 10, 11, 7, 5, 8, 3, 0],
+        [5, 11, 7, 5, 10, 11, 1, 9, 0],
+        [10, 7, 5, 10, 11, 7, 9, 8, 1, 8, 3, 1],
+        [11, 1, 2, 11, 7, 1, 7, 5, 1],
+        [0, 8, 3, 1, 2, 7, 1, 7, 5, 7, 2, 11],
+        [9, 7, 5, 9, 2, 7, 9, 0, 2, 2, 11, 7],
+        [7, 5, 2, 7, 2, 11, 5, 9, 2, 3, 2, 8, 9, 8, 2],
+        [2, 5, 10, 2, 3, 5, 3, 7, 5],
+        [8, 2, 0, 8, 5, 2, 8, 7, 5, 10, 2, 5],
+        [9, 0, 1, 5, 10, 3, 5, 3, 7, 3, 10, 2],
+        [9, 8, 2, 9, 2, 1, 8, 7, 2, 10, 2, 5, 7, 5, 2],
+        [1, 3, 5, 3, 7, 5],
+        [0, 8, 7, 0, 7, 1, 1, 7, 5],
+        [9, 0, 3, 9, 3, 5, 5, 3, 7],
+        [9, 8, 7, 5, 9, 7],
+        [5, 8, 4, 5, 10, 8, 10, 11, 8],
+        [5, 0, 4, 5, 11, 0, 5, 10, 11, 11, 3, 0],
+        [0, 1, 9, 8, 4, 10, 8, 10, 11, 10, 4, 5],
+        [10, 11, 4, 10, 4, 5, 11, 3, 4, 9, 4, 1, 3, 1, 4],
+        [2, 5, 1, 2, 8, 5, 2, 11, 8, 4, 5, 8],
+        [0, 4, 11, 0, 11, 3, 4, 5, 11, 2, 11, 1, 5, 1, 11],
+        [0, 2, 5, 0, 5, 9, 2, 11, 5, 4, 5, 8, 11, 8, 5],
+        [9, 4, 5, 2, 11, 3],
+        [2, 5, 10, 3, 5, 2, 3, 4, 5, 3, 8, 4],
+        [5, 10, 2, 5, 2, 4, 4, 2, 0],
+        [3, 10, 2, 3, 5, 10, 3, 8, 5, 4, 5, 8, 0, 1, 9],
+        [5, 10, 2, 5, 2, 4, 1, 9, 2, 9, 4, 2],
+        [8, 4, 5, 8, 5, 3, 3, 5, 1],
+        [0, 4, 5, 1, 0, 5],
+        [8, 4, 5, 8, 5, 3, 9, 0, 5, 0, 3, 5],
+        [9, 4, 5],
+        [4, 11, 7, 4, 9, 11, 9, 10, 11],
+        [0, 8, 3, 4, 9, 7, 9, 11, 7, 9, 10, 11],
+        [1, 10, 11, 1, 11, 4, 1, 4, 0, 7, 4, 11],
+        [3, 1, 4, 3, 4, 8, 1, 10, 4, 7, 4, 11, 10, 11, 4],
+        [4, 11, 7, 9, 11, 4, 9, 2, 11, 9, 1, 2],
+        [9, 7, 4, 9, 11, 7, 9, 1, 11, 2, 11, 1, 0, 8, 3],
+        [11, 7, 4, 11, 4, 2, 2, 4, 0],
+        [11, 7, 4, 11, 4, 2, 8, 3, 4, 3, 2, 4],
+        [2, 9, 10, 2, 7, 9, 2, 3, 7, 7, 4, 9],
+        [9, 10, 7, 9, 7, 4, 10, 2, 7, 8, 7, 0, 2, 0, 7],
+        [3, 7, 10, 3, 10, 2, 7, 4, 10, 1, 10, 0, 4, 0, 10],
+        [1, 10, 2, 8, 7, 4],
+        [4, 9, 1, 4, 1, 7, 7, 1, 3],
+        [4, 9, 1, 4, 1, 7, 0, 8, 1, 8, 7, 1],
+        [4, 0, 3, 7, 4, 3],
+        [4, 8, 7],
+        [9, 10, 8, 10, 11, 8],
+        [3, 0, 9, 3, 9, 11, 11, 9, 10],
+        [0, 1, 10, 0, 10, 8, 8, 10, 11],
+        [3, 1, 10, 11, 3, 10],
+        [1, 2, 11, 1, 11, 9, 9, 11, 8],
+        [3, 0, 9, 3, 9, 11, 1, 2, 9, 2, 11, 9],
+        [0, 2, 11, 8, 0, 11],
+        [3, 2, 11],
+        [2, 3, 8, 2, 8, 10, 10, 8, 9],
+        [9, 10, 2, 0, 9, 2],
+        [2, 3, 8, 2, 8, 10, 0, 1, 8, 1, 10, 8],
+        [1, 10, 2],
+        [1, 3, 8, 9, 1, 8],
+        [0, 9, 1],
+        [0, 3, 8],
+        []
+    ];
+    static addTriangles(gridCell, threshold, cubeCorners, triangles) {
+        let cubeindex = 0;
+        if (gridCell[0] < threshold)
+            cubeindex |= 1;
+        if (gridCell[1] < threshold)
+            cubeindex |= 2;
+        if (gridCell[2] < threshold)
+            cubeindex |= 4;
+        if (gridCell[3] < threshold)
+            cubeindex |= 8;
+        if (gridCell[4] < threshold)
+            cubeindex |= 16;
+        if (gridCell[5] < threshold)
+            cubeindex |= 32;
+        if (gridCell[6] < threshold)
+            cubeindex |= 64;
+        if (gridCell[7] < threshold)
+            cubeindex |= 128;
+        const triangulation = MarchingCubes.triangleTable[cubeindex];
+        for (const edgeIndex of triangulation) {
+            const indexA = MarchingCubes.cornerIndexAFromEdge[edgeIndex];
+            const indexB = MarchingCubes.cornerIndexBFromEdge[edgeIndex];
+            const vertex = new THREE.Vector3().copy(cubeCorners[indexA]);
+            const p = gridCell[indexA] / (gridCell[indexA] - gridCell[indexB]);
+            vertex.lerp(cubeCorners[indexB], p);
+            triangles.push(vertex.x, vertex.y, vertex.z);
+        }
+    }
+}
+exports.MarchingCubes = MarchingCubes;
+//# sourceMappingURL=marchingCubes.js.map
+
+/***/ }),
+
 /***/ 6451:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -262,15 +628,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Asteroid = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const marchingCubes_1 = __webpack_require__(5627);
 const settings_1 = __webpack_require__(6451);
 const astroGen_1 = __webpack_require__(6647);
 const compounds_1 = __webpack_require__(6772);
+const file_1 = __webpack_require__(5013);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
 class Asteroid extends THREE.Object3D {
     cursors;
     meshCollection;
+    surface = undefined;
+    surfaceMesh;
     constructor(assets, controls, cursors) {
         super();
         this.cursors = cursors;
@@ -300,6 +670,7 @@ class Asteroid extends THREE.Object3D {
                     }
                 }
             }
+            file_1.File.save(this.meshCollection, "saved.json");
         });
     }
     cursorsAreTogether() {
@@ -341,17 +712,33 @@ class Asteroid extends THREE.Object3D {
             }
         }
     }
+    buildCubes() {
+        if (this.surfaceMesh) {
+            this.remove(this.surfaceMesh);
+        }
+        const radius = 10.0;
+        const partitions = radius * 2;
+        const center = new THREE.Vector3(0, 0, 0);
+        this.surface = new marchingCubes_1.MarchingCubes((pos) => {
+            // TODO look into this.meshCollection, return 1 if it's inside.
+            return pos.length() - 8.0;
+        }, radius, center, partitions);
+        this.surfaceMesh = new THREE.Mesh(this.surface, new THREE.MeshPhongMaterial({ color: '#fdd' }));
+        this.add(this.surfaceMesh);
+    }
     serialize() {
         return this.meshCollection.serialize();
     }
     deserialize(serialized) {
         this.meshCollection.deserialize(serialized);
+        // this.buildCubes();
         return this;
     }
     fallback(p) {
         const gen = new astroGen_1.AstroGen(this.meshCollection);
         gen.buildAsteroid(settings_1.S.float('as'), 0, 0, 0);
         this.meshCollection.buildGeometry();
+        // this.buildCubes();
         return this;
     }
     getClosestDistance(p) {
@@ -395,6 +782,7 @@ exports.AstroGen = void 0;
 const THREE = __importStar(__webpack_require__(5232));
 const three_1 = __webpack_require__(5232);
 const MathUtils_1 = __webpack_require__(9542);
+const settings_1 = __webpack_require__(6451);
 const astroTools_1 = __webpack_require__(2904);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
@@ -526,43 +914,31 @@ class AstroGen {
         }
     }
     buildAsteroid(r, xOffset, yOffset, zOffset) {
-        switch ((0, MathUtils_1.randInt)(0, 1)) {
-            case 0:
-                this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
-                break;
-            case 1:
-                this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
-                break;
+        if (settings_1.S.float('cr') < 1) {
+            switch ((0, MathUtils_1.randInt)(0, 1)) {
+                case 0:
+                    this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+                    break;
+                case 1:
+                    this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+                    break;
+            }
+        }
+        else {
+            this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
         }
     }
     buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset) {
-        let items = [];
-        switch ((0, MathUtils_1.randInt)(0, 7)) {
-            case 0:
-                items = ['iron-chondrite', 'carbon-chondrite', 'iron'];
-                break;
-            case 1:
-                items = ['iron-chondrite', 'carbon-chondrite', 'carbon-fiber'];
-                break;
-            case 2:
-                items = ['phylosilicate', 'carbon-chondrite', 'water-ice'];
-                break;
-            case 3:
-                items = ['phylosilicate', 'carbon-chondrite', 'carbon-fiber'];
-                break;
-            case 4:
-                items = ['iron-chondrite', 'borosilicate', 'iron'];
-                break;
-            case 5:
-                items = ['iron-chondrite', 'borosilicate', 'silicon'];
-                break;
-            case 6:
-                items = ['borosilicate', 'phylosilicate', 'silicone'];
-                break;
-            case 7:
-                items = ['borosilicate', 'phylosilicate', 'water-ice'];
-                break;
-        }
+        let itemLists = [];
+        itemLists.push(['iron-chondrite', 'carbon-chondrite', 'iron']);
+        itemLists.push(['iron-chondrite', 'carbon-chondrite', 'carbon-fiber']);
+        itemLists.push(['phylosilicate', 'carbon-chondrite', 'water-ice']);
+        itemLists.push(['phylosilicate', 'carbon-chondrite', 'carbon-fiber']);
+        itemLists.push(['iron-chondrite', 'borosilicate', 'iron']);
+        itemLists.push(['iron-chondrite', 'borosilicate', 'silicon']);
+        itemLists.push(['borosilicate', 'phylosilicate', 'silicone']);
+        itemLists.push(['borosilicate', 'phylosilicate', 'water-ice']);
+        let items = itemLists[(0, MathUtils_1.randInt)(0, itemLists.length - 1)];
         let at = new astroTools_1.AstroTools();
         at.density = 0.9;
         let spurs = Math.ceil(r / 3);
@@ -578,21 +954,17 @@ class AstroGen {
         at.addToConstruction(this.construction);
     }
     bulidBallAsteroid(r, xOffset, yOffset, zOffset) {
-        let items = [];
-        switch ((0, MathUtils_1.randInt)(0, 7)) {
-            case 0:
-                items = ['iron-chondrite', 'carbon-chondrite'];
-                break;
-            case 3:
-                items = ['phylosilicate', 'carbon-chondrite'];
-                break;
-            case 5:
-                items = ['iron-chondrite', 'borosilicate'];
-                break;
-            case 7:
-                items = ['borosilicate', 'phylosilicate'];
-                break;
+        let itemLists = [];
+        if (settings_1.S.float('cr') < 1) {
+            itemLists.push(['iron-chondrite', 'carbon-chondrite']);
+            itemLists.push(['phylosilicate', 'carbon-chondrite']);
+            itemLists.push(['iron-chondrite', 'borosilicate']);
+            itemLists.push(['borosilicate', 'phylosilicate']);
         }
+        else {
+            itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
+        }
+        let items = itemLists[(0, MathUtils_1.randInt)(0, itemLists.length - 1)];
         for (let x = -r; x < r; x++) {
             for (let y = -r; y < r; y++) {
                 for (let z = -r; z < r; z++) {
@@ -1246,16 +1618,39 @@ exports.Cursor = Cursor;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.File = void 0;
 class File {
+    static saveButtons = new Map();
+    static makeSaveButton(o, target) {
+        const div = document.createElement('div');
+        //<a href="path_to_file" download="proposed_file_name">Download</a>
+        const anchor = document.createElement('a');
+        anchor.href = "data:application/json;base64," + btoa(JSON.stringify(o));
+        anchor.innerText = target;
+        JSON.stringify(o);
+        anchor.download = `${target}.json`;
+        anchor.target = '_blank';
+        div.appendChild(anchor);
+        return div;
+    }
+    static refreshLink(o, target) {
+        if (File.saveButtons.get(target)) {
+            document.body.removeChild(File.saveButtons.get(target));
+        }
+        const button = File.makeSaveButton(o, target);
+        document.body.appendChild(button);
+        File.saveButtons.set(target, button);
+    }
     static save(value, target) {
         const o = value.serialize();
         window.localStorage.setItem(target, JSON.stringify(o));
         // File.saveToCloud(value, target);
+        File.refreshLink(o, target);
     }
     static load(target, source, p) {
         const saved = window.localStorage.getItem(source);
         if (saved) {
             console.log(`Loading saved file: ${source}`);
             const o = JSON.parse(saved);
+            File.refreshLink(o, source);
             return target.deserialize(o);
         }
         else {
@@ -1659,6 +2054,9 @@ class MeshCollection extends THREE.Object3D {
             this.defineItem(name, geometry, newMaterial);
         }
     }
+    fallback(p) {
+        throw new Error("Method not implemented.");
+    }
     tmpV = new THREE.Vector3();
     getClosestDistance(p) {
         this.tmpV.copy(p);
@@ -1733,10 +2131,14 @@ class MeshCollection extends THREE.Object3D {
     serialize() {
         const o = {};
         const positionMap = new Map();
+        const rotationMap = new Map();
         for (const [cubePosition, cubeName] of this.cubes.entries()) {
             if (!positionMap.has(cubeName))
                 positionMap.set(cubeName, []);
             positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
+            //if (!rotationMap.has(cubePosition)) rotationMap.set(cubePosition, []);
+            //let q: Quaternion = this.quaternions.get(cubePosition)
+            //rotationMap.get(cubePosition).push({ x: q.x, y: q.y, z: q.z, w: q.w });
         }
         for (const [name, rockPositions] of positionMap.entries()) {
             o[`${name}Positions`] = rockPositions;

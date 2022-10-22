@@ -7,7 +7,7 @@ import { Compounds } from "./compounds";
 import { Controls, StartStopEvent, StartStopEventHandler } from "./controls";
 import { Cursor } from "./cursor";
 
-import { Codeable } from "./file";
+import { Codeable, File } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
 import { MeshCollection } from "./meshCollection";
@@ -48,6 +48,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
           }
         }
       }
+      File.save(this.meshCollection, "saved.json")
     });
   }
 

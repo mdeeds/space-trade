@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Vector3 } from "three";
 import { randInt } from "three/src/math/MathUtils";
+import { S } from "../settings";
 import { AstroTools } from "./astroTools";
 import { Construction } from "./construction";
 import { Grid } from "./grid";
@@ -156,46 +157,36 @@ export class AstroGen {
 
   buildAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
-    switch (randInt(0, 1)) {
-      case 0:
-        this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
-        break;
-      case 1:
-        this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
-        break;
+    if (S.float('cr') < 1) {
+
+      switch (randInt(0, 1)) {
+        case 0:
+          this.buildRandomWalkAsteroid(r, xOffset, yOffset, zOffset);
+          break;
+        case 1:
+          this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
+          break;
+      }
+    }
+    else {
+      this.bulidBallAsteroid(r, xOffset, yOffset, zOffset);
     }
   }
 
   buildRandomWalkAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
 
-    let items = [];
-    switch (randInt(0, 7)) {
-      case 0:
-        items = ['iron-chondrite', 'carbon-chondrite', 'iron'];
-        break;
-      case 1:
-        items = ['iron-chondrite', 'carbon-chondrite', 'carbon-fiber'];
-        break;
-      case 2:
-        items = ['phylosilicate', 'carbon-chondrite', 'water-ice'];
-        break;
-      case 3:
-        items = ['phylosilicate', 'carbon-chondrite', 'carbon-fiber'];
-        break;
-      case 4:
-        items = ['iron-chondrite', 'borosilicate', 'iron'];
-        break;
-      case 5:
-        items = ['iron-chondrite', 'borosilicate', 'silicon'];
-        break;
-      case 6:
-        items = ['borosilicate', 'phylosilicate', 'silicone'];
-        break;
-      case 7:
-        items = ['borosilicate', 'phylosilicate', 'water-ice'];
-        break;
-    }
+    let itemLists = [];
+    itemLists.push(['iron-chondrite', 'carbon-chondrite', 'iron']);
+    itemLists.push(['iron-chondrite', 'carbon-chondrite', 'carbon-fiber']);
+    itemLists.push(['phylosilicate', 'carbon-chondrite', 'water-ice']);
+    itemLists.push(['phylosilicate', 'carbon-chondrite', 'carbon-fiber']);
+    itemLists.push(['iron-chondrite', 'borosilicate', 'iron']);
+    itemLists.push(['iron-chondrite', 'borosilicate', 'silicon']);
+    itemLists.push(['borosilicate', 'phylosilicate', 'silicone']);
+    itemLists.push(['borosilicate', 'phylosilicate', 'water-ice']);
+
+    let items = itemLists[randInt(0, itemLists.length - 1)];
 
     let at = new AstroTools();
     at.density = 0.9;
@@ -215,21 +206,17 @@ export class AstroGen {
 
   bulidBallAsteroid(r: number,
     xOffset: number, yOffset: number, zOffset: number) {
-    let items = [];
-    switch (randInt(0, 7)) {
-      case 0:
-        items = ['iron-chondrite', 'carbon-chondrite'];
-        break;
-      case 3:
-        items = ['phylosilicate', 'carbon-chondrite'];
-        break;
-      case 5:
-        items = ['iron-chondrite', 'borosilicate'];
-        break;
-      case 7:
-        items = ['borosilicate', 'phylosilicate'];
-        break;
+    let itemLists = [];
+    if (S.float('cr') < 1) {
+      itemLists.push(['iron-chondrite', 'carbon-chondrite']);
+      itemLists.push(['phylosilicate', 'carbon-chondrite']);
+      itemLists.push(['iron-chondrite', 'borosilicate']);
+      itemLists.push(['borosilicate', 'phylosilicate']);
     }
+    else {
+      itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
+    }
+    let items = itemLists[randInt(0, itemLists.length - 1)];
     for (let x = -r; x < r; x++) {
       for (let y = -r; y < r; y++) {
         for (let z = -r; z < r; z++) {
