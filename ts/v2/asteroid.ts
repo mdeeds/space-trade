@@ -20,7 +20,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
   private surfaceMesh: THREE.Mesh;
 
   constructor(assets: Assets, controls: Controls,
-    private cursors: Map<THREE.XRHandedness, Cursor>) {
+    private cursors: Map<THREE.XRHandedness, Cursor>, private saveId: string) {
     super();
     this.meshCollection = new MeshCollection(assets, S.float('as') * 1.2);
     this.add(this.meshCollection);
@@ -48,7 +48,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
           }
         }
       }
-      File.save(this.meshCollection, "saved.json")
+      File.save(this, this.saveId);
     });
   }
 

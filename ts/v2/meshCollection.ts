@@ -153,16 +153,17 @@ export class MeshCollection extends THREE.Object3D
   serialize(): Object {
     const o = {};
     const positionMap = new Map<string, Object[]>();
-    const rotationMap = new Map<THREE.Vector3, Object[]>();
+    const rotationMap = new Map<string, Object[]>();
     for (const [cubePosition, cubeName] of this.cubes.entries()) {
       if (!positionMap.has(cubeName)) positionMap.set(cubeName, []);
       positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
-      //if (!rotationMap.has(cubePosition)) rotationMap.set(cubePosition, []);
-      //let q: Quaternion = this.quaternions.get(cubePosition)
-      //rotationMap.get(cubePosition).push({ x: q.x, y: q.y, z: q.z, w: q.w });
+      if (!rotationMap.has(cubeName)) rotationMap.set(cubeName, []);
+      let q: Quaternion = this.quaternions.get(cubePosition)
+      rotationMap.get(cubeName).push({ x: q.x, y: q.y, z: q.z, w: q.w });
     }
     for (const [name, rockPositions] of positionMap.entries()) {
       o[`${name}Positions`] = rockPositions;
+      o[`${name}Rotations`] = rotationMap.get(name);
     }
     return o;
   }
@@ -170,14 +171,17 @@ export class MeshCollection extends THREE.Object3D
   deserialize(o: Object): this {
     this.rocks.clear();
     for (const name of this.geometryMap.keys()) {
-      const key = `${name}Positions`;
-      const positions = o[key];
+      const positions = o[`${name}Positions`];
+      const rotations = o[`${name}Rotations`] ? o[`${name}Rotations`] : [];
       if (!positions) {
         continue;
       }
-      for (const p of positions) {
+      for (let i = 0; i < positions.length; ++i) {
+        const p = positions[i];
+        const q = (i < rotations.length) ? rotations[i] : Grid.notRotated;
         const v = new THREE.Vector3(p.x, p.y, p.z);
-        this.addCube(name, new IsoTransform(v, Grid.randomRotation()));
+        const qu = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+        this.addCube(name, new IsoTransform(v, qu));
       }
     }
     this.buildGeometry();
