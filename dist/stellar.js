@@ -422,6 +422,7 @@ class S {
         S.setDefault('nebs', 2e7, 'Size of each point (meters)');
         S.setDefault('nebr', 1e8, 'Radius of the nebula');
         S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
+        S.setDefault('fov', 75, 'Field of View');
     }
     static float(name) {
         if (S.cache.has(name)) {
@@ -3669,7 +3670,7 @@ class Stellar {
     }
     initializeGraphics() {
         document.body.innerHTML = '';
-        this.camera = new THREE.PerspectiveCamera(75, 1.0, /*near=*/ 0.1, /*far=*/ 20e9);
+        this.camera = new THREE.PerspectiveCamera(settings_1.S.float('fov'), 1.0, /*near=*/ 0.1, /*far=*/ 20e9);
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);
@@ -3766,6 +3767,9 @@ class Stellar {
         // this.scene.add(this.nebulae);
         const canvas = document.getElementsByTagName('canvas')[0];
         this.controls = new controls_1.Controls(this.camera, canvas, this.renderer.xr, this.playerGroup);
+        if (settings_1.S.float('fov') < 75) {
+            this.scene.background = new THREE.Color(0x005500);
+        }
         const light = new THREE.DirectionalLight(new THREE.Color('#fff'), 1.0);
         light.position.set(0, 10, 2);
         this.scene.add(light);
