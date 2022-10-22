@@ -1815,13 +1815,15 @@ class Hud extends THREE.Object3D {
         // HUD will be 1.5m from the player and 2m wide.  This makes it take
         // up about 60 degrees of the view frustrum.  Text at the top and bottom
         // is hard to read.
-        this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.5), new THREE.MeshBasicMaterial({
+        this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.7), // was -1.5
+        new THREE.MeshBasicMaterial({
             color: '#fff',
             map: this.texture,
             transparent: true,
             depthTest: false,
             depthWrite: false,
             side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending
         }));
         this.add(this.mesh);
         this.display();
@@ -1836,7 +1838,7 @@ class Hud extends THREE.Object3D {
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#000';
         ctx.strokeText(this.postedMessage, 64, 1024 * 0.7);
-        ctx.fillStyle = '#0f0f';
+        ctx.fillStyle = '#070';
         ctx.fillText(this.postedMessage, 64, 1024 * 0.7);
         this.texture.needsUpdate = true;
     }

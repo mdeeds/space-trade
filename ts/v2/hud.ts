@@ -23,7 +23,7 @@ export class Hud extends THREE.Object3D implements Ticker {
     // up about 60 degrees of the view frustrum.  Text at the top and bottom
     // is hard to read.
     this.mesh = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.5),
+      new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.7),  // was -1.5
       new THREE.MeshBasicMaterial({
         color: '#fff',
         map: this.texture,
@@ -31,6 +31,7 @@ export class Hud extends THREE.Object3D implements Ticker {
         depthTest: false,
         depthWrite: false,
         side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
       })
     );
 
@@ -50,7 +51,7 @@ export class Hud extends THREE.Object3D implements Ticker {
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#000';
     ctx.strokeText(this.postedMessage, 64, 1024 * 0.7);
-    ctx.fillStyle = '#0f0f';
+    ctx.fillStyle = '#070';
     ctx.fillText(this.postedMessage, 64, 1024 * 0.7);
 
 
