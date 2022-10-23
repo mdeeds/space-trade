@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Quaternion } from "three";
+import { S } from "../settings";
 import { Tick, Ticker } from "../tick";
 import { Assets } from "./assets";
 import { Construction } from "./construction";
@@ -54,6 +54,9 @@ export class MeshCollection extends THREE.Object3D
           emissive: m.emissive,
         });
       }
+      newMaterial.depthWrite = true;
+      newMaterial.depthTest = true;
+      newMaterial.transparent = false;
 
       // TODO: Consider MeshToonMaterial
 
@@ -138,7 +141,9 @@ export class MeshCollection extends THREE.Object3D
         const i = instancedMesh.count++;
         tx.position.copy(pos);
         tx.quaternion.copy(this.quaternions.get(pos));
-        instancedMesh.setMatrixAt(i, tx.MakeMatrix());
+        if (S.float('mcs') == 0) {
+          instancedMesh.setMatrixAt(i, tx.MakeMatrix());
+        }
       } else {
         console.log(`Error: no mesh for ${name}`);
       }
@@ -162,7 +167,7 @@ export class MeshCollection extends THREE.Object3D
       if (!positionMap.has(cubeName)) positionMap.set(cubeName, []);
       positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
       if (!rotationMap.has(cubeName)) rotationMap.set(cubeName, []);
-      let q: Quaternion = this.quaternions.get(cubePosition)
+      let q: THREE.Quaternion = this.quaternions.get(cubePosition)
       rotationMap.get(cubeName).push({ x: q.x, y: q.y, z: q.z, w: q.w });
     }
     for (const [name, rockPositions] of positionMap.entries()) {

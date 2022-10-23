@@ -37,6 +37,8 @@ export class AsteroidMaterial extends THREE.ShaderMaterial {
     gl_FragColor = vec4(lightness * intensity * baseColor, 1.0);
   }
             `,
+            depthTest: true,
+            depthWrite: true,
             blending: THREE.NormalBlending,
             side: THREE.FrontSide,
             transparent: false,

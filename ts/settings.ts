@@ -53,6 +53,8 @@ export class S {
     S.setDefault('nebr', 1e8, 'Radius of the nebula');
     S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
 
+    S.setDefault('mcs', 0, 'Marching cubes step size. 0 = disabled');
+
     S.setDefault('fov', 75, 'Field of View')
   }
 

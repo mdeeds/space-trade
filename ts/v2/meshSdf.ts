@@ -46,7 +46,10 @@ export class MeshSdf {
         return (pos: THREE.Vector3) => {
             this.tmp.copy(pos);
             this.tmp.sub(this.min);
-            const index = Math.round(this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y);
+            this.tmp.x = Math.round(this.tmp.x);
+            this.tmp.y = Math.round(this.tmp.y);
+            this.tmp.z = Math.round(this.tmp.z);
+            const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
             return this.data[index];
         };
     }

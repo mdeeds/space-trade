@@ -3,12 +3,12 @@ import * as THREE from "three";
 export type SDF = (pos: THREE.Vector3) => number;
 
 export class MarchingCubes extends THREE.BufferGeometry {
-  constructor(sdf: SDF,
-    radius: number, center: THREE.Vector3, partitions: number) {
+  // Marching cubes always have the central latice point at 0,0,0.
+  constructor(sdf: SDF, radius: number, stepSize: number) {
     super();
     const vertices: number[] = [];
 
-    const cellRadius = radius / partitions;
+    const cellRadius = stepSize / 2;
     const gridCell = new Float32Array(8);
 
     const protoCorners: THREE.Vector3[] = [];
@@ -28,13 +28,10 @@ export class MarchingCubes extends THREE.BufferGeometry {
 
     console.time('March');
     const cellCenter = new THREE.Vector3();
-    for (let i = 0; i < partitions; ++i) {
-      for (let j = 0; j < partitions; ++j) {
-        for (let k = 0; k < partitions; ++k) {
-          cellCenter.copy(center);
-          cellCenter.x += 2 * i * cellRadius - radius;
-          cellCenter.y += 2 * j * cellRadius - radius;
-          cellCenter.z += 2 * k * cellRadius - radius;
+    for (let x = -radius; x <= radius; x += stepSize) {
+      for (let y = -radius; y <= radius; y += stepSize) {
+        for (let z = -radius; z <= radius; z += stepSize) {
+          cellCenter.set(x, y, z);
           for (let c = 0; c < 8; ++c) {
             cubeCorners[c].copy(cellCenter);
             cubeCorners[c].add(protoCorners[c]);
