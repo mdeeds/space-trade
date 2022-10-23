@@ -14,6 +14,7 @@ import { MeshCollection } from "./meshCollection";
 import { MeshSdf } from "./meshSdf";
 import { PointSet } from "./pointSet";
 import { S } from "../settings";
+import { AsteroidMaterial } from "./asteroidMaterial";
 
 export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
   private meshCollection: MeshCollection;
@@ -96,7 +97,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     }
   }
 
-  private buildCubes() {
+  private async buildCubes() {
     if (this.surfaceMesh) {
       this.remove(this.surfaceMesh);
     }
@@ -112,9 +113,10 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
 
 
     this.surfaceMesh = new THREE.Mesh(
-      this.surface, new THREE.MeshPhongMaterial({ color: '#fdd' })
+      this.surface, await AsteroidMaterial.make(new THREE.Color('#fdd'))
     );
     this.add(this.surfaceMesh);
+    return;
   }
 
   serialize(): Object {
