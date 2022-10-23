@@ -112,7 +112,6 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
       );
       this.add(this.surfaceMesh);
     }
-
     return;
   }
 

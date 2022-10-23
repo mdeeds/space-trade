@@ -7,6 +7,7 @@ import { Codeable } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
 import { LocationMap } from "./locationMap";
+import { Log } from "./log";
 import { NeighborCount } from "./neighborCount";
 import { PointMapOctoTree } from "./octoTree";
 import { PointSet } from "./pointSet";
@@ -27,6 +28,7 @@ export class MeshCollection extends THREE.Object3D
   private geometryMap = new Map<string, THREE.BufferGeometry>();
   // The instances of InstancedMesh created for each item.
   private meshMap = new Map<string, THREE.InstancedMesh>();
+  private colorMap = new Map<string, THREE.Color>();
 
   private cubes: SimpleLocationMap<string>;
   private quaternions = new SimpleLocationMap<THREE.Quaternion>();
@@ -39,6 +41,8 @@ export class MeshCollection extends THREE.Object3D
     super();
     const r = Math.ceil(radius);
     this.cubes = new SimpleLocationMap<string>();
+
+    console.log('constructing Mesh Collection');
 
     for (const name of assets.names()) {
       const mesh = assets.getMesh(name);
@@ -58,6 +62,10 @@ export class MeshCollection extends THREE.Object3D
       newMaterial.depthTest = true;
       newMaterial.transparent = false;
 
+      const color = this.getColor(mesh);
+      this.colorMap.set(name, color);
+      Log.info(`${name} is ${[color.r, color.g, color.b]}`);
+
       // TODO: Consider MeshToonMaterial
 
       const geometry = mesh.geometry.clone();
@@ -66,6 +74,33 @@ export class MeshCollection extends THREE.Object3D
       this.defineItem(name, geometry, newMaterial);
     }
   }
+
+  private getColor(mesh: THREE.Mesh): THREE.Color {
+    const geometry = mesh.geometry;
+    const colorAtt = geometry.getAttribute('color') as THREE.BufferAttribute;
+    const finalColor = new THREE.Color();
+    const c = new THREE.Color();
+    let seen = 0;
+    if (colorAtt) {
+      for (let i = 0; i < colorAtt.count; ++i) {
+        ++seen;
+        c.fromBufferAttribute(colorAtt, i);
+        if (Math.random() < 1 / seen) {
+          finalColor.copy(c);
+        }
+      }
+    }
+    if (seen > 0) {
+      return finalColor;
+    } else {
+      return new THREE.Color(mesh.material['color']);
+    }
+  }
+
+  public getMeshColor(name: string): THREE.Color {
+    return this.colorMap.get(name);
+  }
+
   fallback(p: THREE.Vector3): this {
     throw new Error("Method not implemented.");
   }

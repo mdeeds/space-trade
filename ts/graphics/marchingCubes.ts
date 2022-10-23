@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 export type SDF = (pos: THREE.Vector3) => number;
+export type ColorF = (pos: THREE.Vector3) => THREE.Color;
 
 export class MarchingCubes extends THREE.BufferGeometry {
   // Marching cubes always have the central latice point at 0,0,0.
@@ -28,6 +29,7 @@ export class MarchingCubes extends THREE.BufferGeometry {
 
     console.time('March');
     const cellCenter = new THREE.Vector3();
+    const tmpColor = new THREE.Color();
     for (let x = -radius; x <= radius; x += stepSize) {
       for (let y = -radius; y <= radius; y += stepSize) {
         for (let z = -radius; z <= radius; z += stepSize) {
@@ -35,7 +37,8 @@ export class MarchingCubes extends THREE.BufferGeometry {
           for (let c = 0; c < 8; ++c) {
             cubeCorners[c].copy(cellCenter);
             cubeCorners[c].add(protoCorners[c]);
-            gridCell[c] = sdf(cubeCorners[c]);
+            const distance = sdf(cubeCorners[c]);
+            gridCell[c] = distance;
           }
           MarchingCubes.addTriangles(gridCell, /*threshold=*/0,
             cubeCorners, vertices);
@@ -47,6 +50,16 @@ export class MarchingCubes extends THREE.BufferGeometry {
 
     this.setAttribute('position', new THREE.BufferAttribute(
       new Float32Array(vertices), 3));
+
+    // const colors: THREE.Color[] = [];
+    // const tmp = new THREE.Vector3();
+    // const positionAtt = this.getAttribute('position');
+    // for (let i = 0; i < positionAtt.count; ++i) {
+    //   tmp.fromBufferAttribute(positionAtt, i);
+    //   const color = colorF(tmp);
+    //   colors.push(color);
+    // }
+
   }
 
   private static cornerIndexAFromEdge =

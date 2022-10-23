@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { SDF } from "../graphics/marchingCubes";
+import { SDF, ColorF } from "../graphics/marchingCubes";
 
 import { MeshCollection } from "./meshCollection";
 
@@ -51,6 +51,13 @@ export class MeshSdf {
             this.tmp.z = Math.round(this.tmp.z);
             const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
             return this.data[index];
+        };
+    }
+
+    getColorF(): ColorF {
+        return (pos: THREE.Vector3) => {
+            // TODO!
+            return new THREE.Color('#fff');
         };
     }
 }
