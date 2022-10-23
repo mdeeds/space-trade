@@ -52,6 +52,7 @@ export class Stars extends PointCloud implements Codeable, PointSet {
       if (!this.activeSystems.has(k)) {
         const system = new System(this.assets, this.controls, this.cursors);
         const name = `System:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
+        system.name = name;
         File.load(system, name, k);
         this.activeSystems.set(k, system);
         this.add(system);

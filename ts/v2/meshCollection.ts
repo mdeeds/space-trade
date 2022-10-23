@@ -67,11 +67,15 @@ export class MeshCollection extends THREE.Object3D
     throw new Error("Method not implemented.");
   }
 
+  public getCubes(): Iterable<[THREE.Vector3, string]> {
+    return this.cubes.entries();
+  }
+
   private tmpV = new THREE.Vector3();
   public getClosestDistance(p: THREE.Vector3): number {
     this.tmpV.copy(p);
-    this.tmpV.sub(this.position);  // Astroid relative to System
-    this.tmpV.sub(this.parent.position);  // System relative to Universe
+    this.tmpV.sub(this.parent.position);  // Astroid relative to System
+    this.tmpV.sub(this.parent.parent.position);  // System relative to Universe
     const distance = this.rocks.getClosestDistance(this.tmpV);
     return distance;
   }

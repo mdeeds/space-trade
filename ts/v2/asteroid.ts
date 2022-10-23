@@ -1,18 +1,19 @@
 import * as THREE from "three";
-import { MarchingCubes } from "../graphics/marchingCubes";
-import { S } from "../settings";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
+
 import { Assets } from "./assets";
 import { AstroGen } from "./astroGen";
-import { Compounds } from "./compounds";
-import { Controls, StartStopEvent, StartStopEventHandler } from "./controls";
-import { Cursor } from "./cursor";
-
 import { Codeable, File } from "./file";
+import { Compounds } from "./compounds";
+import { Controls, StartStopEvent } from "./controls";
+import { Cursor } from "./cursor";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
+import { MarchingCubes } from "../graphics/marchingCubes";
 import { MeshCollection } from "./meshCollection";
+import { MeshSdf } from "./meshSdf";
 import { PointSet } from "./pointSet";
-import { Sound } from "./sfx/sound";
+import { S } from "../settings";
 
 export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
   private meshCollection: MeshCollection;
@@ -22,6 +23,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
   constructor(assets: Assets, controls: Controls,
     private cursors: Map<THREE.XRHandedness, Cursor>, private saveId: string) {
     super();
+    this.name = saveId;
     this.meshCollection = new MeshCollection(assets, S.float('as') * 1.2);
     this.add(this.meshCollection);
 
@@ -101,10 +103,14 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     const radius = 10.0;
     const partitions = radius * 2;
     const center = new THREE.Vector3(0, 0, 0);
-    this.surface = new MarchingCubes((pos: THREE.Vector3) => {
-      // TODO look into this.meshCollection, return 1 if it's inside.
-      return pos.length() - 8.0;
-    }, radius, center, partitions);
+    const sdf = new MeshSdf(this.meshCollection);
+    this.surface = new MarchingCubes(
+      sdf.getSdf(), radius, center, partitions);
+
+    this.surface = BufferGeometryUtils.mergeVertices(this.surface, 0.01);
+    this.surface.computeVertexNormals();
+
+
     this.surfaceMesh = new THREE.Mesh(
       this.surface, new THREE.MeshPhongMaterial({ color: '#fdd' })
     );
@@ -117,7 +123,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
 
   deserialize(serialized: Object): this {
     this.meshCollection.deserialize(serialized);
-    // this.buildCubes();
+    this.buildCubes();
     return this;
   }
 
@@ -125,7 +131,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     const gen = new AstroGen(this.meshCollection);
     gen.buildAsteroid(S.float('as'), 0, 0, 0);
     this.meshCollection.buildGeometry();
-    // this.buildCubes();
+    this.buildCubes();
     return this;
   }
 
