@@ -639,12 +639,14 @@ const isoTransform_1 = __webpack_require__(3265);
 const meshCollection_1 = __webpack_require__(1090);
 class Asteroid extends THREE.Object3D {
     cursors;
+    saveId;
     meshCollection;
     surface = undefined;
     surfaceMesh;
-    constructor(assets, controls, cursors) {
+    constructor(assets, controls, cursors, saveId) {
         super();
         this.cursors = cursors;
+        this.saveId = saveId;
         this.meshCollection = new meshCollection_1.MeshCollection(assets, settings_1.S.float('as') * 1.2);
         this.add(this.meshCollection);
         controls.setStartStopCallback((ev) => {
@@ -671,7 +673,7 @@ class Asteroid extends THREE.Object3D {
                     }
                 }
             }
-            file_1.File.save(this.meshCollection, "saved.json");
+            file_1.File.save(this, this.saveId);
         });
     }
     cursorsAreTogether() {
@@ -1813,13 +1815,15 @@ class Hud extends THREE.Object3D {
         // HUD will be 1.5m from the player and 2m wide.  This makes it take
         // up about 60 degrees of the view frustrum.  Text at the top and bottom
         // is hard to read.
-        this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.5), new THREE.MeshBasicMaterial({
+        this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.0, 2.0).translate(0, 0, -1.7), // was -1.5
+        new THREE.MeshBasicMaterial({
             color: '#fff',
             map: this.texture,
             transparent: true,
             depthTest: false,
             depthWrite: false,
             side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending
         }));
         this.add(this.mesh);
         this.display();
@@ -1834,7 +1838,7 @@ class Hud extends THREE.Object3D {
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#000';
         ctx.strokeText(this.postedMessage, 64, 1024 * 0.7);
-        ctx.fillStyle = '#0f0f';
+        ctx.fillStyle = '#070';
         ctx.fillText(this.postedMessage, 64, 1024 * 0.7);
         this.texture.needsUpdate = true;
     }
@@ -2137,26 +2141,31 @@ class MeshCollection extends THREE.Object3D {
             if (!positionMap.has(cubeName))
                 positionMap.set(cubeName, []);
             positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
-            //if (!rotationMap.has(cubePosition)) rotationMap.set(cubePosition, []);
-            //let q: Quaternion = this.quaternions.get(cubePosition)
-            //rotationMap.get(cubePosition).push({ x: q.x, y: q.y, z: q.z, w: q.w });
+            if (!rotationMap.has(cubeName))
+                rotationMap.set(cubeName, []);
+            let q = this.quaternions.get(cubePosition);
+            rotationMap.get(cubeName).push({ x: q.x, y: q.y, z: q.z, w: q.w });
         }
         for (const [name, rockPositions] of positionMap.entries()) {
             o[`${name}Positions`] = rockPositions;
+            o[`${name}Rotations`] = rotationMap.get(name);
         }
         return o;
     }
     deserialize(o) {
         this.rocks.clear();
         for (const name of this.geometryMap.keys()) {
-            const key = `${name}Positions`;
-            const positions = o[key];
+            const positions = o[`${name}Positions`];
+            const rotations = o[`${name}Rotations`] ? o[`${name}Rotations`] : [];
             if (!positions) {
                 continue;
             }
-            for (const p of positions) {
+            for (let i = 0; i < positions.length; ++i) {
+                const p = positions[i];
+                const q = (i < rotations.length) ? rotations[i] : grid_1.Grid.notRotated;
                 const v = new THREE.Vector3(p.x, p.y, p.z);
-                this.addCube(name, new isoTransform_1.IsoTransform(v, grid_1.Grid.randomRotation()));
+                const qu = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+                this.addCube(name, new isoTransform_1.IsoTransform(v, qu));
             }
         }
         this.buildGeometry();
@@ -2834,7 +2843,7 @@ class PointCloud extends THREE.Object3D {
     addStar(pos, color, pointRadius, index, vertices, colors, dxy, r, alpha) {
         const o = Math.round(vertices.length / 3);
         index.push(o + 0, o + 1, o + 2, o + 2, o + 3, o + 0);
-        const c = new THREE.Color(Math.random() * 0.2 + 0.8 * color.r, Math.random() * 0.2 + 0.8 * color.g, Math.random() * 0.2 + 0.8 * color.b);
+        const c = new THREE.Color((Math.random() * 0.2 + 0.8) * color.r, (Math.random() * 0.2 + 0.8) * color.g, (Math.random() * 0.2 + 0.8) * color.b);
         for (let i = 0; i < 4; ++i) {
             vertices.push(pos.x, pos.y, pos.z);
             colors.push(c.r, c.g, c.b);
@@ -3902,9 +3911,9 @@ class System extends THREE.Object3D {
         for (const k of this.tmpSet) {
             if (!this.activeAsteroids.has(k)) {
                 console.log(`Asteroid count: ${this.activeAsteroids.size}`);
-                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors);
-                const name = `Asteroid:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
-                file_1.File.load(asteroid, name, k);
+                const saveId = `Asteroid:${Math.round(k.x)},${Math.round(k.y)},${Math.round(k.z)}`;
+                const asteroid = new asteroid_1.Asteroid(this.assets, this.controls, this.cursors, saveId);
+                file_1.File.load(asteroid, saveId, k);
                 this.activeAsteroids.set(k, asteroid);
                 asteroid.position.copy(k);
                 this.add(asteroid);
@@ -3933,23 +3942,23 @@ class System extends THREE.Object3D {
             const v = new THREE.Vector3(p.x, p.y, p.z);
             this.asteroids.starPositions.add(v, v);
         }
-        this.asteroids.addStars(new THREE.Color('#44f'), settings_1.S.float('as'), 
+        this.asteroids.addStars(new THREE.Color('#070707'), settings_1.S.float('as'), // color was '#44f'
         /*initialIntensity=*/ 500);
         this.planets.starPositions.clear();
         for (const p of o['planetPositions']) {
             const v = new THREE.Vector3(p.x, p.y, p.z);
             this.planets.starPositions.add(v, v);
         }
-        this.planets.addStars(new THREE.Color('#0ff'), settings_1.S.float('as'), 
+        this.planets.addStars(new THREE.Color('#000707'), settings_1.S.float('as'), // color was '#0ff'
         /*initialIntensity=*/ 500);
         return this;
     }
     fallback(p) {
         this.asteroids.starPositions.clear();
-        this.asteroids.build(grid_1.Grid.zero, settings_1.S.float('ar'), settings_1.S.float('ar') / 10.0, settings_1.S.float('ar') / 30.0, settings_1.S.float('na'), new THREE.Color('#44f'), settings_1.S.float('as'), 
+        this.asteroids.build(grid_1.Grid.zero, settings_1.S.float('ar'), settings_1.S.float('ar') / 10.0, settings_1.S.float('ar') / 30.0, settings_1.S.float('na'), new THREE.Color('#070707'), settings_1.S.float('as'), // color was '#44f'
         /*includeOrigin=*/ false, /*initialIntensity=*/ 500);
         this.planets.starPositions.clear();
-        this.planets.build(grid_1.Grid.zero, settings_1.S.float('ar') * 2, settings_1.S.float('ar'), settings_1.S.float('ar') / 50.0, 10 /*planets*/, new THREE.Color('#0ff'), settings_1.S.float('as'), 
+        this.planets.build(grid_1.Grid.zero, settings_1.S.float('ar') * 2, settings_1.S.float('ar'), settings_1.S.float('ar') / 50.0, 10 /*planets*/, new THREE.Color('#000707'), settings_1.S.float('as'), // color was '#0ff'
         /*includeOrigin=*/ false, /*initialIntensity=*/ 500);
         return this;
     }

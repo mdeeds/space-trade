@@ -64,9 +64,9 @@ export class PointCloud extends THREE.Object3D {
     const o = Math.round(vertices.length / 3);
     index.push(o + 0, o + 1, o + 2, o + 2, o + 3, o + 0);
     const c = new THREE.Color(
-      Math.random() * 0.2 + 0.8 * color.r,
-      Math.random() * 0.2 + 0.8 * color.g,
-      Math.random() * 0.2 + 0.8 * color.b);
+      (Math.random() * 0.2 + 0.8) * color.r,
+      (Math.random() * 0.2 + 0.8) * color.g,
+      (Math.random() * 0.2 + 0.8) * color.b);
     for (let i = 0; i < 4; ++i) {
       vertices.push(pos.x, pos.y, pos.z);
       colors.push(c.r, c.g, c.b);
