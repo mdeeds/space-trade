@@ -38,7 +38,7 @@ export class S {
 
     S.setDefault('bai', 0, 'If non-zero, starts with one of everything in the world.')
     S.setDefault('sa', 1e3, 'Starship Acceleration');
-    S.setDefault('rv', 2.0, 'Starship relative velocity');
+    S.setDefault('rv', 1.0, 'Starship relative velocity');
     S.setDefault('m', 1, 'Use merged geometry in Block Build.');
     S.setDefault('hr', -0.5, 'Distance from eye level to hand resting height.');
     S.setDefault('pbf', 1e7, 'Point brightness factor');

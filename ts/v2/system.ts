@@ -107,7 +107,7 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
       const v = new THREE.Vector3(p.x, p.y, p.z);
       this.asteroids.starPositions.add(v, v);
     }
-    this.asteroids.addStars(new THREE.Color('#070707'), S.float('as'),  // color was '#44f'
+    this.asteroids.addStars(new THREE.Color('#222'), S.float('as'),  // color was '#44f'
     /*initialIntensity=*/500);
 
     this.planets.starPositions.clear();
@@ -115,7 +115,7 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
       const v = new THREE.Vector3(p.x, p.y, p.z);
       this.planets.starPositions.add(v, v);
     }
-    this.planets.addStars(new THREE.Color('#000707'), S.float('as'), // color was '#0ff'
+    this.planets.addStars(new THREE.Color('#022'), S.float('as'), // color was '#0ff'
     /*initialIntensity=*/500);
 
     return this;
@@ -125,13 +125,13 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
     this.asteroids.starPositions.clear();
     this.asteroids.build(Grid.zero,
       S.float('ar'), S.float('ar') / 10.0, S.float('ar') / 30.0,
-      S.float('na'), new THREE.Color('#070707'), S.float('as'),  // color was '#44f'
+      S.float('na'), new THREE.Color('#222'), S.float('as'),  // color was '#44f'
       /*includeOrigin=*/false, /*initialIntensity=*/500);
 
     this.planets.starPositions.clear();
     this.planets.build(Grid.zero,
       S.float('ar') * 2, S.float('ar'), S.float('ar') / 50.0,
-      10/*planets*/, new THREE.Color('#000707'), S.float('as'), // color was '#0ff'
+      10/*planets*/, new THREE.Color('#022'), S.float('as'), // color was '#0ff'
         /*includeOrigin=*/false, /*initialIntensity=*/500);
 
     return this;

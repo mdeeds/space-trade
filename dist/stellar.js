@@ -407,7 +407,7 @@ class S {
         S.setDefault('rs', 20, 'Number of ray steps');
         S.setDefault('bai', 0, 'If non-zero, starts with one of everything in the world.');
         S.setDefault('sa', 1e3, 'Starship Acceleration');
-        S.setDefault('rv', 2.0, 'Starship relative velocity');
+        S.setDefault('rv', 1.0, 'Starship relative velocity');
         S.setDefault('m', 1, 'Use merged geometry in Block Build.');
         S.setDefault('hr', -0.5, 'Distance from eye level to hand resting height.');
         S.setDefault('pbf', 1e7, 'Point brightness factor');
@@ -4137,23 +4137,23 @@ class System extends THREE.Object3D {
             const v = new THREE.Vector3(p.x, p.y, p.z);
             this.asteroids.starPositions.add(v, v);
         }
-        this.asteroids.addStars(new THREE.Color('#070707'), settings_1.S.float('as'), // color was '#44f'
+        this.asteroids.addStars(new THREE.Color('#222'), settings_1.S.float('as'), // color was '#44f'
         /*initialIntensity=*/ 500);
         this.planets.starPositions.clear();
         for (const p of o['planetPositions']) {
             const v = new THREE.Vector3(p.x, p.y, p.z);
             this.planets.starPositions.add(v, v);
         }
-        this.planets.addStars(new THREE.Color('#000707'), settings_1.S.float('as'), // color was '#0ff'
+        this.planets.addStars(new THREE.Color('#022'), settings_1.S.float('as'), // color was '#0ff'
         /*initialIntensity=*/ 500);
         return this;
     }
     fallback(p) {
         this.asteroids.starPositions.clear();
-        this.asteroids.build(grid_1.Grid.zero, settings_1.S.float('ar'), settings_1.S.float('ar') / 10.0, settings_1.S.float('ar') / 30.0, settings_1.S.float('na'), new THREE.Color('#070707'), settings_1.S.float('as'), // color was '#44f'
+        this.asteroids.build(grid_1.Grid.zero, settings_1.S.float('ar'), settings_1.S.float('ar') / 10.0, settings_1.S.float('ar') / 30.0, settings_1.S.float('na'), new THREE.Color('#222'), settings_1.S.float('as'), // color was '#44f'
         /*includeOrigin=*/ false, /*initialIntensity=*/ 500);
         this.planets.starPositions.clear();
-        this.planets.build(grid_1.Grid.zero, settings_1.S.float('ar') * 2, settings_1.S.float('ar'), settings_1.S.float('ar') / 50.0, 10 /*planets*/, new THREE.Color('#000707'), settings_1.S.float('as'), // color was '#0ff'
+        this.planets.build(grid_1.Grid.zero, settings_1.S.float('ar') * 2, settings_1.S.float('ar'), settings_1.S.float('ar') / 50.0, 10 /*planets*/, new THREE.Color('#022'), settings_1.S.float('as'), // color was '#0ff'
         /*includeOrigin=*/ false, /*initialIntensity=*/ 500);
         return this;
     }
