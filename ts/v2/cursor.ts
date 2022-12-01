@@ -39,11 +39,14 @@ export class Cursor extends THREE.Object3D {
     points.push(new THREE.Vector3(0.5, 0.5, 0.5));
 
     const material = new THREE.LineBasicMaterial(
-      { color: "#0f0", linewidth: 1 });
+      { color: "#0f0", linewidth: 1, depthTest: true, depthWrite: true });
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     this.lineSegments = new LineSegments(geometry, material);
     this.add(this.lineSegments);
 
+    const axes = new THREE.AxesHelper();
+    (axes.material as THREE.Material).depthTest = true;
+    (axes.material as THREE.Material).depthWrite = true;
     this.add(new THREE.AxesHelper());
   }
 

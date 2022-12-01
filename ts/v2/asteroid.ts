@@ -110,6 +110,8 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
       this.surfaceMesh = new THREE.Mesh(
         this.surface, await AsteroidMaterial.make(new THREE.Color('#fdd'))
       );
+      this.surfaceMesh.geometry.computeBoundingSphere();
+      this.surfaceMesh.geometry.computeBoundingBox();
       this.add(this.surfaceMesh);
     }
     return;

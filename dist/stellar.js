@@ -54,6 +54,7 @@ class MarchingCubes extends THREE.BufferGeometry {
         }
         console.time('March');
         const cellCenter = new THREE.Vector3();
+        const tmpColor = new THREE.Color();
         for (let x = -radius; x <= radius; x += stepSize) {
             for (let y = -radius; y <= radius; y += stepSize) {
                 for (let z = -radius; z <= radius; z += stepSize) {
@@ -61,7 +62,8 @@ class MarchingCubes extends THREE.BufferGeometry {
                     for (let c = 0; c < 8; ++c) {
                         cubeCorners[c].copy(cellCenter);
                         cubeCorners[c].add(protoCorners[c]);
-                        gridCell[c] = sdf(cubeCorners[c]);
+                        const distance = sdf(cubeCorners[c]);
+                        gridCell[c] = distance;
                     }
                     MarchingCubes.addTriangles(gridCell, /*threshold=*/ 0, cubeCorners, vertices);
                 }
@@ -70,6 +72,14 @@ class MarchingCubes extends THREE.BufferGeometry {
         console.timeEnd('March');
         console.log(`Positions: ${vertices.length}`);
         this.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+        // const colors: THREE.Color[] = [];
+        // const tmp = new THREE.Vector3();
+        // const positionAtt = this.getAttribute('position');
+        // for (let i = 0; i < positionAtt.count; ++i) {
+        //   tmp.fromBufferAttribute(positionAtt, i);
+        //   const color = colorF(tmp);
+        //   colors.push(color);
+        // }
     }
     static cornerIndexAFromEdge = [0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3];
     static cornerIndexBFromEdge = [1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7];
@@ -729,6 +739,8 @@ class Asteroid extends THREE.Object3D {
             this.surface = BufferGeometryUtils.mergeVertices(this.surface, 0.01);
             this.surface.computeVertexNormals();
             this.surfaceMesh = new THREE.Mesh(this.surface, await asteroidMaterial_1.AsteroidMaterial.make(new THREE.Color('#fdd')));
+            this.surfaceMesh.geometry.computeBoundingSphere();
+            this.surfaceMesh.geometry.computeBoundingBox();
             this.add(this.surfaceMesh);
         }
         return;
@@ -787,23 +799,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AsteroidMaterial = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const constants_1 = __webpack_require__(2025);
 class AsteroidMaterial extends THREE.ShaderMaterial {
-    tex;
-    constructor(color, tex) {
+    // src/renderers/shaders/ShaderChunk/common.glsl.js
+    constructor(color, tex_low, tex_mid, tex_hig) {
         super({
             vertexShader: `
+#define EPSILON 1e-6
   varying vec3 vNormal;
   varying vec3 vMxyz;
+  uniform float logDepthBufFC;
   void main() {
     vMxyz = position;
     vNormal = normal;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+
+    gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
+    gl_Position.z *= gl_Position.w;
   }
             `,
             fragmentShader: `
   varying vec3 vNormal;
   uniform vec3 baseColor;
-  uniform sampler2D tex;
+  uniform sampler2D tex_low;
+  uniform sampler2D tex_mid;
+  uniform sampler2D tex_hig;
   varying vec3 vMxyz;
   void main() {
     float intensity = (0.2 + clamp(vNormal.y, 0.0, 1.0));
@@ -815,9 +835,9 @@ class AsteroidMaterial extends THREE.ShaderMaterial {
     vec3 o3 = mod(mxyz * 3.1, 1.0);
     vec3 rates = vec3(0.5, 0.3, 0.2);
 
-    float lxy = dot(rates, vec3(texture(tex, o1.xy).r, texture(tex, o2.xy).r, texture(tex, o3.xy).r));
-    float lyz = dot(rates, vec3(texture(tex, o1.yz).r, texture(tex, o2.yz).r, texture(tex, o3.yz).r));
-    float lzx = dot(rates, vec3(texture(tex, o1.zx).r, texture(tex, o2.zx).r, texture(tex, o3.zx).r));
+    float lxy = dot(rates, vec3(texture(tex_low, o1.xy).r, texture(tex_mid, o2.xy).r, texture(tex_hig, o3.xy).r));
+    float lyz = dot(rates, vec3(texture(tex_low, o1.yz).r, texture(tex_mid, o2.yz).r, texture(tex_hig, o3.yz).r));
+    float lzx = dot(rates, vec3(texture(tex_low, o1.zx).r, texture(tex_mid, o2.zx).r, texture(tex_hig, o3.zx).r));
 
     float lightness = lxy * smoothstep(0.2, 1.0, abs(vNormal.z)) + lyz * smoothstep(0.2, 1.0, abs(vNormal.x)) + lzx * smoothstep(0.2, 1.0, abs(vNormal.y));
 
@@ -832,22 +852,33 @@ class AsteroidMaterial extends THREE.ShaderMaterial {
             vertexColors: false,
             uniforms: {
                 baseColor: { value: color },
-                tex: { value: tex },
+                tex_low: { value: tex_low },
+                tex_mid: { value: tex_mid },
+                tex_hig: { value: tex_hig },
+                logDepthBufFC: {
+                    value: 2.0 / (Math.log(constants_1.Constants.cameraFar + 1.0) / Math.LN2)
+                },
             }
         });
-        this.tex = tex;
         super.uniformsNeedUpdate = true;
+    }
+    static async loadTex(name) {
+        const loader = new THREE.ImageLoader();
+        return new Promise((resolve, reject) => {
+            loader.load('images/astro_tex.png', (image) => {
+                const tex = new THREE.Texture(image);
+                tex.needsUpdate = true;
+                resolve(tex);
+            }, null, (e) => { reject(e); });
+        });
     }
     static async make(color) {
         const c = new THREE.Color(color);
-        const loader = new THREE.ImageLoader();
-        let tex;
+        const tex_low = await AsteroidMaterial.loadTex('images/astro_tex_low.png');
+        const tex_mid = await AsteroidMaterial.loadTex('images/astro_tex_mid.png');
+        const tex_hig = await AsteroidMaterial.loadTex('images/astro_tex_hig.png');
         return new Promise((resolve, reject) => {
-            loader.load('images/astro_tex.png', (image) => {
-                tex = new THREE.Texture(image);
-                tex.needsUpdate = true;
-                resolve(new AsteroidMaterial(c, tex));
-            }, null, (e) => { reject(e); });
+            resolve(new AsteroidMaterial(c, tex_low, tex_mid, tex_hig));
         });
     }
 }
@@ -1376,6 +1407,20 @@ exports.Compounds = Compounds;
 
 /***/ }),
 
+/***/ 2025:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Constants = void 0;
+class Constants {
+    static cameraFar = 20e9;
+}
+exports.Constants = Constants;
+//# sourceMappingURL=constants.js.map
+
+/***/ }),
+
 /***/ 5417:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1686,10 +1731,13 @@ class Cursor extends THREE.Object3D {
         points.push(new THREE.Vector3(0.5, 0.5, -0.5));
         points.push(new THREE.Vector3(0.5, -0.5, 0.5));
         points.push(new THREE.Vector3(0.5, 0.5, 0.5));
-        const material = new THREE.LineBasicMaterial({ color: "#0f0", linewidth: 1 });
+        const material = new THREE.LineBasicMaterial({ color: "#0f0", linewidth: 1, depthTest: true, depthWrite: true });
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         this.lineSegments = new three_1.LineSegments(geometry, material);
         this.add(this.lineSegments);
+        const axes = new THREE.AxesHelper();
+        axes.material.depthTest = true;
+        axes.material.depthWrite = true;
         this.add(new THREE.AxesHelper());
     }
     isHolding() {
@@ -2112,6 +2160,7 @@ const THREE = __importStar(__webpack_require__(5232));
 const settings_1 = __webpack_require__(6451);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
+const log_1 = __webpack_require__(4920);
 const neighborCount_1 = __webpack_require__(6516);
 const octoTree_1 = __webpack_require__(9343);
 const simpleLocationMap_1 = __webpack_require__(6125);
@@ -2132,6 +2181,7 @@ class MeshCollection extends THREE.Object3D {
     geometryMap = new Map();
     // The instances of InstancedMesh created for each item.
     meshMap = new Map();
+    colorMap = new Map();
     cubes;
     quaternions = new simpleLocationMap_1.SimpleLocationMap();
     t = new THREE.Vector3();
@@ -2142,6 +2192,7 @@ class MeshCollection extends THREE.Object3D {
         this.radius = radius;
         const r = Math.ceil(radius);
         this.cubes = new simpleLocationMap_1.SimpleLocationMap();
+        console.log('constructing Mesh Collection');
         for (const name of assets.names()) {
             const mesh = assets.getMesh(name);
             // console.log(`Mesh: ${mesh.name}`);
@@ -2159,12 +2210,40 @@ class MeshCollection extends THREE.Object3D {
             newMaterial.depthWrite = true;
             newMaterial.depthTest = true;
             newMaterial.transparent = false;
+            const color = this.getColor(mesh);
+            this.colorMap.set(name, color);
+            log_1.Log.info(`${name} is ${[color.r, color.g, color.b]}`);
             // TODO: Consider MeshToonMaterial
             const geometry = mesh.geometry.clone();
             mesh.matrix.decompose(this.t, this.r, this.s);
             geometry.scale(this.s.x, this.s.y, this.s.z);
             this.defineItem(name, geometry, newMaterial);
         }
+    }
+    getColor(mesh) {
+        const geometry = mesh.geometry;
+        const colorAtt = geometry.getAttribute('color');
+        const finalColor = new THREE.Color();
+        const c = new THREE.Color();
+        let seen = 0;
+        if (colorAtt) {
+            for (let i = 0; i < colorAtt.count; ++i) {
+                ++seen;
+                c.fromBufferAttribute(colorAtt, i);
+                if (Math.random() < 1 / seen) {
+                    finalColor.copy(c);
+                }
+            }
+        }
+        if (seen > 0) {
+            return finalColor;
+        }
+        else {
+            return new THREE.Color(mesh.material['color']);
+        }
+    }
+    getMeshColor(name) {
+        return this.colorMap.get(name);
     }
     fallback(p) {
         throw new Error("Method not implemented.");
@@ -2368,6 +2447,12 @@ class MeshSdf {
             this.tmp.z = Math.round(this.tmp.z);
             const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
             return this.data[index];
+        };
+    }
+    getColorF() {
+        return (pos) => {
+            // TODO!
+            return new THREE.Color('#fff');
         };
     }
 }
@@ -3805,6 +3890,7 @@ const positionalDelayAudio_1 = __webpack_require__(1050);
 const log_1 = __webpack_require__(4920);
 const hud_1 = __webpack_require__(1835);
 const nebulaCloud_1 = __webpack_require__(6815);
+const constants_1 = __webpack_require__(2025);
 class Stellar {
     scene = new THREE.Scene();
     camera;
@@ -3874,7 +3960,7 @@ class Stellar {
     }
     initializeGraphics() {
         document.body.innerHTML = '';
-        this.camera = new THREE.PerspectiveCamera(settings_1.S.float('fov'), 1.0, /*near=*/ 0.1, /*far=*/ 20e9);
+        this.camera = new THREE.PerspectiveCamera(settings_1.S.float('fov'), 1.0, /*near=*/ 0.1, /*far=*/ constants_1.Constants.cameraFar);
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);

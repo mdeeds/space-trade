@@ -1,17 +1,24 @@
 import * as THREE from "three";
+import { Constants } from "./constants";
 import { Log } from "./log";
 
 export class AsteroidMaterial extends THREE.ShaderMaterial {
+    // src/renderers/shaders/ShaderChunk/common.glsl.js
     private constructor(color: THREE.Color,
         tex_low: THREE.Texture, tex_mid: THREE.Texture, tex_hig: THREE.Texture) {
         super({
             vertexShader: `
+#define EPSILON 1e-6
   varying vec3 vNormal;
   varying vec3 vMxyz;
+  uniform float logDepthBufFC;
   void main() {
     vMxyz = position;
     vNormal = normal;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+
+    gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
+    gl_Position.z *= gl_Position.w;
   }
             `,
             fragmentShader: `
@@ -51,11 +58,13 @@ export class AsteroidMaterial extends THREE.ShaderMaterial {
                 tex_low: { value: tex_low },
                 tex_mid: { value: tex_mid },
                 tex_hig: { value: tex_hig },
+                logDepthBufFC: {
+                    value:
+                        2.0 / (Math.log(Constants.cameraFar + 1.0) / Math.LN2)
+                },
             }
         });
         super.uniformsNeedUpdate = true;
-
-
     }
 
     private static async loadTex(name: string): Promise<THREE.Texture> {

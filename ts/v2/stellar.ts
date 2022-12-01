@@ -17,6 +17,7 @@ import { PositionalDelayAudio } from "./sfx/positionalDelayAudio";
 import { Log } from "./log";
 import { Hud } from "./hud";
 import { NebulaCloud } from "./nebulaCloud";
+import { Constants } from "./constants";
 
 export class Stellar {
   private scene = new THREE.Scene();
@@ -100,7 +101,7 @@ export class Stellar {
   private initializeGraphics() {
     document.body.innerHTML = '';
     this.camera = new THREE.PerspectiveCamera(S.float('fov'),
-      1.0, /*near=*/0.1, /*far=*/20e9);
+      1.0, /*near=*/0.1, /*far=*/Constants.cameraFar);
     this.camera.position.set(0, 1.7, 0);
     this.camera.lookAt(0, 1.7, -1.5);
     this.playerGroup.add(this.camera);
