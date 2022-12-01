@@ -64,8 +64,7 @@ export class MeshCollection extends THREE.Object3D
 
       const color = this.getColor(mesh);
       this.colorMap.set(name, color);
-      Log.info(`${name} is ${[color.r, color.g, color.b]}`);
-
+      // Log.info(`Color of ${name} is ${[color.r, color.g, color.b]}`);
       // TODO: Consider MeshToonMaterial
 
       const geometry = mesh.geometry.clone();
