@@ -49,6 +49,11 @@ export class MeshSdf {
             this.tmp.x = Math.round(this.tmp.x);
             this.tmp.y = Math.round(this.tmp.y);
             this.tmp.z = Math.round(this.tmp.z);
+            if (this.tmp.x < 0 || this.tmp.x >= this.extent.x ||
+                this.tmp.y < 0 || this.tmp.y >= this.extent.y ||
+                this.tmp.z < 0 || this.tmp.z >= this.extent.z)
+                return 1;
+
             const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
             return this.data[index];
         };
