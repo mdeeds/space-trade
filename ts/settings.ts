@@ -49,8 +49,8 @@ export class S {
     S.setDefault('pv', 2, 'Point cloud version');
 
     S.setDefault('nebn', 3e3, 'Number of nebula points');
-    S.setDefault('nebs', 2e7, 'Size of each point (meters)');
-    S.setDefault('nebr', 1e8, 'Radius of the nebula');
+    S.setDefault('nebs', 2e8, 'Size of each point (meters)');
+    S.setDefault('nebr', 1e9, 'Radius of the nebula');
     S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
 
     S.setDefault('mcs', 0, 'Marching cubes step size. 0 = disabled');
