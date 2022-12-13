@@ -5,9 +5,10 @@ export type ColorF = (pos: THREE.Vector3) => THREE.Color;
 
 export class MarchingCubes extends THREE.BufferGeometry {
   // Marching cubes always have the central latice point at 0,0,0.
-  constructor(sdf: SDF, radius: number, stepSize: number) {
+  constructor(sdf: SDF, cf: ColorF, radius: number, stepSize: number) {
     super();
     const vertices: number[] = [];
+    const colors: number[] = [];
 
     const cellRadius = stepSize / 2;
     const gridCell = new Float32Array(8);
@@ -41,7 +42,7 @@ export class MarchingCubes extends THREE.BufferGeometry {
             gridCell[c] = distance;
           }
           MarchingCubes.addTriangles(gridCell, /*threshold=*/0,
-            cubeCorners, vertices);
+            cubeCorners, vertices, colors, cf);
         }
       }
     }
@@ -50,16 +51,8 @@ export class MarchingCubes extends THREE.BufferGeometry {
 
     this.setAttribute('position', new THREE.BufferAttribute(
       new Float32Array(vertices), 3));
-
-    // const colors: THREE.Color[] = [];
-    // const tmp = new THREE.Vector3();
-    // const positionAtt = this.getAttribute('position');
-    // for (let i = 0; i < positionAtt.count; ++i) {
-    //   tmp.fromBufferAttribute(positionAtt, i);
-    //   const color = colorF(tmp);
-    //   colors.push(color);
-    // }
-
+    this.setAttribute('color', new THREE.BufferAttribute(
+      new Float32Array(colors), 3));
   }
 
   private static cornerIndexAFromEdge =
@@ -329,7 +322,7 @@ export class MarchingCubes extends THREE.BufferGeometry {
   ];
 
   private static addTriangles(gridCell: Float32Array, threshold: number,
-    cubeCorners: THREE.Vector3[], triangles: number[]) {
+    cubeCorners: THREE.Vector3[], triangles: number[], colors: number[], colorF: ColorF) {
     let cubeindex = 0;
     if (gridCell[0] < threshold) cubeindex |= 1;
     if (gridCell[1] < threshold) cubeindex |= 2;
@@ -338,7 +331,7 @@ export class MarchingCubes extends THREE.BufferGeometry {
     if (gridCell[4] < threshold) cubeindex |= 16;
     if (gridCell[5] < threshold) cubeindex |= 32;
     if (gridCell[6] < threshold) cubeindex |= 64;
-    if (gridCell[7] < threshold) cubeindex |= 128;
+    if (gridCell[7] < threshold) cubeindex |= 128
 
     const triangulation = MarchingCubes.triangleTable[cubeindex];
 
@@ -348,6 +341,8 @@ export class MarchingCubes extends THREE.BufferGeometry {
       const vertex = new THREE.Vector3().copy(cubeCorners[indexA]);
 
       const p = gridCell[indexA] / (gridCell[indexA] - gridCell[indexB]);
+      const color = colorF(cubeCorners[indexA]) || colorF(cubeCorners[indexB]);
+      colors.push(color.r, color.g, color.b);
       vertex.lerp(cubeCorners[indexB], p);
       triangles.push(vertex.x, vertex.y, vertex.z);
     }

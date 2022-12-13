@@ -9,26 +9,28 @@ export class AsteroidMaterial extends THREE.ShaderMaterial {
         super({
             vertexShader: `
 #define EPSILON 1e-6
-  varying vec3 vNormal;
-  varying vec3 vMxyz;
-  uniform float logDepthBufFC;
-  void main() {
+uniform float logDepthBufFC;
+varying vec3 vNormal;
+varying vec3 vMxyz;
+varying vec3 vColor;
+void main() {
     vMxyz = position;
     vNormal = normal;
+    vColor = color;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
 
     gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
     gl_Position.z *= gl_Position.w;
-  }
+}
             `,
             fragmentShader: `
-  varying vec3 vNormal;
-  uniform vec3 baseColor;
-  uniform sampler2D tex_low;
-  uniform sampler2D tex_mid;
-  uniform sampler2D tex_hig;
-  varying vec3 vMxyz;
-  void main() {
+varying vec3 vNormal;
+varying vec3 vColor;
+uniform sampler2D tex_low;
+uniform sampler2D tex_mid;
+uniform sampler2D tex_hig;
+varying vec3 vMxyz;
+void main() {
     float intensity = (0.2 + clamp(vNormal.y, 0.0, 1.0));
 
     vec3 mxyz = vMxyz;
@@ -44,15 +46,15 @@ export class AsteroidMaterial extends THREE.ShaderMaterial {
 
     float lightness = lxy * smoothstep(0.2, 1.0, abs(vNormal.z)) + lyz * smoothstep(0.2, 1.0, abs(vNormal.x)) + lzx * smoothstep(0.2, 1.0, abs(vNormal.y));
 
-    gl_FragColor = vec4(lightness * intensity * baseColor, 1.0);
-  }
+    gl_FragColor = vec4(lightness * intensity * vColor, 1.0);
+}
             `,
             depthTest: true,
             depthWrite: true,
             blending: THREE.NormalBlending,
             side: THREE.FrontSide,
             transparent: false,
-            vertexColors: false,
+            vertexColors: true,
             uniforms: {
                 baseColor: { value: color },
                 tex_low: { value: tex_low },

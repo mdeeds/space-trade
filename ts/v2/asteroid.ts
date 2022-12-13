@@ -104,7 +104,7 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     const radius = 10.0;
     const sdf = new MeshSdf(this.meshCollection);
     if (S.float('mcs') > 0) {
-      this.surface = new MarchingCubes(sdf.getSdf(), radius, S.float('mcs'));
+      this.surface = new MarchingCubes(sdf.getSdf(), sdf.getColorF(), radius, S.float('mcs'));
       this.surface = BufferGeometryUtils.mergeVertices(this.surface, 0.01);
       this.surface.computeVertexNormals();
       this.surfaceMesh = new THREE.Mesh(
