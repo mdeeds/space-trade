@@ -114,7 +114,7 @@ export class Assets {
       m.name = modelName;
       namedMeshes.set(modelName, m);
       Assets.principalColors.set(modelName, this.getPrincipalColor(m));
-      Assets.logModel('', m);
+      // Assets.logModel('', m);
     }
 
     return new Promise<Assets>((accept, reject) => {
