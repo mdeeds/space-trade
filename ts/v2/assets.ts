@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { MeshPhongMaterial } from "three";
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Log } from "./log";
@@ -36,6 +37,24 @@ export class Assets {
     for (const child of o.children) {
       const mesh = Assets.findFirstMesh(child);
       if (!!mesh) { return mesh; }
+    }
+    return null;
+  }
+
+  private static getPrincipalColor(m: THREE.Mesh): THREE.Color {
+    // const material = m.material as THREE.Material;
+    // let color: THREE.Color = null;
+    // color ||= (material as MeshPhongMaterial).color;
+    // return color;
+
+    return new THREE.Color(Math.random(), Math.random(), Math.random());
+  }
+
+  private static principalColors = new Map<string, THREE.Color>();
+
+  static getColor(s: string): THREE.Color {
+    if (this.principalColors.has(s)) {
+      return this.principalColors.get(s);
     }
     return null;
   }
@@ -94,10 +113,24 @@ export class Assets {
       const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
       m.name = modelName;
       namedMeshes.set(modelName, m);
+      Assets.principalColors.set(modelName, this.getPrincipalColor(m));
+      Assets.logModel('', m);
     }
 
     return new Promise<Assets>((accept, reject) => {
       accept(new Assets(namedMeshes));
     });
+  }
+
+  static logModel(prefix: string, o: THREE.Object3D) {
+    console.log(`${o.name}`);
+    prefix = prefix + ' ';
+    if (o['material'] && o['material']['color']) {
+      const col = o['material']['color'];
+      console.log(`${prefix}color: ${[col.r, col.g, col.b]}`);
+    }
+    for (const c of o.children) {
+      this.logModel(prefix, c);
+    }
   }
 }

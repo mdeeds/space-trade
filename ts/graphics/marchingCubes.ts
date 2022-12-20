@@ -342,7 +342,11 @@ export class MarchingCubes extends THREE.BufferGeometry {
 
       const p = gridCell[indexA] / (gridCell[indexA] - gridCell[indexB]);
       const color = colorF(cubeCorners[indexA]) || colorF(cubeCorners[indexB]);
-      colors.push(color.r, color.g, color.b);
+      if (!color) {
+        colors.push(1, 0, 1);
+      } else {
+        colors.push(color.r, color.g, color.b);
+      }
       vertex.lerp(cubeCorners[indexB], p);
       triangles.push(vertex.x, vertex.y, vertex.z);
     }

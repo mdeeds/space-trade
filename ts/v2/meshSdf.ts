@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { SDF, ColorF } from "../graphics/marchingCubes";
+import { Assets } from "./assets";
 
 import { MeshCollection } from "./meshCollection";
 
 export class MeshSdf {
     private data: Float32Array;
+    private colorData: THREE.Color[] = [];
     private extent = new THREE.Vector3();
     private min = new THREE.Vector3(Infinity, Infinity, Infinity);
 
@@ -38,6 +40,7 @@ export class MeshSdf {
             tmp.sub(this.min);
             const index = Math.round(tmp.x + tmp.y * this.extent.x + tmp.z * this.extent.x * this.extent.y);
             this.data[index] = -1;
+            this.colorData[index] = Assets.getColor(s);
         }
     }
 
@@ -61,8 +64,18 @@ export class MeshSdf {
 
     getColorF(): ColorF {
         return (pos: THREE.Vector3) => {
-            // TODO!
-            return new THREE.Color('#fff');
+            this.tmp.copy(pos);
+            this.tmp.sub(this.min);
+            this.tmp.x = Math.round(this.tmp.x);
+            this.tmp.y = Math.round(this.tmp.y);
+            this.tmp.z = Math.round(this.tmp.z);
+            if (this.tmp.x < 0 || this.tmp.x >= this.extent.x ||
+                this.tmp.y < 0 || this.tmp.y >= this.extent.y ||
+                this.tmp.z < 0 || this.tmp.z >= this.extent.z)
+                return null;
+
+            const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
+            return this.colorData[index];
         };
     }
 }
