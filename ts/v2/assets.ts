@@ -48,11 +48,12 @@ export class Assets {
       const tmpColor = new THREE.Color();
       for (let i = 0; i < colorAtt.count; ++i) {
         tmpColor.fromBufferAttribute(colorAtt, i);
+        // console.log(`${[tmpColor.r, tmpColor.g, tmpColor.b]}`);
         tmpColor.multiplyScalar(1 / colorAtt.count);
         meanColor.add(tmpColor);
       }
-      meanColor.multiplyScalar(1 / 255);
-      console.log(`${[meanColor.r, meanColor.g, meanColor.b]}`);
+      meanColor.multiplyScalar(1 / 100);
+      // console.log(`${[meanColor.r, meanColor.g, meanColor.b]}`);
       return meanColor;
     }
 
@@ -126,7 +127,7 @@ export class Assets {
       m.name = modelName;
       namedMeshes.set(modelName, m);
       Assets.principalColors.set(modelName, this.getPrincipalColor(m));
-      Assets.logModel('', m);
+      // Assets.logModel('', m);
     }
 
     return new Promise<Assets>((accept, reject) => {
