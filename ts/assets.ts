@@ -161,7 +161,7 @@ export class Assets extends THREE.Object3D {
     const modelNames = [
       'accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'guide', 'ice', 'light-blue',
       'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-      'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer']
+      'silicon-crystalized', 'tank', 'thruster-jet', 'wedge', 'producer']
     for (const modelName of modelNames) {
       // console.log(`Loading ${modelName}`);
       const model = await ModelLoader.loadModel(`Model/${modelName}.glb`);
@@ -180,7 +180,7 @@ export class Assets extends THREE.Object3D {
   static initItems() {
     const paintableItems = [
       'cube', 'wedge', 'arm', 'cluster-jet', 'scaffold',
-      'thruster', 'tank', 'light-blue',
+      'thruster-jet', 'tank', 'light-blue',
       'corner']
     Assets.items = [];
     for (const [key, value] of Assets.meshes.entries()) {
@@ -196,7 +196,7 @@ export class Assets extends THREE.Object3D {
     }
     const producers = ['accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'ice', 'light-blue',
       'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-      'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
+      'silicon-crystalized', 'tank', 'thruster-jet', 'wedge', 'producer'
     ]
     for (const [key, value] of Assets.meshes.entries()) {
       if (producers.includes(key)) {
