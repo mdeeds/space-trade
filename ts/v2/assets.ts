@@ -41,33 +41,35 @@ export class Assets {
     return null;
   }
 
-  private static getPrincipalColor(m: THREE.Mesh): THREE.Color {
+  private static getPrincipalColors(m: THREE.Mesh): THREE.Color[] {
+    const colors: THREE.Color[] = [];
     if (m.geometry.hasAttribute('color')) {
       const colorAtt = m.geometry.getAttribute('color') as BufferAttribute;
       const meanColor = new THREE.Color(0, 0, 0);
-      const tmpColor = new THREE.Color();
       for (let i = 0; i < colorAtt.count; ++i) {
+        const tmpColor = new THREE.Color();
         tmpColor.fromBufferAttribute(colorAtt, i);
         // console.log(`${[tmpColor.r, tmpColor.g, tmpColor.b]}`);
-        tmpColor.multiplyScalar(1 / colorAtt.count);
-        meanColor.add(tmpColor);
+        tmpColor.multiplyScalar(1 / 100);
+        colors.push(tmpColor);
       }
       meanColor.multiplyScalar(1 / 100);
       // console.log(`${[meanColor.r, meanColor.g, meanColor.b]}`);
-      return meanColor;
+      return colors;
     }
 
     const material = m.material as THREE.Material;
     let color: THREE.Color = null;
     color ||= (material as MeshPhongMaterial).color;
-    return color;
+    return [color];
   }
 
-  private static principalColors = new Map<string, THREE.Color>();
+  private static principalColors = new Map<string, THREE.Color[]>();
 
   static getColor(s: string): THREE.Color {
     if (this.principalColors.has(s)) {
-      return this.principalColors.get(s);
+      const colors = this.principalColors.get(s);
+      return colors[Math.floor(Math.random() * colors.length)];
     }
     return null;
   }
@@ -126,7 +128,7 @@ export class Assets {
       const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
       m.name = modelName;
       namedMeshes.set(modelName, m);
-      Assets.principalColors.set(modelName, this.getPrincipalColor(m));
+      Assets.principalColors.set(modelName, this.getPrincipalColors(m));
       // Assets.logModel('', m);
     }
 
