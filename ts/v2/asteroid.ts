@@ -104,6 +104,10 @@ export class Asteroid extends THREE.Object3D implements Codeable, PointSet {
     const radius = 10.0;
     const sdf = new MeshSdf(this.meshCollection);
     if (S.float('mcs') > 0) {
+      // TODO: ideally we don't have to clone the Marching Cubes
+      // when we merge the Vertices.  Probably best to make MarchingCubes
+      // some sort of factory instead of an Object itself.
+      // I.e. MarchingCubs *has a* Mesh; not Marching cubes *is a* mesh.
       this.surface = new MarchingCubes(sdf.getSdf(), sdf.getColorF(), radius, S.float('mcs'));
       this.surface = BufferGeometryUtils.mergeVertices(this.surface, 0.01);
       this.surface.computeVertexNormals();

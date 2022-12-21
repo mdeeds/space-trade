@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { MeshPhongMaterial } from "three";
+import { BufferAttribute, MeshPhongMaterial } from "three";
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Log } from "./log";
@@ -42,12 +42,24 @@ export class Assets {
   }
 
   private static getPrincipalColor(m: THREE.Mesh): THREE.Color {
-    // const material = m.material as THREE.Material;
-    // let color: THREE.Color = null;
-    // color ||= (material as MeshPhongMaterial).color;
-    // return color;
+    if (m.geometry.hasAttribute('color')) {
+      const colorAtt = m.geometry.getAttribute('color') as BufferAttribute;
+      const meanColor = new THREE.Color(0, 0, 0);
+      const tmpColor = new THREE.Color();
+      for (let i = 0; i < colorAtt.count; ++i) {
+        tmpColor.fromBufferAttribute(colorAtt, i);
+        tmpColor.multiplyScalar(1 / colorAtt.count);
+        meanColor.add(tmpColor);
+      }
+      meanColor.multiplyScalar(1 / 255);
+      console.log(`${[meanColor.r, meanColor.g, meanColor.b]}`);
+      return meanColor;
+    }
 
-    return new THREE.Color(Math.random(), Math.random(), Math.random());
+    const material = m.material as THREE.Material;
+    let color: THREE.Color = null;
+    color ||= (material as MeshPhongMaterial).color;
+    return color;
   }
 
   private static principalColors = new Map<string, THREE.Color>();
@@ -114,7 +126,7 @@ export class Assets {
       m.name = modelName;
       namedMeshes.set(modelName, m);
       Assets.principalColors.set(modelName, this.getPrincipalColor(m));
-      // Assets.logModel('', m);
+      Assets.logModel('', m);
     }
 
     return new Promise<Assets>((accept, reject) => {
