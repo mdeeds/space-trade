@@ -187,7 +187,7 @@ class Assets extends THREE.Object3D {
         const modelNames = [
             'accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'guide', 'ice', 'light-blue',
             'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-            'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
+            'silicon-crystalized', 'tank', 'thruster-jet', 'wedge', 'producer'
         ];
         for (const modelName of modelNames) {
             // console.log(`Loading ${modelName}`);
@@ -206,7 +206,7 @@ class Assets extends THREE.Object3D {
     static initItems() {
         const paintableItems = [
             'cube', 'wedge', 'arm', 'cluster-jet', 'scaffold',
-            'thruster', 'tank', 'light-blue',
+            'thruster-jet', 'tank', 'light-blue',
             'corner'
         ];
         Assets.items = [];
@@ -223,7 +223,7 @@ class Assets extends THREE.Object3D {
         }
         const producers = ['accordion', 'arm', 'clay', 'cluster-jet', 'corner', 'cube', 'ice', 'light-blue',
             'metal-common', 'metal-rare', 'port', 'salt-common', 'salt-rare', 'scaffold', 'silicate-rock',
-            'silicon-crystalized', 'tank', 'thruster', 'wedge', 'producer'
+            'silicon-crystalized', 'tank', 'thruster-jet', 'wedge', 'producer'
         ];
         for (const [key, value] of Assets.meshes.entries()) {
             if (producers.includes(key)) {
@@ -4498,8 +4498,8 @@ class S {
         S.setDefault('om', 0, 'Size of origin marker');
         S.setDefault('pv', 2, 'Point cloud version');
         S.setDefault('nebn', 3e3, 'Number of nebula points');
-        S.setDefault('nebs', 2e7, 'Size of each point (meters)');
-        S.setDefault('nebr', 1e8, 'Radius of the nebula');
+        S.setDefault('nebs', 2e8, 'Size of each point (meters)');
+        S.setDefault('nebr', 1e9, 'Radius of the nebula');
         S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
         S.setDefault('mcs', 0, 'Marching cubes step size. 0 = disabled');
         S.setDefault('fov', 75, 'Field of View');
@@ -8033,7 +8033,8 @@ class WebGLRenderTarget extends EventDispatcher {
 		this.texture = source.texture.clone();
 		this.texture.isRenderTargetTexture = true; // ensure image object is not shared, see #20328
 
-		this.texture.image = Object.assign({}, source.texture.image);
+		const image = Object.assign({}, source.texture.image);
+		this.texture.source = new Source(image);
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
 		if (source.depthTexture !== null) this.depthTexture = source.depthTexture.clone();
@@ -45634,7 +45635,8 @@ class WebGLRenderTarget extends EventDispatcher {
 
 		// ensure image object is not shared, see #20328
 
-		this.texture.image = Object.assign( {}, source.texture.image );
+		const image = Object.assign( {}, source.texture.image );
+		this.texture.source = new Source( image );
 
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;

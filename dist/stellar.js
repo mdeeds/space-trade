@@ -34,9 +34,10 @@ exports.MarchingCubes = void 0;
 const THREE = __importStar(__webpack_require__(5232));
 class MarchingCubes extends THREE.BufferGeometry {
     // Marching cubes always have the central latice point at 0,0,0.
-    constructor(sdf, radius, stepSize) {
+    constructor(sdf, cf, radius, stepSize) {
         super();
         const vertices = [];
+        const colors = [];
         const cellRadius = stepSize / 2;
         const gridCell = new Float32Array(8);
         const protoCorners = [];
@@ -65,21 +66,14 @@ class MarchingCubes extends THREE.BufferGeometry {
                         const distance = sdf(cubeCorners[c]);
                         gridCell[c] = distance;
                     }
-                    MarchingCubes.addTriangles(gridCell, /*threshold=*/ 0, cubeCorners, vertices);
+                    MarchingCubes.addTriangles(gridCell, /*threshold=*/ 0, cubeCorners, vertices, colors, cf);
                 }
             }
         }
         console.timeEnd('March');
         console.log(`Positions: ${vertices.length}`);
         this.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
-        // const colors: THREE.Color[] = [];
-        // const tmp = new THREE.Vector3();
-        // const positionAtt = this.getAttribute('position');
-        // for (let i = 0; i < positionAtt.count; ++i) {
-        //   tmp.fromBufferAttribute(positionAtt, i);
-        //   const color = colorF(tmp);
-        //   colors.push(color);
-        // }
+        this.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
     }
     static cornerIndexAFromEdge = [0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3];
     static cornerIndexBFromEdge = [1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7];
@@ -342,7 +336,7 @@ class MarchingCubes extends THREE.BufferGeometry {
         [0, 3, 8],
         []
     ];
-    static addTriangles(gridCell, threshold, cubeCorners, triangles) {
+    static addTriangles(gridCell, threshold, cubeCorners, triangles, colors, colorF) {
         let cubeindex = 0;
         if (gridCell[0] < threshold)
             cubeindex |= 1;
@@ -366,6 +360,13 @@ class MarchingCubes extends THREE.BufferGeometry {
             const indexB = MarchingCubes.cornerIndexBFromEdge[edgeIndex];
             const vertex = new THREE.Vector3().copy(cubeCorners[indexA]);
             const p = gridCell[indexA] / (gridCell[indexA] - gridCell[indexB]);
+            const color = colorF(cubeCorners[indexA]) || colorF(cubeCorners[indexB]);
+            if (!color) {
+                colors.push(1, 0, 1);
+            }
+            else {
+                colors.push(color.r, color.g, color.b);
+            }
             vertex.lerp(cubeCorners[indexB], p);
             triangles.push(vertex.x, vertex.y, vertex.z);
         }
@@ -427,8 +428,8 @@ class S {
         S.setDefault('om', 0, 'Size of origin marker');
         S.setDefault('pv', 2, 'Point cloud version');
         S.setDefault('nebn', 3e3, 'Number of nebula points');
-        S.setDefault('nebs', 2e7, 'Size of each point (meters)');
-        S.setDefault('nebr', 1e8, 'Radius of the nebula');
+        S.setDefault('nebs', 2e8, 'Size of each point (meters)');
+        S.setDefault('nebr', 1e9, 'Radius of the nebula');
         S.setDefault('neba', 0.03, 'Alpha for each nebula instance');
         S.setDefault('mcs', 0, 'Marching cubes step size. 0 = disabled');
         S.setDefault('fov', 75, 'Field of View');
@@ -544,6 +545,35 @@ class Assets {
         }
         return null;
     }
+    static getPrincipalColors(m) {
+        const colors = [];
+        if (m.geometry.hasAttribute('color')) {
+            const colorAtt = m.geometry.getAttribute('color');
+            const meanColor = new THREE.Color(0, 0, 0);
+            for (let i = 0; i < colorAtt.count; ++i) {
+                const tmpColor = new THREE.Color();
+                tmpColor.fromBufferAttribute(colorAtt, i);
+                // console.log(`${[tmpColor.r, tmpColor.g, tmpColor.b]}`);
+                tmpColor.multiplyScalar(1 / 100);
+                colors.push(tmpColor);
+            }
+            meanColor.multiplyScalar(1 / 100);
+            // console.log(`${[meanColor.r, meanColor.g, meanColor.b]}`);
+            return colors;
+        }
+        const material = m.material;
+        let color = null;
+        color ||= material.color;
+        return [color];
+    }
+    static principalColors = new Map();
+    static getColor(s) {
+        if (this.principalColors.has(s)) {
+            const colors = this.principalColors.get(s);
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        return null;
+    }
     static async loadMeshFromModel(filename) {
         const loader = new GLTFLoader_js_1.GLTFLoader();
         return new Promise((resolve, reject) => {
@@ -568,11 +598,13 @@ class Assets {
             'cube',
             'cylinder',
             'factory',
+            'fertilizer',
             'food',
             'fuel',
             'glass-corner',
             'glass-cube',
             'glass-wedge',
+            'gourmet-food',
             'guide',
             'habitat',
             'iron-chondrite',
@@ -597,10 +629,23 @@ class Assets {
             const m = await Assets.loadMeshFromModel(`Model/${modelName}.glb`);
             m.name = modelName;
             namedMeshes.set(modelName, m);
+            Assets.principalColors.set(modelName, this.getPrincipalColors(m));
+            // Assets.logModel('', m);
         }
         return new Promise((accept, reject) => {
             accept(new Assets(namedMeshes));
         });
+    }
+    static logModel(prefix, o) {
+        console.log(`${o.name}`);
+        prefix = prefix + ' ';
+        if (o['material'] && o['material']['color']) {
+            const col = o['material']['color'];
+            console.log(`${prefix}color: ${[col.r, col.g, col.b]}`);
+        }
+        for (const c of o.children) {
+            this.logModel(prefix, c);
+        }
     }
 }
 exports.Assets = Assets;
@@ -735,7 +780,11 @@ class Asteroid extends THREE.Object3D {
         const radius = 10.0;
         const sdf = new meshSdf_1.MeshSdf(this.meshCollection);
         if (settings_1.S.float('mcs') > 0) {
-            this.surface = new marchingCubes_1.MarchingCubes(sdf.getSdf(), radius, settings_1.S.float('mcs'));
+            // TODO: ideally we don't have to clone the Marching Cubes
+            // when we merge the Vertices.  Probably best to make MarchingCubes
+            // some sort of factory instead of an Object itself.
+            // I.e. MarchingCubs *has a* Mesh; not Marching cubes *is a* mesh.
+            this.surface = new marchingCubes_1.MarchingCubes(sdf.getSdf(), sdf.getColorF(), radius, settings_1.S.float('mcs'));
             this.surface = BufferGeometryUtils.mergeVertices(this.surface, 0.01);
             this.surface.computeVertexNormals();
             this.surfaceMesh = new THREE.Mesh(this.surface, await asteroidMaterial_1.AsteroidMaterial.make(new THREE.Color('#fdd')));
@@ -806,26 +855,28 @@ class AsteroidMaterial extends THREE.ShaderMaterial {
         super({
             vertexShader: `
 #define EPSILON 1e-6
-  varying vec3 vNormal;
-  varying vec3 vMxyz;
-  uniform float logDepthBufFC;
-  void main() {
+uniform float logDepthBufFC;
+varying vec3 vNormal;
+varying vec3 vMxyz;
+varying vec3 vColor;
+void main() {
     vMxyz = position;
     vNormal = normal;
+    vColor = color;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
 
     gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
     gl_Position.z *= gl_Position.w;
-  }
+}
             `,
             fragmentShader: `
-  varying vec3 vNormal;
-  uniform vec3 baseColor;
-  uniform sampler2D tex_low;
-  uniform sampler2D tex_mid;
-  uniform sampler2D tex_hig;
-  varying vec3 vMxyz;
-  void main() {
+varying vec3 vNormal;
+varying vec3 vColor;
+uniform sampler2D tex_low;
+uniform sampler2D tex_mid;
+uniform sampler2D tex_hig;
+varying vec3 vMxyz;
+void main() {
     float intensity = (0.2 + clamp(vNormal.y, 0.0, 1.0));
 
     vec3 mxyz = vMxyz;
@@ -841,15 +892,15 @@ class AsteroidMaterial extends THREE.ShaderMaterial {
 
     float lightness = lxy * smoothstep(0.2, 1.0, abs(vNormal.z)) + lyz * smoothstep(0.2, 1.0, abs(vNormal.x)) + lzx * smoothstep(0.2, 1.0, abs(vNormal.y));
 
-    gl_FragColor = vec4(lightness * intensity * baseColor, 1.0);
-  }
+    gl_FragColor = vec4(lightness * intensity * vColor, 1.0);
+}
             `,
             depthTest: true,
             depthWrite: true,
             blending: THREE.NormalBlending,
             side: THREE.FrontSide,
             transparent: false,
-            vertexColors: false,
+            vertexColors: true,
             uniforms: {
                 baseColor: { value: color },
                 tex_low: { value: tex_low },
@@ -1339,20 +1390,20 @@ class Compounds {
         this.add('iron-cube', 'carbon-fiber-cube', 'habitat');
         // Farmer Water+Carbon
         this.add('phylosilicate', 'carbon-chondrite', 'mud');
-        this.add('water-ice', 'carbon-fiber', 'food');
-        this.add('polyoxide-corner', 'carbon-fiber-corner', 'composite-slab');
-        this.add('polyoxide-wedge', 'carbon-fiber-wedge', 'thruster-jet');
+        this.add('water-ice', 'carbon-fiber', 'fertilizer');
+        this.add('polyoxide-corner', 'carbon-fiber-corner', 'food');
+        this.add('polyoxide-wedge', 'carbon-fiber-wedge', 'gourmet-food');
         this.add('polyoxide-cube', 'carbon-fiber-cube', 'fuel');
         // Pilot Iron+Silicon
         this.add('iron-chondrite', 'borosilicate', 'point');
-        this.add('iron', 'silicone', 'rod');
+        //this.add('iron', 'silicone', 'rod');
         this.add('iron-corner', 'glass-corner', 'cluster-jet');
         this.add('iron-wedge', 'glass-wedge', 'chair');
         this.add('iron-cube', 'glass-cube', 'thruster-jet');
         // Engineer Silicon+Water
         this.add('borosilicate', 'phylosilicate', 'scaffold');
-        this.add('silicone', 'water-ice', 'Cube.010');
-        this.add('glass-corner', 'polyoxide-corner', 'wheel');
+        //this.add('silicone', 'water-ice', 'Cube.010');
+        //this.add('glass-corner', 'polyoxide-corner', 'wheel');
         this.add('glass-wedge', 'polyoxide-wedge', 'conveyor');
         this.add('glass-cube', 'polyoxide-cube', 'factory');
     }
@@ -2160,7 +2211,6 @@ const THREE = __importStar(__webpack_require__(5232));
 const settings_1 = __webpack_require__(6451);
 const grid_1 = __webpack_require__(3424);
 const isoTransform_1 = __webpack_require__(3265);
-const log_1 = __webpack_require__(4920);
 const neighborCount_1 = __webpack_require__(6516);
 const octoTree_1 = __webpack_require__(9343);
 const simpleLocationMap_1 = __webpack_require__(6125);
@@ -2212,7 +2262,7 @@ class MeshCollection extends THREE.Object3D {
             newMaterial.transparent = false;
             const color = this.getColor(mesh);
             this.colorMap.set(name, color);
-            log_1.Log.info(`${name} is ${[color.r, color.g, color.b]}`);
+            // Log.info(`Color of ${name} is ${[color.r, color.g, color.b]}`);
             // TODO: Consider MeshToonMaterial
             const geometry = mesh.geometry.clone();
             mesh.matrix.decompose(this.t, this.r, this.s);
@@ -2403,8 +2453,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MeshSdf = void 0;
 const THREE = __importStar(__webpack_require__(5232));
+const assets_1 = __webpack_require__(7253);
 class MeshSdf {
     data;
+    colorData = [];
     extent = new THREE.Vector3();
     min = new THREE.Vector3(Infinity, Infinity, Infinity);
     constructor(meshCollection) {
@@ -2435,6 +2487,7 @@ class MeshSdf {
             tmp.sub(this.min);
             const index = Math.round(tmp.x + tmp.y * this.extent.x + tmp.z * this.extent.x * this.extent.y);
             this.data[index] = -1;
+            this.colorData[index] = assets_1.Assets.getColor(s);
         }
     }
     tmp = new THREE.Vector3();
@@ -2445,14 +2498,27 @@ class MeshSdf {
             this.tmp.x = Math.round(this.tmp.x);
             this.tmp.y = Math.round(this.tmp.y);
             this.tmp.z = Math.round(this.tmp.z);
+            if (this.tmp.x < 0 || this.tmp.x >= this.extent.x ||
+                this.tmp.y < 0 || this.tmp.y >= this.extent.y ||
+                this.tmp.z < 0 || this.tmp.z >= this.extent.z)
+                return 1;
             const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
             return this.data[index];
         };
     }
     getColorF() {
         return (pos) => {
-            // TODO!
-            return new THREE.Color('#fff');
+            this.tmp.copy(pos);
+            this.tmp.sub(this.min);
+            this.tmp.x = Math.round(this.tmp.x);
+            this.tmp.y = Math.round(this.tmp.y);
+            this.tmp.z = Math.round(this.tmp.z);
+            if (this.tmp.x < 0 || this.tmp.x >= this.extent.x ||
+                this.tmp.y < 0 || this.tmp.y >= this.extent.y ||
+                this.tmp.z < 0 || this.tmp.z >= this.extent.z)
+                return null;
+            const index = this.tmp.x + this.tmp.y * this.extent.x + this.tmp.z * this.extent.x * this.extent.y;
+            return this.colorData[index];
         };
     }
 }
@@ -7023,7 +7089,8 @@ class WebGLRenderTarget extends EventDispatcher {
 		this.texture = source.texture.clone();
 		this.texture.isRenderTargetTexture = true; // ensure image object is not shared, see #20328
 
-		this.texture.image = Object.assign({}, source.texture.image);
+		const image = Object.assign({}, source.texture.image);
+		this.texture.source = new Source(image);
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
 		if (source.depthTexture !== null) this.depthTexture = source.depthTexture.clone();
@@ -44626,7 +44693,8 @@ class WebGLRenderTarget extends EventDispatcher {
 
 		// ensure image object is not shared, see #20328
 
-		this.texture.image = Object.assign( {}, source.texture.image );
+		const image = Object.assign( {}, source.texture.image );
+		this.texture.source = new Source( image );
 
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
