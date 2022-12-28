@@ -4129,7 +4129,11 @@ class Stellar {
         const light = new THREE.DirectionalLight(new THREE.Color('#fff'), 1.0);
         light.position.set(0, 10, 2);
         this.scene.add(light);
-        const ambient = new THREE.AmbientLight('#def', 0.5);
+        const headLamp = new THREE.PointLight(0xFFFFFF, 1.0, 10, 10);
+        headLamp.position.set(0, 0, 0);
+        this.playerGroup.add(headLamp);
+        const ambient = new THREE.AmbientLight('#def', 0.1);
+        //const ambient = new THREE.AmbientLight('#111', 0.1);
         this.scene.add(ambient);
         console.log('Initialize World');
         const assets = await assets_1.Assets.load();
