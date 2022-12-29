@@ -3,3 +3,4 @@ src/**/*.js.map
 dist/*.js.map
 node_modules/**
 *.blend1
+*.blend1
