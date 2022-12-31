@@ -1150,7 +1150,8 @@ class AstroGen {
             itemLists.push(['borosilicate', 'phylosilicate']);
         }
         else {
-            itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
+            itemLists.push(['gourmet-food']);
+            //itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
         }
         let items = itemLists[(0, MathUtils_1.randInt)(0, itemLists.length - 1)];
         for (let x = -r; x < r; x++) {
