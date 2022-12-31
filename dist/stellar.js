@@ -2267,8 +2267,8 @@ class MeshCollection extends THREE.Object3D {
             const geometry = mesh.geometry.clone();
             mesh.matrix.decompose(this.t, this.r, this.s);
             geometry.scale(this.s.x, this.s.y, this.s.z);
-            this.defineItem(name, geometry, oldMaterial);
-            //this.defineItem(name, geometry, newMaterial);
+            //this.defineItem(name, geometry, oldMaterial);
+            this.defineItem(name, geometry, newMaterial);
         }
     }
     getColor(mesh) {
