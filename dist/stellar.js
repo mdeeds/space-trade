@@ -2246,20 +2246,20 @@ class MeshCollection extends THREE.Object3D {
         for (const name of assets.names()) {
             const mesh = assets.getMesh(name);
             // console.log(`Mesh: ${mesh.name}`);
-            let oldMaterial = mesh.material;
-            let newMaterial = oldMaterial;
-            if (oldMaterial.type === 'MeshPhysicalMaterial') {
-                let m = oldMaterial;
-                // console.log(m);
-                newMaterial = new THREE.MeshPhongMaterial({
-                    color: m.color,
-                    shininess: 1.0,
-                    emissive: m.emissive,
-                });
-            }
-            newMaterial.depthWrite = true;
-            newMaterial.depthTest = true;
-            newMaterial.transparent = false;
+            // let oldMaterial = mesh.material as THREE.Material;
+            // let newMaterial = oldMaterial;
+            // if (oldMaterial.type === 'MeshPhysicalMaterial') {
+            //   let m = oldMaterial as THREE.MeshPhysicalMaterial;
+            //   // console.log(m);
+            //   newMaterial = new THREE.MeshPhongMaterial({
+            //     color: m.color,
+            //     shininess: 1.0,
+            //     emissive: m.emissive,
+            //   });
+            // }
+            // newMaterial.depthWrite = true;
+            // newMaterial.depthTest = true;
+            // newMaterial.transparent = false;
             const color = this.getColor(mesh);
             this.colorMap.set(name, color);
             // Log.info(`Color of ${name} is ${[color.r, color.g, color.b]}`);
@@ -2267,8 +2267,8 @@ class MeshCollection extends THREE.Object3D {
             const geometry = mesh.geometry.clone();
             mesh.matrix.decompose(this.t, this.r, this.s);
             geometry.scale(this.s.x, this.s.y, this.s.z);
-            //this.defineItem(name, geometry, oldMaterial);
-            this.defineItem(name, geometry, newMaterial);
+            this.defineItem(name, geometry, mesh.material);
+            //this.defineItem(name, geometry, newMaterial);
         }
     }
     getColor(mesh) {
