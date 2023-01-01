@@ -106,7 +106,7 @@ export class Stellar {
     this.camera.lookAt(0, 1.7, -1.5);
     this.playerGroup.add(this.camera);
 
-    this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     this.renderer.setSize(800, 800);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(this.renderer.domElement);
