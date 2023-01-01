@@ -6,7 +6,7 @@ class CursorEvent extends Event {
   }
 }
 
-class CursorEventSource {
+class InputAdapter {
   private grabListeners: ((CursorEvent) => void)[] = [];
   private pointer = new THREE.Vector2();
   private raycaster = new THREE.Raycaster();
