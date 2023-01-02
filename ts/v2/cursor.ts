@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { LineSegments } from "three";
 import { Assets } from "./assets";
+import { Cubie } from "./construction";
 
 export class Cursor extends THREE.Object3D {
   private hold: string;
@@ -63,6 +64,7 @@ export class Cursor extends THREE.Object3D {
       this.remove(this.heldObject);
     }
     if (item) {
+      // TODO: There should be rotation here.
       this.heldObject = this.assets.getMesh(item);
       if (this.heldObject) {
         this.add(this.heldObject);

@@ -101,6 +101,12 @@ export class System extends THREE.Object3D implements Codeable, PointSet {
     return o;
   }
 
+  private maybeLoad(): void {
+    const url = new URL(document.URL);
+    const stringVal = url.searchParams.get('');
+
+  }
+
   deserialize(o: Object): this {
     this.asteroids.starPositions.clear();
     for (const p of o['asteroidPositions']) {

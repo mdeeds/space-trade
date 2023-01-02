@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { SDF, ColorF } from "../graphics/marchingCubes";
 import { Assets } from "./assets";
 
-import { MeshCollection } from "./meshCollection";
+import { Construction } from "./construction";
 
 export class MeshSdf {
     private data: Float32Array;
@@ -10,7 +10,7 @@ export class MeshSdf {
     private extent = new THREE.Vector3();
     private min = new THREE.Vector3(Infinity, Infinity, Infinity);
 
-    constructor(meshCollection: MeshCollection) {
+    constructor(meshCollection: Construction) {
         const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
         for (const [p, s] of meshCollection.getCubes()) {
             this.min.x = Math.min(this.min.x, p.x);

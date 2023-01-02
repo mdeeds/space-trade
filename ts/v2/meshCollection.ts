@@ -2,21 +2,14 @@ import * as THREE from "three";
 import { S } from "../settings";
 import { Tick, Ticker } from "../tick";
 import { Assets } from "./assets";
-import { Construction } from "./construction";
+import { Construction, Cubie } from "./construction";
 import { Codeable } from "./file";
 import { Grid } from "./grid";
 import { IsoTransform } from "./isoTransform";
-import { LocationMap } from "./locationMap";
-import { Log } from "./log";
 import { NeighborCount } from "./neighborCount";
 import { PointMapOctoTree } from "./octoTree";
 import { PointSet } from "./pointSet";
 import { SimpleLocationMap } from "./simpleLocationMap";
-
-class NameAndRotation {
-  constructor(readonly name: string, readonly quaternion: THREE.Quaternion) {
-  }
-}
 
 export class MeshCollection extends THREE.Object3D
   implements PointSet, Construction, Ticker, Codeable {
@@ -30,7 +23,7 @@ export class MeshCollection extends THREE.Object3D
   private meshMap = new Map<string, THREE.InstancedMesh>();
   private colorMap = new Map<string, THREE.Color>();
 
-  private cubes: SimpleLocationMap<string>;
+  private cubes: SimpleLocationMap<Cubie>;
   private quaternions = new SimpleLocationMap<THREE.Quaternion>();
 
   private t = new THREE.Vector3();
@@ -40,7 +33,7 @@ export class MeshCollection extends THREE.Object3D
   constructor(assets: Assets, private radius: number) {
     super();
     const r = Math.ceil(radius);
-    this.cubes = new SimpleLocationMap<string>();
+    this.cubes = new SimpleLocationMap<Cubie>();
 
     console.log('constructing Mesh Collection');
 
@@ -104,7 +97,13 @@ export class MeshCollection extends THREE.Object3D
     throw new Error("Method not implemented.");
   }
 
-  public getCubes(): Iterable<[THREE.Vector3, string]> {
+  public *getCubes(): Iterable<[THREE.Vector3, string]> {
+    for (const [p, c] of this.cubes.entries()) {
+      yield [p, c.name];
+    }
+  }
+
+  public *getCubies(): Iterable<[THREE.Vector3, Cubie]> {
     return this.cubes.entries();
   }
 
@@ -119,18 +118,22 @@ export class MeshCollection extends THREE.Object3D
 
   private dirty = false;
   public addCube(name: string, tx: IsoTransform) {
-    this.cubes.set(tx.position, name);
+    this.cubes.set(tx.position, new Cubie(name, tx));
     this.rocks.add(tx.position, tx);
     this.quaternions.set(tx.position, tx.quaternion);
     this.dirty = true;
   }
 
-  public removeCube(position: THREE.Vector3): string {
-    const name = this.cubes.get(position);
-    if (!!name) {
+  public addCubie(cubie: Cubie) {
+    this.addCube(cubie.name, cubie.tx);
+  }
+
+  public removeCubie(position: THREE.Vector3): Cubie {
+    const cubie = this.cubes.get(position);
+    if (!!cubie) {
       this.cubes.set(position, null);
       this.dirty = true;
-      return name;
+      return cubie;
     }
     return null;
   }
@@ -139,8 +142,8 @@ export class MeshCollection extends THREE.Object3D
     return !!this.cubes.get(p);
   }
 
-  public get(p: THREE.Vector3): string {
-    return this.cubes.get(p);
+  public getCubeAt(p: THREE.Vector3): string {
+    return this.cubes.get(p).name;
   }
 
   public buildGeometry() {
@@ -150,10 +153,10 @@ export class MeshCollection extends THREE.Object3D
 
     const nc = new NeighborCount();
     // console.log('Building mesh collection.');
-    for (const [cubePosition, cubeName] of this.cubes.entries()) {
+    for (const [cubePosition, cubie] of this.cubes.entries()) {
       let tx: IsoTransform = new IsoTransform(
         cubePosition, this.quaternions.get(cubePosition));
-      nc.set(cubePosition, cubeName);
+      nc.set(cubePosition, cubie.name);
     }
 
     // Populate the neighbor mesh
@@ -197,7 +200,8 @@ export class MeshCollection extends THREE.Object3D
     const o = {};
     const positionMap = new Map<string, Object[]>();
     const rotationMap = new Map<string, Object[]>();
-    for (const [cubePosition, cubeName] of this.cubes.entries()) {
+    for (const [cubePosition, cubie] of this.cubes.entries()) {
+      const cubeName = cubie.name;
       if (!positionMap.has(cubeName)) positionMap.set(cubeName, []);
       positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
       if (!rotationMap.has(cubeName)) rotationMap.set(cubeName, []);
