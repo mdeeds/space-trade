@@ -1150,8 +1150,8 @@ class AstroGen {
             itemLists.push(['borosilicate', 'phylosilicate']);
         }
         else {
-            itemLists.push(['gourmet-food']);
-            //itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
+            //itemLists.push(['gourmet-food']);
+            itemLists.push(['borosilicate', 'phylosilicate', 'iron-chondrite', 'carbon-chondrite']);
         }
         let items = itemLists[(0, MathUtils_1.randInt)(0, itemLists.length - 1)];
         for (let x = -r; x < r; x++) {
@@ -4032,7 +4032,7 @@ class Stellar {
         this.camera.position.set(0, 1.7, 0);
         this.camera.lookAt(0, 1.7, -1.5);
         this.playerGroup.add(this.camera);
-        this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
         this.renderer.setSize(800, 800);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         document.body.appendChild(this.renderer.domElement);
