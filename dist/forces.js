@@ -186,6 +186,8 @@ class Controls {
         this.scaleTen(physicalPosition.position, this.tmp);
     }
     tmp = new THREE.Vector3();
+    // Sets left and right to be the positions of the left and right
+    // cursors in World space.
     setPositions(left, right, camera) {
         if (this.twoHands) {
             this.twoHands.getLeftPosition(left);
@@ -198,6 +200,7 @@ class Controls {
             left.position.copy(this.raycaster.ray.direction);
             left.position.multiplyScalar(10);
             left.position.add(this.raycaster.ray.origin);
+            this.camera.getWorldQuaternion(left.quaternion);
             right.position.set(0, 0, 0);
             right.quaternion.copy(grid_1.Grid.notRotated);
         }
@@ -235,6 +238,22 @@ class Controls {
                 gripLocation.getWorldQuaternion(p.quaternion);
                 this.setCursorPosition(p);
                 this.startStopCallback(new StartStopEvent(side, 'end', 'grip', p));
+            }
+        });
+        grip.addEventListener('squeezestart', (ev) => {
+            if (!!this.startStopCallback) {
+                gripLocation.getWorldPosition(p.position);
+                gripLocation.getWorldQuaternion(p.quaternion);
+                this.setCursorPosition(p);
+                this.startStopCallback(new StartStopEvent(side, 'start', 'squeeze', p));
+            }
+        });
+        grip.addEventListener('selectend', (ev) => {
+            if (!!this.startStopCallback) {
+                gripLocation.getWorldPosition(p.position);
+                gripLocation.getWorldQuaternion(p.quaternion);
+                this.setCursorPosition(p);
+                this.startStopCallback(new StartStopEvent(side, 'end', 'squeeze', p));
             }
         });
     }
@@ -3609,7 +3628,8 @@ class WebGLRenderTarget extends EventDispatcher {
 		this.texture = source.texture.clone();
 		this.texture.isRenderTargetTexture = true; // ensure image object is not shared, see #20328
 
-		this.texture.image = Object.assign({}, source.texture.image);
+		const image = Object.assign({}, source.texture.image);
+		this.texture.source = new Source(image);
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
 		if (source.depthTexture !== null) this.depthTexture = source.depthTexture.clone();

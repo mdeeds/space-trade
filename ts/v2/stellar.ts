@@ -106,7 +106,7 @@ export class Stellar {
     this.camera.lookAt(0, 1.7, -1.5);
     this.playerGroup.add(this.camera);
 
-    this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     this.renderer.setSize(800, 800);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(this.renderer.domElement);
@@ -224,8 +224,14 @@ export class Stellar {
       1.0);
     light.position.set(0, 10, 2);
     this.scene.add(light);
+    
+    const headLamp = new THREE.PointLight(0xFFFFFF, 1.0, 20, 10);
+    headLamp.position.set(0, 0, 0);
 
-    const ambient = new THREE.AmbientLight('#def', 0.5);
+    this.playerGroup.add(headLamp);
+
+    const ambient = new THREE.AmbientLight('#cef', 0.1);
+    //const ambient = new THREE.AmbientLight('#111', 0.1);
     this.scene.add(ambient);
 
     console.log('Initialize World');

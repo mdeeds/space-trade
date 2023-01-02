@@ -40,4 +40,19 @@ http://localhost:8888/dist/?mouse=0&hr=0
 
 Happy coding!
 
+# Deploy using Heroku
+Install the Heroku CLI: https://devcenter.heroku.com/articles/getting-started-with-nodejs#set-up
+$ heroku login
+change to the working directory
+$ heroku git:remote -a space-trade-001
+$ git push heroku main
+$ heroku ps:scale web=1
+$ heroku open
+$ heroku logs --tail
+
+
+
+
+
+
 ## Overview
