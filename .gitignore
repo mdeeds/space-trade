@@ -1,6 +1,8 @@
 src/**/*.js
 src/**/*.js.map
 dist/*.js.map
+dist/music/*.asd
+dist/music/*.wav
 node_modules/**
 *.blend1
 *.blend1
