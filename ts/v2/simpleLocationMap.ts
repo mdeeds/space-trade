@@ -33,6 +33,9 @@ export class SimpleLocationMap<T> implements LocationMap<T> {
 
   public set(position: THREE.Vector3, value: T): void {
     const key = this.toKey(position);
+    if (!value) {
+      throw new Error(`Value is required.`);
+    }
     this.data.set(key, value);
     if (!this.vectors.has(key)) {
       const v = new THREE.Vector3(position.x, position.y, position.z);
@@ -42,6 +45,9 @@ export class SimpleLocationMap<T> implements LocationMap<T> {
 
   public set3(x: number, y: number, z: number, value: T): void {
     const key = this.toKey3(x, y, z);
+    if (!value) {
+      throw new Error(`Value is required.`);
+    }
     this.data.set(key, value);
     if (!this.vectors.has(key)) {
       const v = new THREE.Vector3(x, y, z);

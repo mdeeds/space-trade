@@ -132,7 +132,7 @@ export class MeshCollection extends THREE.Object3D
   public removeCubie(position: THREE.Vector3): Cubie {
     const cubie = this.cubes.get(position);
     if (!!cubie) {
-      this.cubes.set(position, null);
+      this.cubes.delete(position);
       this.dirty = true;
       return cubie;
     }
