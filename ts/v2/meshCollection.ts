@@ -40,20 +40,21 @@ export class MeshCollection extends THREE.Object3D
     for (const name of assets.names()) {
       const mesh = assets.getMesh(name);
       // console.log(`Mesh: ${mesh.name}`);
-      // let oldMaterial = mesh.material as THREE.Material;
-      // let newMaterial = oldMaterial;
-      // if (oldMaterial.type === 'MeshPhysicalMaterial') {
-      //   let m = oldMaterial as THREE.MeshPhysicalMaterial;
-      //   // console.log(m);
-      //   newMaterial = new THREE.MeshPhongMaterial({
-      //     color: m.color,
-      //     shininess: 1.0,
-      //     emissive: m.emissive,
-      //   });
-      // }
-      // newMaterial.depthWrite = true;
-      // newMaterial.depthTest = true;
-      // newMaterial.transparent = false;
+      let oldMaterial = mesh.material as THREE.Material;
+      let newMaterial = oldMaterial;
+      if (oldMaterial.type === 'MeshPhysicalMaterial') {
+        let m = oldMaterial as THREE.MeshPhysicalMaterial;
+        // console.log(m);
+        newMaterial = new THREE.MeshPhongMaterial({
+          color: m.color,
+          shininess: 1.0,
+          emissive: m.emissive,
+          map: m.map
+        });
+      }
+      newMaterial.depthWrite = true;
+      newMaterial.depthTest = true;
+      newMaterial.transparent = false;
 
       const color = this.getColor(mesh);
       this.colorMap.set(name, color);
@@ -63,8 +64,8 @@ export class MeshCollection extends THREE.Object3D
       const geometry = mesh.geometry.clone();
       mesh.matrix.decompose(this.t, this.r, this.s);
       geometry.scale(this.s.x, this.s.y, this.s.z);
-      this.defineItem(name, geometry, mesh.material as THREE.Material);
-      //this.defineItem(name, geometry, newMaterial);
+      //this.defineItem(name, geometry, mesh.material as THREE.Material);
+      this.defineItem(name, geometry, newMaterial);
     }
   }
 
@@ -207,7 +208,7 @@ export class MeshCollection extends THREE.Object3D
       positionMap.get(cubeName).push({ x: cubePosition.x, y: cubePosition.y, z: cubePosition.z });
       if (!rotationMap.has(cubeName)) rotationMap.set(cubeName, []);
       let q: THREE.Quaternion = this.quaternions.get(cubePosition)
-      rotationMap.get(cubeName).push({ x: q.x, y: q.y, z: q.z, w: q.w });
+      rotationMap.get(cubeName).push({ x: q.x, y: q.y, z: q.z, w: q.w });  
     }
     for (const [name, rockPositions] of positionMap.entries()) {
       o[`${name}Positions`] = rockPositions;
