@@ -15,6 +15,9 @@ Required packages:
 npm install                               // to install from the package lock
 
 -- or --
+// install Type Script and Node.js then these:
+
+npm install -g typescript // <- I think this is right
 
 npm -D install three@0.140.0              //Version 0.141.0 is not working with this project.
 npm -D install --save-dev @types/three
@@ -29,13 +32,13 @@ Start an HTTP server from python (you can leave this running):
 python3 -m http.server 8888
 Then you can browse to the page on localhost:
 
-http://localhost:8888/dist
+http://localhost:8888/dist/stellar.html
 
 Ctrl-Shift-J to see the console log
 
 To enable mouse-as-grip use these parameters:
 
-http://localhost:8888/dist/?mouse=0&hr=0
+http://localhost:8888/dist/stellar.html?mouse=0&hr=0
 
 
 Happy coding!
