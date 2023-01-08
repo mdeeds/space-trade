@@ -48,8 +48,17 @@ export class MeshCollection extends THREE.Object3D
         newMaterial = new THREE.MeshPhongMaterial({
           color: m.color,
           shininess: 1.0,
+          specular: new THREE.Color(0x222),
           emissive: m.emissive,
-          map: m.map
+          map: m.map,
+          envMap: m.envMap,
+          flatShading: m.flatShading,
+          wireframe: m.wireframe,
+          vertexColors: m.vertexColors,
+          fog: m.fog,
+          alphaMap: m.alphaMap,
+          reflectivity: m.reflectivity,
+
         });
       }
       newMaterial.depthWrite = true;
