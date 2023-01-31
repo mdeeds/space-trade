@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg48"
+   width="655.35999"
+   height="655.35999"
+   viewBox="0 0 655.35999 655.35999"
+   sodipodi:docname="water_die.png"
+   inkscape:version="1.2.2 (b0a8486, 2022-12-01)"
+   inkscape:dataloss="true"
+   inkscape:export-filename="die.svg"
+   inkscape:export-xdpi="150"
+   inkscape:export-ydpi="150"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs52">
+    <rect
+       x="4.7691369"
+       y="207.39574"
+       width="235.21136"
+       height="237.37827"
+       id="rect393" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview50"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.87396494"
+     inkscape:cx="194.51581"
+     inkscape:cy="305.50425"
+     inkscape:window-width="1400"
+     inkscape:window-height="991"
+     inkscape:window-x="26"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g54" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g54">
+    <rect
+       style="fill:#dedede;fill-opacity:1;stroke-width:111.652"
+       id="rect1320"
+       width="655.51495"
+       height="658.38513"
+       x="0.96270043"
+       y="1.0228966" />
+    <text
+       xml:space="preserve"
+       id="text391"
+       style="font-size:192px;white-space:pre;shape-inside:url(#rect393);fill:#030303;fill-opacity:1;stroke-width:96"
+       transform="translate(53.603587,10.995149)"><tspan
+         x="4.7695312"
+         y="377.27148"
+         id="tspan7913">2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:192px;fill:#030303;fill-opacity:1;stroke-width:96"
+       x="268.25378"
+       y="590.66632"
+       id="text449"><tspan
+         sodipodi:role="line"
+         id="tspan447"
+         x="268.25378"
+         y="590.66632">3</tspan></text>
+    <circle
+       style="fill:#030303;fill-opacity:1;stroke-width:96"
+       id="path503"
+       cx="317.60614"
+       cy="322.23715"
+       r="16.227411" />
+    <circle
+       style="fill:#030303;fill-opacity:1;stroke-width:96"
+       id="path503-6"
+       cx="546.46106"
+       cy="326.32083"
+       r="16.227411" />
+    <circle
+       style="fill:#030303;fill-opacity:1;stroke-width:96"
+       id="path503-6-7"
+       cx="544.70496"
+       cy="523.37378"
+       r="16.227411" />
+    <circle
+       style="fill:#030303;fill-opacity:1;stroke-width:96"
+       id="path503-3"
+       cx="125.09563"
+       cy="530.03693"
+       r="16.227411" />
+  </g>
+</svg>
