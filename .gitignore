@@ -6,3 +6,4 @@ dist/music/*.wav
 node_modules/**
 *.blend1
 *.blend1
+**/*~
